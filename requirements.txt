@@ -1,0 +1,7 @@
+# Core dependencies
+requests>=2.31.0
+pydantic>=2.0.0
+networkx>=3.0.0
+
+# Optional packages for enhanced features
+# sentence-transformers>=2.2.2  # Pluggable neural cross-encoder reranking

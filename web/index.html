@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAG Research Scientist Workstation</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- GLOBAL APPLICATION SHELL -->
+  <div class="app-shell">
+    
+    <!-- Global Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-title">RAG RESEARCH SCIENTIST</div>
+        <div class="brand-sub">Evidence before conclusions.</div>
+      </div>
+
+      <!-- 6 Investigation Views -->
+      <nav class="nav-tabs" role="tablist" aria-label="Investigation Views">
+        <button class="tab-btn active" data-tab="tab-synthesis" role="tab" aria-selected="true">
+          <span class="tab-num">01</span> Synthesis & Claims
+        </button>
+        <button class="tab-btn" data-tab="tab-graph" role="tab" aria-selected="false">
+          <span class="tab-num">02</span> Evidence Graph
+        </button>
+        <button class="tab-btn" data-tab="tab-literature" role="tab" aria-selected="false">
+          <span class="tab-num">03</span> Literature
+        </button>
+        <button class="tab-btn" data-tab="tab-analytics" role="tab" aria-selected="false">
+          <span class="tab-num">04</span> Visualizations
+        </button>
+        <button class="tab-btn" data-tab="tab-gaps" role="tab" aria-selected="false">
+          <span class="tab-num">05</span> Research Gaps
+        </button>
+        <button class="tab-btn" data-tab="tab-recommendations" role="tab" aria-selected="false">
+          <span class="tab-num">06</span> Next Research
+        </button>
+      </nav>
+
+      <div class="header-right">
+        <button id="btnExportJson" class="btn-action-sm">Export JSON</button>
+        <button id="btnExportMarkdown" class="btn-action-sm">Export Markdown</button>
+      </div>
+    </header>
+
+    <!-- Global Query Bar -->
+    <div class="query-bar-container">
+      <div class="query-input-wrap">
+        <span class="query-icon">🔍</span>
+        <input type="text" id="queryInput" value="OCR on low-resource Indic languages since 2024" placeholder="Search / research question...">
+      </div>
+      <button id="btnRunAgent" class="btn-run-agent">Run Research Agent</button>
+    </div>
+
+    <!-- MAIN CONTENT VIEWS -->
+    <main class="app-body">
+
+      <!-- VIEW 01: SYNTHESIS & CLAIMS (THREE-COLUMN WORKSTATION) -->
+      <section id="tab-synthesis" class="view-page active" role="tabpanel">
+        <div class="three-column-workstation">
+          
+          <!-- Column 1: Research Trace -->
+          <aside class="col-trace">
+            <div class="section-title-sm">RESEARCH TRACE</div>
+            <div class="trace-list" id="traceStageList">
+              <div class="trace-item" data-stage="01"><span class="trace-num">01</span><span class="trace-label">Query Planner</span><span class="trace-status">DONE</span></div>
+              <div class="trace-item" data-stage="02"><span class="trace-num">02</span><span class="trace-label">Multi-Retrieval</span><span class="trace-status">DONE</span></div>
+              <div class="trace-item" data-stage="03"><span class="trace-num">03</span><span class="trace-label">Deduplication</span><span class="trace-status">DONE</span></div>
+              <div class="trace-item" data-stage="04"><span class="trace-num">04</span><span class="trace-label">Reranker</span><span class="trace-status">DONE</span></div>
+              <div class="trace-item" data-stage="05"><span class="trace-num">05</span><span class="trace-label">Evidence Extraction</span><span class="trace-status">DONE</span></div>
+              <div class="trace-item active" data-stage="06"><span class="trace-num">06</span><span class="trace-label">Claim Analysis</span><span class="trace-status">ACTIVE</span></div>
+              <div class="trace-item" data-stage="07"><span class="trace-num">07</span><span class="trace-label">Contradiction Analysis</span><span class="trace-status">DONE</span></div>
+              <div class="trace-item" data-stage="08"><span class="trace-num">08</span><span class="trace-label">Synthesis</span><span class="trace-status">DONE</span></div>
+            </div>
+
+            <div class="trace-output-box">
+              <div class="section-title-sm">STAGE EXECUTION LOG</div>
+              <div class="trace-log-text" id="traceLogText">
+                Stage 06 (Claim Analysis): Synthesized evidence-grounded claims with calculated confidence scores.
+              </div>
+            </div>
+          </aside>
+
+          <!-- Column 2: Research Synthesis -->
+          <article class="col-synthesis">
+            <div class="synthesis-header">
+              <div class="meta-label">RESEARCH QUESTION</div>
+              <h1 class="research-question-text" id="centerQueryTitle">OCR on low-resource Indic languages since 2024</h1>
+            </div>
+
+            <div class="section-block">
+              <div class="section-title-sm">EXECUTIVE FINDING</div>
+              <div class="executive-finding-box" id="executiveFindingText">
+                Scientific evidence synthesis compiled across verified documents. Transitioning to end-to-end Vision-Language Models (VLMs) and HarfBuzz synthetic font rendering pipelines provides the highest accuracy gains for low-resource Indic scripts.
+              </div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-title-sm">KEY CLAIMS</div>
+              <div id="centerClaimsList" class="claims-list"></div>
+            </div>
+          </article>
+
+          <!-- Column 3: Evidence Inspector -->
+          <aside class="col-inspector" id="synthesisInspector">
+            <div class="section-title-sm" id="inspHeaderTitle">EVIDENCE INSPECTOR</div>
+            
+            <div class="inspector-card">
+              <div class="insp-row">
+                <div class="insp-label">Paper</div>
+                <div class="insp-val" id="inspPaperTitle">Select a claim to inspect evidence</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Source</div>
+                <div class="insp-val" id="inspSource">arXiv</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Published</div>
+                <div class="insp-val" id="inspPublished">2025</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Relevance</div>
+                <div class="insp-val highlight" id="inspRelevance">0.91</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Evidence Passage</div>
+                <div class="insp-val passage-quote" id="inspSnippet">
+                  "Click on any claim in the center panel to inspect supporting source passages."
+                </div>
+              </div>
+              <a id="btnOpenPaperLink" href="#" target="_blank" class="btn-open-paper">[ OPEN PAPER ]</a>
+            </div>
+          </aside>
+
+        </div>
+      </section>
+
+      <!-- VIEW 02: EVIDENCE GRAPH -->
+      <section id="tab-graph" class="view-page" role="tabpanel">
+        <div class="graph-workstation">
+          
+          <!-- Graph Toolbar -->
+          <div class="graph-toolbar">
+            <div class="graph-filters">
+              <span class="filter-title">FILTER NODES:</span>
+              <button class="node-filter-btn active" data-type="all">ALL</button>
+              <button class="node-filter-btn" data-type="paper">PAPER</button>
+              <button class="node-filter-btn" data-type="claim">CLAIM</button>
+              <button class="node-filter-btn" data-type="method">METHOD</button>
+              <button class="node-filter-btn" data-type="dataset">DATASET</button>
+              <button class="node-filter-btn" data-type="gap">GAP</button>
+            </div>
+            <div class="graph-controls">
+              <button id="btnZoomIn" class="btn-graph-action">Zoom +</button>
+              <button id="btnZoomOut" class="btn-graph-action">Zoom -</button>
+              <button id="btnResetGraph" class="btn-graph-action">Reset View</button>
+            </div>
+          </div>
+
+          <!-- Main Canvas Area & Inspector Split -->
+          <div class="graph-canvas-container">
+            <canvas id="fullGraphCanvas"></canvas>
+            
+            <aside class="graph-side-inspector">
+              <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
+              <div class="insp-row">
+                <div class="insp-label">Node Label</div>
+                <div class="insp-val" id="graphNodeLabel">Click any graph node to inspect connections</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Type</div>
+                <div class="insp-val highlight" id="graphNodeType">-</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Connected Edges</div>
+                <div class="insp-val" id="graphNodeConnections">-</div>
+              </div>
+            </aside>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- VIEW 03: LITERATURE -->
+      <section id="tab-literature" class="view-page" role="tabpanel">
+        <div class="literature-workstation">
+          <div class="lit-toolbar">
+            <div class="lit-count" id="litCountLabel">LITERATURE — 31 PAPERS</div>
+            <div class="lit-controls">
+              <input type="text" id="litSearchInput" class="input-sm" placeholder="Search literature...">
+              <select id="litSourceFilter" class="select-sm">
+                <option value="all">Source: All</option>
+                <option value="arxiv">Source: arXiv</option>
+                <option value="web">Source: Web</option>
+              </select>
+              <select id="litYearFilter" class="select-sm">
+                <option value="all">Year: All</option>
+                <option value="2026">Year: 2026</option>
+                <option value="2025">Year: 2025</option>
+                <option value="2024">Year: 2024</option>
+              </select>
+              <select id="litSortSelect" class="select-sm">
+                <option value="relevance">Sort: Relevance</option>
+                <option value="year">Sort: Year</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="lit-table-split">
+            <div class="table-container">
+              <table class="dense-lit-table">
+                <thead>
+                  <tr>
+                    <th>TITLE</th>
+                    <th>AUTHORS</th>
+                    <th>YEAR</th>
+                    <th>SOURCE</th>
+                    <th>RELEVANCE</th>
+                    <th>EVIDENCE</th>
+                  </tr>
+                </thead>
+                <tbody id="litTableBody"></tbody>
+              </table>
+            </div>
+
+            <aside class="lit-drawer" id="litDrawer">
+              <div class="section-title-sm">PAPER INSPECTOR</div>
+              <div class="insp-row">
+                <div class="insp-label">Paper Title</div>
+                <div class="insp-val" id="litDrawerTitle">Select a paper to inspect</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Authors</div>
+                <div class="insp-val" id="litDrawerAuthors">-</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Year / Source</div>
+                <div class="insp-val" id="litDrawerYearSource">-</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Relevance Score</div>
+                <div class="insp-val highlight" id="litDrawerRelevance">-</div>
+              </div>
+              <div class="insp-row">
+                <div class="insp-label">Related Claims</div>
+                <div class="insp-val" id="litDrawerClaims">-</div>
+              </div>
+              <div class="insp-actions">
+                <a id="btnLitDrawerOpen" href="#" target="_blank" class="btn-action-block">[ OPEN PAPER ]</a>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 04: VISUALIZATIONS -->
+      <section id="tab-analytics" class="view-page" role="tabpanel">
+        <div class="analytics-workstation">
+          <div class="analytics-grid">
+            
+            <!-- Vis 1: Retrieval Funnel -->
+            <div class="viz-card">
+              <div class="viz-title">01 RETRIEVAL FUNNEL</div>
+              <div class="funnel-container" id="funnelChart"></div>
+            </div>
+
+            <!-- Vis 2: Claim Support vs Contradiction -->
+            <div class="viz-card">
+              <div class="viz-title">02 CLAIM SUPPORT VS CONTRADICTION</div>
+              <div class="claims-viz-list" id="claimsVizList"></div>
+            </div>
+
+            <!-- Vis 3: Source Distribution -->
+            <div class="viz-card">
+              <div class="viz-title">03 SOURCE DISTRIBUTION</div>
+              <canvas id="sourceDistCanvas" height="180"></canvas>
+            </div>
+
+            <!-- Vis 4: Methodology Comparison Matrix -->
+            <div class="viz-card span-2">
+              <div class="viz-title">04 METHODOLOGY COMPARISON MATRIX</div>
+              <div id="methodologyMatrixTable" class="matrix-wrap"></div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 05: RESEARCH GAPS -->
+      <section id="tab-gaps" class="view-page" role="tabpanel">
+        <div class="gaps-workstation">
+          
+          <main class="gaps-notebook">
+            <div class="gaps-header-summary">
+              <h2 class="gaps-title">RESEARCH GAPS</h2>
+              <div class="gaps-count-badge" id="gapsCountBadge">01 IDENTIFIED FROM 31 PAPERS</div>
+            </div>
+            <div id="page5GapsContainer"></div>
+          </main>
+
+          <aside class="gaps-sidebar">
+            <div class="section-title-sm">SUPPORTING EVIDENCE</div>
+            <div id="gapsSupportingEvList" class="sidebar-list-sm">
+              <div class="sidebar-item-sm">E-014: "Historical Indic font degradation CER >25%"</div>
+              <div class="sidebar-item-sm">E-021: "Lack of 19th century palm-leaf dataset"</div>
+            </div>
+
+            <div class="section-title-sm" style="margin-top: 1.5rem;">RELATED PAPERS</div>
+            <div id="gapsRelatedPapersList" class="sidebar-list-sm">
+              <div class="sidebar-item-sm">Paper 01: Yes-MT WMT 2024</div>
+              <div class="sidebar-item-sm">Paper 02: SPRING IITM 2024</div>
+            </div>
+          </aside>
+
+        </div>
+      </section>
+
+      <!-- VIEW 06: NEXT RESEARCH -->
+      <section id="tab-recommendations" class="view-page" role="tabpanel">
+        <div class="recs-workstation">
+          <div class="recs-header">
+            <h2 class="recs-title">WHAT SHOULD BE RESEARCHED NEXT?</h2>
+            <div class="meta-label">Graph-Grounded Research Directions</div>
+          </div>
+          <div id="page6RecsContainer"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,897 @@
+/* RAG Research Scientist Agent - Scientific Workstation Design System */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+:root {
+  --bg-dark: #080a0f;
+  --bg-surface: #0d1117;
+  --bg-surface-elevated: #161b22;
+  --bg-hover: #1c2128;
+  
+  --border-dim: rgba(255, 255, 255, 0.08);
+  --border-subtle: #21262d;
+  --border-active: #00f2fe;
+
+  --accent-cyan: #00f2fe;
+  --accent-blue: #38bdf8;
+  --accent-purple: #8b5cf6;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+
+  --text-main: #f0f6fc;
+  --text-muted: #8b949e;
+  --text-dim: #484f58;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-title: 'Outfit', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  --radius-sm: 4px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+/* Accessibility Focus Outline */
+:focus-visible {
+  outline: 2px solid var(--accent-cyan) !important;
+  outline-offset: 1px !important;
+}
+
+/* Global Application Shell */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* App Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1.2rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-dim);
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.brand-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+/* Nav Tabs */
+.nav-tabs {
+  display: flex;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
+}
+
+.tab-btn {
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.12s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-hover);
+}
+
+.tab-btn.active {
+  color: #040914;
+  background: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.tab-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.header-right {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-action-sm {
+  padding: 4px 9px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 3px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.btn-action-sm:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-muted);
+}
+
+/* Global Query Bar */
+.query-bar-container {
+  padding: 0.5rem 1.2rem;
+  background: #06080d;
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  height: 46px;
+  flex-shrink: 0;
+}
+
+.query-input-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.query-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+.query-input-wrap input {
+  width: 100%;
+  padding: 6px 12px 6px 32px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.84rem;
+  outline: none;
+}
+
+.query-input-wrap input:focus {
+  border-color: var(--accent-cyan);
+}
+
+.btn-run-agent {
+  padding: 6px 14px;
+  background: var(--accent-cyan);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #040914;
+  font-weight: 700;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+.btn-run-agent:hover {
+  background: #38bdf8;
+}
+
+/* Main Body Views Switcher */
+.app-body {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.view-page {
+  display: none;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.view-page.active {
+  display: flex;
+}
+
+/* Section Title Helper */
+.section-title-sm {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 3px;
+}
+
+/* VIEW 01: THREE-COLUMN WORKSTATION */
+.three-column-workstation {
+  display: grid;
+  grid-template-columns: 220px 1fr 320px;
+  width: 100%;
+  height: 100%;
+}
+
+.col-trace {
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-dim);
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.trace-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.trace-item {
+  padding: 6px 8px;
+  border-radius: 3px;
+  background: transparent;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.trace-item:hover {
+  background: var(--bg-hover);
+}
+
+.trace-item.active {
+  background: rgba(0, 242, 254, 0.08);
+  border-left-color: var(--accent-cyan);
+}
+
+.trace-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.trace-label {
+  font-size: 0.78rem;
+  flex: 1;
+}
+
+.trace-status {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+.trace-output-box {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  margin-top: auto;
+}
+
+.trace-log-text {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.col-synthesis {
+  padding: 1.2rem 1.6rem;
+  overflow-y: auto;
+  background: var(--bg-dark);
+}
+
+.synthesis-header {
+  margin-bottom: 1rem;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--accent-cyan);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.research-question-text {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.section-block {
+  margin-bottom: 1.2rem;
+}
+
+.executive-finding-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-main);
+}
+
+.claims-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.claim-card-v2 {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.12s ease;
+}
+
+.claim-card-v2:hover {
+  border-color: var(--border-subtle);
+}
+
+.claim-card-v2.selected {
+  border-color: var(--accent-cyan);
+  background: var(--bg-surface-elevated);
+}
+
+.claim-num {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.claim-body-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.claim-metrics-bar {
+  display: flex;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.metric-tag.sources { color: var(--accent-cyan); }
+.metric-tag.confidence { color: var(--accent-emerald); }
+.metric-tag.status { color: var(--accent-purple); }
+
+.col-inspector {
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-dim);
+  padding: 0.9rem;
+  overflow-y: auto;
+}
+
+.inspector-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.insp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.insp-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.insp-val {
+  font-size: 0.82rem;
+  color: var(--text-main);
+}
+
+.insp-val.highlight {
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.passage-quote {
+  font-style: italic;
+  color: var(--text-muted);
+  background: var(--bg-dark);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent-cyan);
+}
+
+.btn-open-paper {
+  display: block;
+  text-align: center;
+  padding: 7px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  margin-top: 8px;
+}
+
+.btn-open-paper:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+/* VIEW 02: EVIDENCE GRAPH WORKSTATION */
+.graph-workstation {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.graph-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 1rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-dim);
+  height: 38px;
+}
+
+.graph-filters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filter-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  margin-right: 4px;
+}
+
+.node-filter-btn {
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  background: transparent;
+  border: 1px solid var(--border-dim);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.node-filter-btn.active {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  background: rgba(0, 242, 254, 0.08);
+}
+
+.graph-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-graph-action {
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.graph-canvas-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  position: relative;
+  background: var(--bg-dark);
+}
+
+#fullGraphCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.graph-side-inspector {
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-dim);
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* VIEW 03: LITERATURE DATABASE WORKSTATION */
+.literature-workstation {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 0.8rem 1.2rem;
+}
+
+.lit-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.lit-count {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.lit-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.input-sm, .select-sm {
+  padding: 4px 8px;
+  font-size: 0.76rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+}
+
+.lit-table-split {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.table-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  overflow-y: auto;
+}
+
+.dense-lit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.dense-lit-table th {
+  background: var(--bg-surface-elevated);
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.dense-lit-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.dense-lit-table tr:hover {
+  background: var(--bg-hover);
+  cursor: pointer;
+}
+
+.dense-lit-table tr.selected {
+  background: var(--bg-surface-elevated);
+}
+
+.lit-drawer {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.btn-action-block {
+  display: block;
+  text-align: center;
+  padding: 6px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  text-decoration: none;
+  border-radius: 3px;
+  margin-top: 4px;
+}
+
+/* VIEW 04: VISUALIZATIONS */
+.analytics-workstation {
+  padding: 1rem 1.2rem;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.viz-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+}
+
+.viz-card.span-2 {
+  grid-column: span 2;
+}
+
+.viz-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: 0.8rem;
+}
+
+.funnel-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.funnel-stage {
+  background: var(--bg-dark);
+  border-left: 2px solid var(--accent-cyan);
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* VIEW 05: RESEARCH GAPS NOTEBOOK */
+.gaps-workstation {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.gaps-notebook {
+  padding: 1.2rem 1.6rem;
+  overflow-y: auto;
+  background: var(--bg-dark);
+}
+
+.gaps-header-summary {
+  margin-bottom: 1.2rem;
+}
+
+.gaps-title {
+  font-family: var(--font-title);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.gaps-count-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-amber);
+  margin-top: 2px;
+}
+
+.gap-card-spec {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.gap-num-spec {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-amber);
+  font-weight: 700;
+}
+
+.gap-name-spec {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+
+.gap-field {
+  margin-bottom: 0.7rem;
+}
+
+.gap-field-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.gap-field-val {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.gap-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 0.8rem;
+}
+
+.btn-gap-action {
+  padding: 5px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.btn-gap-action:hover {
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+}
+
+.gaps-sidebar {
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-dim);
+  padding: 0.9rem;
+  overflow-y: auto;
+}
+
+.sidebar-list-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-item-sm {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: var(--bg-dark);
+  padding: 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border-dim);
+}
+
+/* VIEW 06: NEXT RESEARCH PLANNING */
+.recs-workstation {
+  padding: 1.2rem 1.6rem;
+  overflow-y: auto;
+  max-width: 900px;
+}
+
+.recs-header {
+  margin-bottom: 1.2rem;
+}
+
+.recs-title {
+  font-family: var(--font-title);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.rec-card-spec {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rec-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.rec-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: 0.8rem;
+}
+
+/* Responsive Panel Stacking for Tablet/Mobile */
+@media (max-width: 960px) {
+  .three-column-workstation,
+  .lit-table-split,
+  .gaps-workstation,
+  .graph-canvas-container {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: auto;
+  }
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  .viz-card.span-2 {
+    grid-column: span 1;
+  }
+}
+
+/* Accessibility: Reduced-Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

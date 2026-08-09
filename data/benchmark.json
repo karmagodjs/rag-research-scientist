@@ -1,0 +1,15 @@
+{
+  "description": "RAG Research Scientist Agent Evaluation Benchmark Dataset",
+  "questions": [
+    {
+      "id": "q1",
+      "query": "OCR on low-resource Indic languages since 2024",
+      "expected_keywords": ["OCR", "Indic", "language", "script", "vision", "dataset", "low-resource"]
+    },
+    {
+      "id": "q2",
+      "query": "Dense retrieval and graph-based RAG architectures in 2025",
+      "expected_keywords": ["retrieval", "graph", "RAG", "dense", "knowledge", "embedding"]
+    }
+  ]
+}

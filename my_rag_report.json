@@ -1,0 +1,891 @@
+{
+  "research_question": "Dense retrieval and graph-based RAG architectures in 2025",
+  "executive_summary": "Scientific evidence synthesis for 'Dense retrieval and graph-based RAG architectures in 2025' compiled across 3 verified documents.",
+  "retrieval_statistics": {
+    "total_documents": 3,
+    "raw_documents": 24,
+    "num_subqueries": 4,
+    "iterations": 2
+  },
+  "claims": [
+    {
+      "claim": "Retrieved literature highlights: Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation.",
+      "evidence": [
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "paper_title": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+          "snippet": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1",
+          "relevance_score": 0.74
+        },
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "paper_title": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+          "snippet": "We present a scalable dense retrieval system based on a two-tower bi-encoder, fine-tuned on the Amazon Reviews 2023 (Fashion) subset using supervised contrastive learning with Multiple Negatives Ranking Loss.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1",
+          "relevance_score": 0.63
+        },
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "paper_title": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+          "snippet": "We cast content-based recommendation as recommendation-as-retrieval: given a natural-language intent signal (a query or review), retrieve the top-K most relevant items from a large catalog via semantic similarity.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1",
+          "relevance_score": 0.52
+        },
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "paper_title": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+          "snippet": "On a review-to-title benchmark over 826,402 catalog items, our approach improves Recall@10 from 0.26 (BM25) to 0.66, while meeting practical latency and model-size constraints: 6.1 ms median CPU inference latency (batch size 1) and a 4x reduction in model size.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1",
+          "relevance_score": 0.52
+        },
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "paper_title": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+          "snippet": "Overall, we provide an end-to-end, reproducible blueprint for taking domain-adapted dense retrieval from offline training to CPU-efficient serving at catalog scale.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1",
+          "relevance_score": 0.52
+        }
+      ],
+      "confidence": 0.62,
+      "reasoning": "Calculated from 1 supporting sources, avg relevance 0.59, recency score 1.0."
+    },
+    {
+      "claim": "Retrieved literature highlights: On Single and Multiple Representations in Dense Passage Retrieval.",
+      "evidence": [
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "paper_title": "On Single and Multiple Representations in Dense Passage Retrieval",
+          "snippet": "On Single and Multiple Representations in Dense Passage Retrieval.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2",
+          "relevance_score": 0.74
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "paper_title": "On Single and Multiple Representations in Dense Passage Retrieval",
+          "snippet": "The advent of contextualised language models has brought gains in search effectiveness, not just when applied for re-ranking the output of classical weighting models such as BM25, but also when used directly for passage indexing and retrieval, a technique which is called dense retrieval.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2",
+          "relevance_score": 0.74
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "paper_title": "On Single and Multiple Representations in Dense Passage Retrieval",
+          "snippet": "In the existing literature in neural ranking, two dense retrieval families have become apparent: single representation, where entire passages are represented by a single embedding (usually BERT's [CLS] token, as exemplified by the recent ANCE approach), or multiple representations, where each token in a passage is represented by its own embedding (as exemplified by the recent ColBERT approach).",
+          "source_url": "http://arxiv.org/abs/2108.06279v2",
+          "relevance_score": 0.63
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "paper_title": "On Single and Multiple Representations in Dense Passage Retrieval",
+          "snippet": "However, because of the likely importance of dense retrieval moving forward, a clear understanding of their advantages and disadvantages is paramount.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2",
+          "relevance_score": 0.63
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "paper_title": "On Single and Multiple Representations in Dense Passage Retrieval",
+          "snippet": "We observe that, while ANCE is more efficient than ColBERT in terms of response time and memory usage, multiple representations are statistically more effective than the single representations for MAP and MRR@10.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2",
+          "relevance_score": 0.52
+        }
+      ],
+      "confidence": 0.61,
+      "reasoning": "Calculated from 1 supporting sources, avg relevance 0.65, recency score 0.8."
+    },
+    {
+      "claim": "Retrieved literature highlights: Dense retrieval is becoming one of the standard approaches for document and passage ranking.",
+      "evidence": [
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "paper_title": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings",
+          "snippet": "Dense retrieval is becoming one of the standard approaches for document and passage ranking.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1",
+          "relevance_score": 0.63
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "paper_title": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings",
+          "snippet": "Typically, dense retrieval models are evaluated on clean and curated datasets.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1",
+          "relevance_score": 0.63
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "paper_title": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings",
+          "snippet": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1",
+          "relevance_score": 0.52
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "paper_title": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings",
+          "snippet": "In this work, we study the robustness of dense retrievers against typos in the user question.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1",
+          "relevance_score": 0.52
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "paper_title": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings",
+          "snippet": "We observe a significant drop in the performance of the dual-encoder model when encountering typos and explore ways to improve its robustness by combining data augmentation with contrastive learning.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1",
+          "relevance_score": 0.52
+        }
+      ],
+      "confidence": 0.58,
+      "reasoning": "Calculated from 1 supporting sources, avg relevance 0.56, recency score 0.8."
+    }
+  ],
+  "contradiction_analysis": [
+    {
+      "claim": "Retrieved literature highlights: Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation.",
+      "supporting_evidence": [
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "snippet": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "The advent of contextualised language models has brought gains in search effectiveness, not just when applied for re-ranking the output of classical weighting models such as BM25, but also when used directly for passage indexing and retrieval, a technique which is called dense retrieval.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        },
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "snippet": "We cast content-based recommendation as recommendation-as-retrieval: given a natural-language intent signal (a query or review), retrieve the top-K most relevant items from a large catalog via semantic similarity.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        },
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "snippet": "Overall, we provide an end-to-end, reproducible blueprint for taking domain-adapted dense retrieval from offline training to CPU-efficient serving at catalog scale.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "We observe that, while ANCE is more efficient than ColBERT in terms of response time and memory usage, multiple representations are statistically more effective than the single representations for MAP and MRR@10.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      ],
+      "contradicting_evidence": [
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "snippet": "We present a scalable dense retrieval system based on a two-tower bi-encoder, fine-tuned on the Amazon Reviews 2023 (Fashion) subset using supervised contrastive learning with Multiple Negatives Ranking Loss.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "However, because of the likely importance of dense retrieval moving forward, a clear understanding of their advantages and disadvantages is paramount.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      ],
+      "status": "mixed"
+    },
+    {
+      "claim": "Retrieved literature highlights: On Single and Multiple Representations in Dense Passage Retrieval.",
+      "supporting_evidence": [
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "On Single and Multiple Representations in Dense Passage Retrieval.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "The advent of contextualised language models has brought gains in search effectiveness, not just when applied for re-ranking the output of classical weighting models such as BM25, but also when used directly for passage indexing and retrieval, a technique which is called dense retrieval.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "In the existing literature in neural ranking, two dense retrieval families have become apparent: single representation, where entire passages are represented by a single embedding (usually BERT's [CLS] token, as exemplified by the recent ANCE approach), or multiple representations, where each token in a passage is represented by its own embedding (as exemplified by the recent ColBERT approach).",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        },
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "snippet": "On a review-to-title benchmark over 826,402 catalog items, our approach improves Recall@10 from 0.26 (BM25) to 0.66, while meeting practical latency and model-size constraints: 6.1 ms median CPU inference latency (batch size 1) and a 4x reduction in model size.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "We observe that, while ANCE is more efficient than ColBERT in terms of response time and memory usage, multiple representations are statistically more effective than the single representations for MAP and MRR@10.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "In this work, we study the robustness of dense retrievers against typos in the user question.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "We observe a significant drop in the performance of the dual-encoder model when encountering typos and explore ways to improve its robustness by combining data augmentation with contrastive learning.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      ],
+      "contradicting_evidence": [
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "snippet": "We present a scalable dense retrieval system based on a two-tower bi-encoder, fine-tuned on the Amazon Reviews 2023 (Fashion) subset using supervised contrastive learning with Multiple Negatives Ranking Loss.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "However, because of the likely importance of dense retrieval moving forward, a clear understanding of their advantages and disadvantages is paramount.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      ],
+      "status": "mixed"
+    },
+    {
+      "claim": "Retrieved literature highlights: Dense retrieval is becoming one of the standard approaches for document and passage ranking.",
+      "supporting_evidence": [
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "The advent of contextualised language models has brought gains in search effectiveness, not just when applied for re-ranking the output of classical weighting models such as BM25, but also when used directly for passage indexing and retrieval, a technique which is called dense retrieval.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "Dense retrieval is becoming one of the standard approaches for document and passage ranking.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "Typically, dense retrieval models are evaluated on clean and curated datasets.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "We observe that, while ANCE is more efficient than ColBERT in terms of response time and memory usage, multiple representations are statistically more effective than the single representations for MAP and MRR@10.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "In this work, we study the robustness of dense retrievers against typos in the user question.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        },
+        {
+          "paper_id": "arxiv_2205.02303v1",
+          "snippet": "We observe a significant drop in the performance of the dual-encoder model when encountering typos and explore ways to improve its robustness by combining data augmentation with contrastive learning.",
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      ],
+      "contradicting_evidence": [
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "snippet": "We present a scalable dense retrieval system based on a two-tower bi-encoder, fine-tuned on the Amazon Reviews 2023 (Fashion) subset using supervised contrastive learning with Multiple Negatives Ranking Loss.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        },
+        {
+          "paper_id": "arxiv_2108.06279v2",
+          "snippet": "However, because of the likely importance of dense retrieval moving forward, a clear understanding of their advantages and disadvantages is paramount.",
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      ],
+      "status": "mixed"
+    }
+  ],
+  "research_timeline": {
+    "2021": [
+      {
+        "paper_id": "arxiv_2108.06279v2",
+        "title": "On Single and Multiple Representations in Dense Passage Retrieval",
+        "authors": [
+          "Craig Macdonald",
+          "Nicola Tonellotto"
+        ],
+        "url": "http://arxiv.org/abs/2108.06279v2",
+        "source": "arxiv"
+      }
+    ],
+    "2022": [
+      {
+        "paper_id": "arxiv_2205.02303v1",
+        "title": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings",
+        "authors": [
+          "Georgios Sidiropoulos",
+          "Evangelos Kanoulas"
+        ],
+        "url": "http://arxiv.org/abs/2205.02303v1",
+        "source": "arxiv"
+      }
+    ],
+    "2026": [
+      {
+        "paper_id": "arxiv_2602.00899v1",
+        "title": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+        "authors": [
+          "Mritunjay Pandey"
+        ],
+        "url": "http://arxiv.org/abs/2602.00899v1",
+        "source": "arxiv"
+      }
+    ]
+  },
+  "open_research_gaps": [
+    {
+      "gap": "Cross-Domain Generalization Deficit in Low-Resource Domains",
+      "evidence_for_gap": [
+        {
+          "paper_id": "arxiv_2602.00899v1",
+          "snippet": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation.",
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        }
+      ],
+      "why_it_matters": "Current methods lack empirical verification across diverse document degradation regimes."
+    }
+  ],
+  "what_to_research_next": [
+    {
+      "research_direction": "Graph-Grounded Architecture for Cross-Domain Generalization Deficit in Low-Resource Domains",
+      "motivation": "Directly addresses Current methods lack empirical verification across diverse document degradation regimes. identified in retrieved literature.",
+      "evidence": [
+        "http://arxiv.org/abs/2602.00899v1"
+      ],
+      "novelty": "Combines dynamic retrieval-augmented verification with structural evidence graph constraints.",
+      "difficulty": "Medium-High",
+      "expected_impact": "Substantially improves performance stability and reduces error rates on underrepresented domain corpora."
+    }
+  ],
+  "evidence_graph": {
+    "nodes": [
+      {
+        "id": "query_root",
+        "label": "Dense retrieval and graph-based RAG architectures in 2025",
+        "type": "question",
+        "metadata": {}
+      },
+      {
+        "id": "arxiv_2602.00899v1",
+        "label": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+        "type": "paper",
+        "metadata": {
+          "url": "http://arxiv.org/abs/2602.00899v1"
+        }
+      },
+      {
+        "id": "arxiv_2108.06279v2",
+        "label": "On Single and Multiple Representations in Dense Passage Retrieval",
+        "type": "paper",
+        "metadata": {
+          "url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      },
+      {
+        "id": "arxiv_2205.02303v1",
+        "label": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings",
+        "type": "paper",
+        "metadata": {
+          "url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      },
+      {
+        "id": "claim_1",
+        "label": "Retrieved literature highlights: Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation.",
+        "type": "claim",
+        "metadata": {
+          "confidence": 0.62
+        }
+      },
+      {
+        "id": "ev_7192013407644255824",
+        "label": "Domain-Adaptive and Scalable Dense Retrieval for C...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        }
+      },
+      {
+        "id": "ev_6613862716974531622",
+        "label": "We present a scalable dense retrieval system based...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        }
+      },
+      {
+        "id": "ev_8361819501521092405",
+        "label": "We cast content-based recommendation as recommenda...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        }
+      },
+      {
+        "id": "ev_5964031670369764851",
+        "label": "On a review-to-title benchmark over 826,402 catalo...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        }
+      },
+      {
+        "id": "ev_837510451535572075",
+        "label": "Overall, we provide an end-to-end, reproducible bl...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2602.00899v1"
+        }
+      },
+      {
+        "id": "claim_2",
+        "label": "Retrieved literature highlights: On Single and Multiple Representations in Dense Passage Retrieval.",
+        "type": "claim",
+        "metadata": {
+          "confidence": 0.61
+        }
+      },
+      {
+        "id": "ev_5006444022626478930",
+        "label": "On Single and Multiple Representations in Dense Pa...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      },
+      {
+        "id": "ev_7769021384529064180",
+        "label": "The advent of contextualised language models has b...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      },
+      {
+        "id": "ev_6518447767683215801",
+        "label": "In the existing literature in neural ranking, two ...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      },
+      {
+        "id": "ev_5811331498834656802",
+        "label": "However, because of the likely importance of dense...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      },
+      {
+        "id": "ev_690925666115304148",
+        "label": "We observe that, while ANCE is more efficient than...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2108.06279v2"
+        }
+      },
+      {
+        "id": "claim_3",
+        "label": "Retrieved literature highlights: Dense retrieval is becoming one of the standard approaches for document and passage ranking.",
+        "type": "claim",
+        "metadata": {
+          "confidence": 0.58
+        }
+      },
+      {
+        "id": "ev_6000173360806883773",
+        "label": "Dense retrieval is becoming one of the standard ap...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      },
+      {
+        "id": "ev_1984620010644336407",
+        "label": "Typically, dense retrieval models are evaluated on...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      },
+      {
+        "id": "ev_4152367561001251156",
+        "label": "Analysing the Robustness of Dual Encoders for Dens...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      },
+      {
+        "id": "ev_2408332360093829957",
+        "label": "In this work, we study the robustness of dense ret...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      },
+      {
+        "id": "ev_8440177448248952937",
+        "label": "We observe a significant drop in the performance o...",
+        "type": "evidence",
+        "metadata": {
+          "source_url": "http://arxiv.org/abs/2205.02303v1"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "query_root",
+        "target": "arxiv_2602.00899v1",
+        "relation": "retrieved_paper"
+      },
+      {
+        "source": "query_root",
+        "target": "arxiv_2108.06279v2",
+        "relation": "retrieved_paper"
+      },
+      {
+        "source": "query_root",
+        "target": "arxiv_2205.02303v1",
+        "relation": "retrieved_paper"
+      },
+      {
+        "source": "query_root",
+        "target": "claim_1",
+        "relation": "evaluates_claim"
+      },
+      {
+        "source": "claim_1",
+        "target": "ev_7192013407644255824",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2602.00899v1",
+        "target": "ev_7192013407644255824",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_1",
+        "target": "ev_6613862716974531622",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2602.00899v1",
+        "target": "ev_6613862716974531622",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_1",
+        "target": "ev_8361819501521092405",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2602.00899v1",
+        "target": "ev_8361819501521092405",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_1",
+        "target": "ev_5964031670369764851",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2602.00899v1",
+        "target": "ev_5964031670369764851",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_1",
+        "target": "ev_837510451535572075",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2602.00899v1",
+        "target": "ev_837510451535572075",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "query_root",
+        "target": "claim_2",
+        "relation": "evaluates_claim"
+      },
+      {
+        "source": "claim_2",
+        "target": "ev_5006444022626478930",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2108.06279v2",
+        "target": "ev_5006444022626478930",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_2",
+        "target": "ev_7769021384529064180",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2108.06279v2",
+        "target": "ev_7769021384529064180",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_2",
+        "target": "ev_6518447767683215801",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2108.06279v2",
+        "target": "ev_6518447767683215801",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_2",
+        "target": "ev_5811331498834656802",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2108.06279v2",
+        "target": "ev_5811331498834656802",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_2",
+        "target": "ev_690925666115304148",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2108.06279v2",
+        "target": "ev_690925666115304148",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "query_root",
+        "target": "claim_3",
+        "relation": "evaluates_claim"
+      },
+      {
+        "source": "claim_3",
+        "target": "ev_6000173360806883773",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2205.02303v1",
+        "target": "ev_6000173360806883773",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_3",
+        "target": "ev_1984620010644336407",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2205.02303v1",
+        "target": "ev_1984620010644336407",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_3",
+        "target": "ev_4152367561001251156",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2205.02303v1",
+        "target": "ev_4152367561001251156",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_3",
+        "target": "ev_2408332360093829957",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2205.02303v1",
+        "target": "ev_2408332360093829957",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_3",
+        "target": "ev_8440177448248952937",
+        "relation": "has_evidence"
+      },
+      {
+        "source": "arxiv_2205.02303v1",
+        "target": "ev_8440177448248952937",
+        "relation": "provides_evidence"
+      },
+      {
+        "source": "claim_1",
+        "target": "arxiv_2602.00899v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_1",
+        "target": "arxiv_2108.06279v2",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_1",
+        "target": "arxiv_2602.00899v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_1",
+        "target": "arxiv_2602.00899v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_1",
+        "target": "arxiv_2108.06279v2",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_1",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_1",
+        "target": "arxiv_2602.00899v1",
+        "relation": "contradicts"
+      },
+      {
+        "source": "claim_1",
+        "target": "arxiv_2108.06279v2",
+        "relation": "contradicts"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2108.06279v2",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2108.06279v2",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2108.06279v2",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2602.00899v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2108.06279v2",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2602.00899v1",
+        "relation": "contradicts"
+      },
+      {
+        "source": "claim_2",
+        "target": "arxiv_2108.06279v2",
+        "relation": "contradicts"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2108.06279v2",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2108.06279v2",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2205.02303v1",
+        "relation": "supports"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2602.00899v1",
+        "relation": "contradicts"
+      },
+      {
+        "source": "claim_3",
+        "target": "arxiv_2108.06279v2",
+        "relation": "contradicts"
+      }
+    ]
+  },
+  "citation_list": [
+    {
+      "id": "arxiv_2602.00899v1",
+      "title": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+      "authors": [
+        "Mritunjay Pandey"
+      ],
+      "url": "http://arxiv.org/abs/2602.00899v1",
+      "published": "2026",
+      "source": "arxiv"
+    },
+    {
+      "id": "arxiv_2108.06279v2",
+      "title": "On Single and Multiple Representations in Dense Passage Retrieval",
+      "authors": [
+        "Craig Macdonald",
+        "Nicola Tonellotto",
+        "Iadh Ounis"
+      ],
+      "url": "http://arxiv.org/abs/2108.06279v2",
+      "published": "2021",
+      "source": "arxiv"
+    },
+    {
+      "id": "arxiv_2205.02303v1",
+      "title": "Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings",
+      "authors": [
+        "Georgios Sidiropoulos",
+        "Evangelos Kanoulas"
+      ],
+      "url": "http://arxiv.org/abs/2205.02303v1",
+      "published": "2022",
+      "source": "arxiv"
+    }
+  ]
+}

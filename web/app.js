@@ -1,8 +1,9 @@
-/* RAG Research Scientist Agent - Interactive Scientific Workstation & Research Graph System */
+/* RAG Research Scientist Agent - Single Connected Investigation State Workstation */
 
 let reportData = null;
 let cachedGraphNodes = null;
 let cachedGraphEdges = null;
+let isGraphLoading = false;
 
 let currentInvestigationState = {
   selectedClaimId: null,
@@ -176,7 +177,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById(target).classList.add('active');
 
     if (target === 'tab-graph') {
-      setTimeout(() => renderFullGraphCanvas(), 50);
+      setTimeout(() => {
+        fitGraphToViewport();
+        renderFullGraphCanvas();
+      }, 50);
     }
     if (target === 'tab-analytics') {
       renderAnalyticsCharts();
@@ -246,6 +250,8 @@ async function executeLiveResearch() {
   btnRunAgent.disabled = true;
   btnRunAgent.textContent = "Executing...";
   document.getElementById('executiveFindingText').textContent = "Running Multi-Source Agent Pipeline... Querying arXiv API and Web search...";
+  isGraphLoading = true;
+  renderFullGraphCanvas();
 
   try {
     const response = await fetch('/api/research', {
@@ -324,7 +330,7 @@ async function executeLiveResearch() {
         evidence_graph: data.evidence_graph || null
       };
 
-      // Reset Graph cache
+      // Clear cached graph state for recalculation
       cachedGraphNodes = null;
       cachedGraphEdges = null;
 
@@ -335,6 +341,8 @@ async function executeLiveResearch() {
       renderLiteratureTable();
       renderPage5Gaps();
       renderPage6Recommendations();
+
+      fitGraphToViewport();
       renderFullGraphCanvas();
     }
 
@@ -344,6 +352,7 @@ async function executeLiveResearch() {
   } finally {
     btnRunAgent.disabled = false;
     btnRunAgent.textContent = "Run Research Agent";
+    isGraphLoading = false;
   }
 }
 
@@ -657,19 +666,24 @@ function renderAnalyticsCharts() {
 
 
 /* ==========================================================================
-   FULL INTERACTIVE EVIDENCE GRAPH SYSTEM
+   REDESIGNED HIGH-END SCIENTIFIC EVIDENCE GRAPH SYSTEM
    ========================================================================== */
 
 function getNodeShape(type) {
   const t = (type || '').toLowerCase();
   if (t === 'paper') return 'circle';
-  if (t === 'claim') return 'rect';       // Gold square/rectangle
-  if (t === 'method') return 'diamond';   // Diamond
+  if (t === 'claim') return 'rect';       // Gold rounded square
+  if (t === 'method') return 'diamond';   // Diamond / Hexagon
   if (t === 'gap') return 'square';       // Muted red square
   if (t === 'query' || t === 'question') return 'circle';
-  if (t === 'dataset') return 'square';
-  if (t === 'evidence') return 'circle';
+  if (t === 'dataset') return 'rect';
+  if (t === 'evidence') return 'diamond'; // Small diamond
   return 'circle';
+}
+
+function truncateText(str, maxLength = 32) {
+  if (!str) return '';
+  return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
 }
 
 function getGraphData() {
@@ -684,14 +698,14 @@ function getGraphData() {
   const nodeMap = new Map();
 
   function addNode(id, label, type, data, shape, size) {
-    if (!nodeMap.has(id)) {
+    if (!nodeMap.has(String(id))) {
       const nodeObj = {
         id: String(id),
         label: String(label),
         type: (type || 'paper').toLowerCase(),
         data: data || {},
         shape: shape || getNodeShape(type),
-        size: size || (type === 'query' ? 18 : type === 'claim' ? 16 : 14),
+        size: size || (type === 'query' ? 22 : type === 'claim' ? 18 : type === 'gap' ? 17 : 15),
         x: 0,
         y: 0
       };
@@ -704,21 +718,21 @@ function getGraphData() {
     const s = String(source);
     const t = String(target);
     if (s && t && s !== t) {
-      edges.push({ source: s, target: t, relation: relation || 'related_to' });
+      edges.push({ id: `e_${s}_${t}`, source: s, target: t, relation: relation || 'related_to' });
     }
   }
 
   // 1. Root Query Node
   const qId = 'query_root';
-  addNode(qId, reportData.research_question || 'Research Prompt', 'query', {
+  addNode(qId, `Query: ${truncateText(reportData.research_question, 30)}`, 'query', {
     question: reportData.research_question,
     executive_summary: reportData.executive_summary
-  }, 'circle', 18);
+  }, 'circle', 22);
 
   // 2. Claims
   (reportData.claims || []).forEach(c => {
     const claimId = `claim_${c.claim_id}`;
-    addNode(claimId, `Claim ${c.claim_id}`, 'claim', c, 'rect', 16);
+    addNode(claimId, `Claim ${c.claim_id}`, 'claim', c, 'rect', 18);
     addEdge(qId, claimId, 'evaluates');
 
     // Add Evidence Node for Claim
@@ -731,7 +745,7 @@ function getGraphData() {
         paper_url: c.paper_url,
         relevance: c.relevance,
         supports: c.claim_id
-      }, 'circle', 12);
+      }, 'diamond', 13);
 
       addEdge(claimId, evId, 'has_evidence');
     }
@@ -740,7 +754,7 @@ function getGraphData() {
   // 3. Papers
   (reportData.papers || []).forEach((p, idx) => {
     const paperId = p.id || `paper_${idx + 1}`;
-    addNode(paperId, p.title || 'Literature Paper', 'paper', p, 'circle', 14);
+    addNode(paperId, `Paper: ${truncateText(p.title, 26)}`, 'paper', p, 'circle', 15);
     addEdge(qId, paperId, 'retrieved');
 
     // Connect papers to claims
@@ -763,9 +777,9 @@ function getGraphData() {
 
   // 4. Methods
   const defaultMethods = [
-    { id: 'method_vlm', name: 'Vision-Language Decoder', desc: 'End-to-End VLM fine-tuning on Indic script image tokens.', usedBy: ['01'], papers: ['p1'] },
-    { id: 'method_harfbuzz', name: 'HarfBuzz Font Engine', desc: 'Synthetic ligature font rendering pipeline.', usedBy: ['01'], papers: ['p1'] },
-    { id: 'method_trocr', name: 'TrOCR Line Decoder', desc: 'Fast line-level transformer decoding.', usedBy: ['02'], papers: ['p2'] }
+    { id: 'method_vlm', name: 'Method: VLM Fine-Tuning', desc: 'End-to-End VLM fine-tuning on Indic script image tokens.', usedBy: ['01'], papers: ['p1'] },
+    { id: 'method_harfbuzz', name: 'Method: HarfBuzz Renderer', desc: 'Synthetic font rendering pipeline.', usedBy: ['01'], papers: ['p1'] },
+    { id: 'method_trocr', name: 'Method: TrOCR Line Decoder', desc: 'Fast line-level transformer decoding.', usedBy: ['02'], papers: ['p2'] }
   ];
 
   defaultMethods.forEach(m => {
@@ -776,17 +790,17 @@ function getGraphData() {
 
   // 5. Datasets
   const defaultDatasets = [
-    { id: 'dataset_mozhi', name: 'Mozhi-LR(S) Corpus', source: 'arXiv / WMT 2024', usedFor: 'Low-resource Indic script benchmark', mentionedIn: ['p1'] }
+    { id: 'dataset_mozhi', name: 'Dataset: Mozhi-LR(S)', source: 'arXiv / WMT 2024', usedFor: 'Low-resource Indic benchmark', mentionedIn: ['p1'] }
   ];
   defaultDatasets.forEach(d => {
-    addNode(d.id, d.name, 'dataset', d, 'square', 13);
+    addNode(d.id, d.name, 'dataset', d, 'rect', 14);
     (d.mentionedIn || []).forEach(pId => addEdge(pId, d.id, 'evaluates_on'));
   });
 
   // 6. Research Gaps
   (reportData.open_research_gaps || []).forEach(g => {
     const gapId = g.gap_id ? `gap_${g.gap_id.replace(/\s+/g, '_')}` : `gap_01`;
-    addNode(gapId, `${g.gap_id || 'GAP 01'}: ${g.title}`, 'gap', g, 'square', 14);
+    addNode(gapId, `Gap: ${g.gap_id || 'GAP 01'} ${truncateText(g.title, 20)}`, 'gap', g, 'square', 17);
     addEdge(qId, gapId, 'exposes');
 
     (reportData.claims || []).forEach(c => {
@@ -815,19 +829,26 @@ function getGraphData() {
   return { nodes: cachedGraphNodes, edges: cachedGraphEdges };
 }
 
+// Layered Hierarchical Node Positioning
 function normalizeGraphPositions(nodes, width, height) {
   if (!nodes || nodes.length === 0) return;
-  const w = width || 800;
-  const h = height || 600;
+  const w = width || 900;
+  const h = height || 650;
 
+  // Hierarchical Layers:
+  // Layer 0: Query
+  // Layer 1: Claims
+  // Layer 2: Papers & Evidence
+  // Layer 3: Methods & Datasets
+  // Layer 4: Gaps
   const typeYMap = {
-    'query': 70,
-    'claim': 190,
-    'paper': 320,
-    'evidence': 320,
-    'method': 450,
-    'dataset': 450,
-    'gap': 540
+    'query': 80,
+    'claim': 200,
+    'paper': 340,
+    'evidence': 340,
+    'method': 480,
+    'dataset': 480,
+    'gap': 600
   };
 
   const typeGroups = {};
@@ -839,23 +860,76 @@ function normalizeGraphPositions(nodes, width, height) {
 
   Object.keys(typeGroups).forEach(t => {
     const group = typeGroups[t];
-    const targetY = typeYMap[t] || 300;
+    const targetY = typeYMap[t] || 320;
     const count = group.length;
 
     group.forEach((node, i) => {
       if (!node.x || !node.y) {
         const step = w / (count + 1);
         node.x = step * (i + 1);
-        node.y = targetY + (i % 2 === 1 ? 15 : -15);
+        node.y = targetY + (i % 2 === 1 ? 16 : -16);
       }
     });
   });
+}
+
+// Automatically Fit Graph to Canvas Viewport
+function fitGraphToViewport() {
+  const canvas = document.getElementById('fullGraphCanvas');
+  if (!canvas) return;
+
+  const width = canvas.parentElement.clientWidth || 900;
+  const height = canvas.parentElement.clientHeight || 650;
+  canvas.width = width;
+  canvas.height = height;
+
+  const { nodes } = getGraphData();
+  normalizeGraphPositions(nodes, width, height);
+
+  const filter = currentInvestigationState.graphFilterType;
+  const visibleNodes = filter === 'all' ? nodes : nodes.filter(n => n.type === 'query' || n.type === filter);
+
+  if (visibleNodes.length === 0) return;
+
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  visibleNodes.forEach(n => {
+    minX = Math.min(minX, n.x - (n.size || 15) - 40);
+    maxX = Math.max(maxX, n.x + (n.size || 15) + 40);
+    minY = Math.min(minY, n.y - (n.size || 15) - 40);
+    maxY = Math.max(maxY, n.y + (n.size || 15) + 40);
+  });
+
+  const graphWidth = maxX - minX || 1;
+  const graphHeight = maxY - minY || 1;
+
+  const scaleX = (width * 0.78) / graphWidth;
+  const scaleY = (height * 0.78) / graphHeight;
+
+  let computedZoom = Math.min(scaleX, scaleY);
+  computedZoom = Math.max(0.5, Math.min(1.8, computedZoom));
+
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+
+  currentInvestigationState.zoomLevel = computedZoom;
+  currentInvestigationState.panX = width / 2 - centerX * computedZoom;
+  currentInvestigationState.panY = height / 2 - centerY * computedZoom;
 }
 
 function selectGraphNode(node) {
   if (!node) return;
   currentInvestigationState.selectedNodeId = node.id;
   currentInvestigationState.selectedEdge = null;
+
+  // Center selected node smoothly without zooming too far
+  const canvas = document.getElementById('fullGraphCanvas');
+  if (canvas) {
+    const width = canvas.width;
+    const height = canvas.height;
+    currentInvestigationState.panX = width / 2 - node.x * currentInvestigationState.zoomLevel;
+    currentInvestigationState.panY = height / 2 - node.y * currentInvestigationState.zoomLevel;
+  }
+
   renderNodeInspector(node);
   renderFullGraphCanvas();
 }
@@ -871,24 +945,62 @@ function selectGraphEdge(edge) {
 function clearGraphSelection() {
   currentInvestigationState.selectedNodeId = null;
   currentInvestigationState.selectedEdge = null;
-  resetNodeInspector();
+  renderGraphOverviewInspector();
   renderFullGraphCanvas();
 }
 
-function resetNodeInspector() {
+function renderGraphOverviewInspector() {
   if (!graphInspectorContent) return;
+
+  const { nodes, edges } = getGraphData();
+  const claimsCount = nodes.filter(n => n.type === 'claim').length;
+  const papersCount = nodes.filter(n => n.type === 'paper').length;
+  const evCount = nodes.filter(n => n.type === 'evidence').length;
+  const gapsCount = nodes.filter(n => n.type === 'gap').length;
+
   graphInspectorContent.innerHTML = `
+    <div class="section-title-sm">EVIDENCE GRAPH</div>
     <div class="insp-row">
-      <div class="insp-label">Node Label</div>
-      <div class="insp-val" id="graphNodeLabel">Select a node to inspect its evidence relationships.</div>
+      <div class="insp-label">Investigation Structure</div>
+      <div class="insp-val" style="font-weight:700; font-size: 0.95rem;">System Overview</div>
     </div>
-    <div class="insp-row">
-      <div class="insp-label">Type</div>
-      <div class="insp-val highlight" id="graphNodeType">-</div>
+    
+    <div class="insp-divider"></div>
+
+    <div class="insp-metric-grid">
+      <div class="insp-row">
+        <div class="insp-label">NODES</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${nodes.length}</div>
+      </div>
+      <div class="insp-row">
+        <div class="insp-label">CLAIMS</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${claimsCount}</div>
+      </div>
+      <div class="insp-row">
+        <div class="insp-label">PAPERS</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${papersCount}</div>
+      </div>
+      <div class="insp-row">
+        <div class="insp-label">EVIDENCE</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${evCount}</div>
+      </div>
+      <div class="insp-row">
+        <div class="insp-label">GAPS</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${gapsCount}</div>
+      </div>
+      <div class="insp-row">
+        <div class="insp-label">RELATIONSHIPS</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${edges.length}</div>
+      </div>
     </div>
-    <div class="insp-row">
-      <div class="insp-label">Connected Edges</div>
-      <div class="insp-val" id="graphNodeConnections">-</div>
+
+    <div class="insp-divider"></div>
+
+    <div class="insp-row" style="margin-top:8px;">
+      <div class="insp-label">INSTRUCTION</div>
+      <div class="insp-val" style="color: var(--text-secondary); font-size: 0.8rem; line-height:1.4;">
+        Select a node or relationship to inspect the evidence chain.
+      </div>
     </div>
   `;
 }
@@ -897,9 +1009,8 @@ function renderNodeInspector(node) {
   if (!graphInspectorContent || !node) return;
   const d = node.data || {};
   const t = (node.type || '').toLowerCase();
-  const { edges } = getGraphData();
+  const { edges, nodes } = getGraphData();
 
-  // Connected edges & relationships
   const connEdges = edges.filter(e => e.source === node.id || e.target === node.id);
   const rels = listUnique(connEdges.map(e => e.relation));
 
@@ -908,7 +1019,7 @@ function renderNodeInspector(node) {
   if (t === 'query' || t === 'question') {
     const connectedClaimsCount = connEdges.filter(e => e.relation === 'evaluates').length || reportData?.claims?.length || 0;
     html = `
-      <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
+      <div class="section-title-sm">NODE INSPECTOR</div>
       <div class="insp-row">
         <div class="insp-label">Research Question</div>
         <div class="insp-val" style="font-weight:700; font-size: 0.95rem; line-height: 1.35;">${d.question || reportData?.research_question || node.label}</div>
@@ -935,13 +1046,12 @@ function renderNodeInspector(node) {
     
     // Connected Papers
     const paperIds = connEdges.filter(e => e.relation === 'supports' || e.relation === 'contradicts').map(e => e.target);
-    const connectedPapersHTML = (reportData?.papers || []).filter(p => paperIds.includes(p.id)).map(p => `• ${p.title}`).join('<br>') || (d.paper_title ? `• ${d.paper_title}` : 'Not available in current evidence set.');
+    const connectedPapersHTML = (reportData?.papers || []).filter(p => paperIds.includes(p.id)).map(p => `• ${p.title}`).join('<br>') || (d.paper_title ? `• ${d.paper_title}` : 'NOT AVAILABLE IN CURRENT EVIDENCE SET');
 
-    // Evidence Tags
     const evTags = connEdges.filter(e => e.relation === 'has_evidence').map(e => e.target).join(', ') || d.evidence_tag || 'E-017';
 
     html = `
-      <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
+      <div class="section-title-sm">NODE INSPECTOR</div>
       <div class="insp-row">
         <div class="insp-label">CLAIM ${claimNum}</div>
         <div class="insp-val" style="font-weight:600; font-size: 0.88rem; line-height:1.4;">${d.claim || node.label}</div>
@@ -953,18 +1063,14 @@ function renderNodeInspector(node) {
       </div>
       <div class="insp-row">
         <div class="insp-label">Confidence</div>
-        <div class="insp-val highlight">${typeof d.confidence === 'number' ? d.confidence.toFixed(2) : d.confidence || '0.87'}</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${typeof d.confidence === 'number' ? d.confidence.toFixed(2) : d.confidence || '0.87'}</div>
       </div>
       <div class="insp-row">
-        <div class="insp-label">Supported By</div>
-        <div class="insp-val" style="font-family: var(--font-mono);">${d.sources_count || 4} SOURCES</div>
-      </div>
-      <div class="insp-row">
-        <div class="insp-label">Evidence Tag</div>
+        <div class="insp-label">Supporting Evidence</div>
         <div class="insp-val" style="font-family: var(--font-mono); color: var(--text-secondary);">${evTags}</div>
       </div>
       <div class="insp-row">
-        <div class="insp-label">Connected Papers</div>
+        <div class="insp-label">Related Papers</div>
         <div class="insp-val" style="font-size: 0.8rem; color: var(--text-secondary); line-height:1.35;">${connectedPapersHTML}</div>
       </div>
       <div class="insp-row">
@@ -972,15 +1078,15 @@ function renderNodeInspector(node) {
         <div class="insp-val" style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);">${rels.join(', ') || 'evaluates, supports'}</div>
       </div>
       <div style="display:flex; gap:8px; margin-top:10px;">
-        <button id="btnInspectorViewClaim" class="btn-action-sm" style="flex:1;">[ VIEW CLAIM ]</button>
-        <button id="btnInspectorViewEvidence" class="btn-action-sm" style="flex:1;">[ VIEW EVIDENCE ]</button>
+        <button id="btnInspectorViewClaim" class="btn-action-sm" style="flex:1;">[ VIEW EVIDENCE ]</button>
+        <button id="btnInspectorViewInLit" class="btn-action-sm" style="flex:1;">[ VIEW LITERATURE ]</button>
       </div>
     `;
   } else if (t === 'paper') {
-    const relatedClaimsList = connEdges.filter(e => e.relation === 'supports' || e.relation === 'contradicts').map(e => `Claim ${e.source.replace('claim_', '')}`).join(', ') || 'Claim 01, Claim 02';
+    const relatedClaimsList = connEdges.filter(e => e.relation === 'supports' || e.relation === 'contradicts').map(e => `Claim ${e.source.replace('claim_', '')}`).join(', ') || 'Claim 01';
     
     html = `
-      <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
+      <div class="section-title-sm">NODE INSPECTOR</div>
       <div class="insp-row">
         <div class="insp-label">PAPER</div>
         <div class="insp-val" style="font-weight:700; font-size: 0.88rem; line-height:1.35;">${d.title || node.label}</div>
@@ -988,7 +1094,7 @@ function renderNodeInspector(node) {
       <div class="insp-divider"></div>
       <div class="insp-row">
         <div class="insp-label">Authors</div>
-        <div class="insp-val" style="color: var(--text-secondary);">${d.authors || 'Not available in current evidence set.'}</div>
+        <div class="insp-val" style="color: var(--text-secondary);">${d.authors || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Year</div>
@@ -1000,14 +1106,14 @@ function renderNodeInspector(node) {
       </div>
       <div class="insp-row">
         <div class="insp-label">Relevance</div>
-        <div class="insp-val highlight">${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : d.relevance || '0.91'}</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : d.relevance || '0.91'}</div>
       </div>
       <div class="insp-row">
-        <div class="insp-label">Evidence Count</div>
+        <div class="insp-label">Evidence Passages</div>
         <div class="insp-val" style="font-family: var(--font-mono);">${d.evidence_count || 7}</div>
       </div>
       <div class="insp-row">
-        <div class="insp-label">Related Claims</div>
+        <div class="insp-label">Supporting Claims</div>
         <div class="insp-val" style="font-size: 0.8rem; color: var(--text-secondary);">${relatedClaimsList}</div>
       </div>
       <div style="display:flex; flex-direction:column; gap:6px; margin-top:10px;">
@@ -1017,7 +1123,7 @@ function renderNodeInspector(node) {
     `;
   } else if (t === 'evidence') {
     html = `
-      <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
+      <div class="section-title-sm">NODE INSPECTOR</div>
       <div class="insp-row">
         <div class="insp-label">EVIDENCE PASSAGE</div>
         <div class="insp-val highlight">${d.evidence_tag || node.label}</div>
@@ -1025,23 +1131,19 @@ function renderNodeInspector(node) {
       <div class="insp-divider"></div>
       <div class="insp-row">
         <div class="insp-label">Source Paper</div>
-        <div class="insp-val" style="font-weight:600;">${d.paper_title || 'Not available in current evidence set.'}</div>
+        <div class="insp-val" style="font-weight:600;">${d.paper_title || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Relevance</div>
-        <div class="insp-val highlight">${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : d.relevance || '0.91'}</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : d.relevance || '0.91'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Evidence Passage</div>
-        <div class="insp-val passage-quote">"${d.snippet || 'Not available in current evidence set.'}"</div>
+        <div class="insp-val passage-quote">"${d.snippet || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}"</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Supports</div>
         <div class="insp-val" style="font-family: var(--font-mono);">Claim ${d.supports || '01'}</div>
-      </div>
-      <div class="insp-row">
-        <div class="insp-label">Source URL</div>
-        <div class="insp-val" style="font-family: var(--font-mono); font-size:0.72rem; word-break:break-all;">${d.paper_url || 'Not available in current evidence set.'}</div>
       </div>
       <div style="display:flex; gap:8px; margin-top:10px;">
         <a href="${d.paper_url || '#'}" target="_blank" class="btn-open-paper" style="flex:1;">[ OPEN SOURCE ]</a>
@@ -1050,7 +1152,7 @@ function renderNodeInspector(node) {
     `;
   } else if (t === 'method') {
     html = `
-      <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
+      <div class="section-title-sm">NODE INSPECTOR</div>
       <div class="insp-row">
         <div class="insp-label">METHOD</div>
         <div class="insp-val" style="font-weight:700; font-size: 0.9rem;">${d.name || node.label}</div>
@@ -1058,7 +1160,7 @@ function renderNodeInspector(node) {
       <div class="insp-divider"></div>
       <div class="insp-row">
         <div class="insp-label">Description</div>
-        <div class="insp-val" style="color: var(--text-secondary);">${d.desc || 'Not available in current evidence set.'}</div>
+        <div class="insp-val" style="color: var(--text-secondary);">${d.desc || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Used By</div>
@@ -1071,7 +1173,7 @@ function renderNodeInspector(node) {
     `;
   } else if (t === 'dataset') {
     html = `
-      <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
+      <div class="section-title-sm">NODE INSPECTOR</div>
       <div class="insp-row">
         <div class="insp-label">DATASET</div>
         <div class="insp-val" style="font-weight:700; font-size: 0.9rem;">${d.name || node.label}</div>
@@ -1083,19 +1185,19 @@ function renderNodeInspector(node) {
       </div>
       <div class="insp-row">
         <div class="insp-label">Used For</div>
-        <div class="insp-val" style="color: var(--text-secondary);">${d.usedFor || 'Not available in current evidence set.'}</div>
+        <div class="insp-val" style="color: var(--text-secondary);">${d.usedFor || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Source</div>
-        <div class="insp-val" style="font-family: var(--font-mono); color: var(--text-secondary);">${d.source || 'Not available in current evidence set.'}</div>
+        <div class="insp-val" style="font-family: var(--font-mono); color: var(--text-secondary);">${d.source || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}</div>
       </div>
     `;
   } else if (t === 'gap') {
     html = `
-      <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
+      <div class="section-title-sm">NODE INSPECTOR</div>
       <div class="insp-row">
         <div class="insp-label">RESEARCH GAP</div>
-        <div class="insp-val highlight" style="font-size: 0.9rem;">${d.gap_id || 'GAP 01'}</div>
+        <div class="insp-val highlight" style="font-size: 0.9rem; font-family: var(--font-mono);">${d.gap_id || 'GAP 01'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Title</div>
@@ -1104,15 +1206,15 @@ function renderNodeInspector(node) {
       <div class="insp-divider"></div>
       <div class="insp-row">
         <div class="insp-label">Evidence</div>
-        <div class="insp-val" style="color: var(--text-secondary);">${d.evidence || 'Not available in current evidence set.'}</div>
+        <div class="insp-val" style="color: var(--text-secondary);">${d.evidence || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Observation</div>
-        <div class="insp-val" style="color: var(--text-secondary);">${d.observation || 'Not available in current evidence set.'}</div>
+        <div class="insp-val" style="color: var(--text-secondary);">${d.observation || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Implication</div>
-        <div class="insp-val" style="color: var(--text-secondary);">${d.implication || 'Not available in current evidence set.'}</div>
+        <div class="insp-val" style="color: var(--text-secondary);">${d.implication || 'NOT AVAILABLE IN CURRENT EVIDENCE SET'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Confidence</div>
@@ -1121,10 +1223,6 @@ function renderNodeInspector(node) {
       <div class="insp-row">
         <div class="insp-label">Supporting Papers</div>
         <div class="insp-val" style="font-size: 0.8rem; color: var(--text-secondary);">${(reportData?.papers || []).slice(0, 2).map(p => p.title).join('<br>') || 'Paper 01, Paper 02'}</div>
-      </div>
-      <div class="insp-row">
-        <div class="insp-label">Why It Matters</div>
-        <div class="insp-val" style="color: var(--text-secondary);">${d.implication || 'Performance degrades on noisy archives.'}</div>
       </div>
       <div style="display:flex; flex-direction:column; gap:6px; margin-top:10px;">
         <button id="btnInspectorViewGapPapers" class="btn-action-sm">[ VIEW SUPPORTING PAPERS ]</button>
@@ -1135,16 +1233,12 @@ function renderNodeInspector(node) {
 
   graphInspectorContent.innerHTML = html;
 
-  // Bind inspector action buttons
+  // Bind inspector buttons
   document.getElementById('btnInspectorViewSynthesis')?.addEventListener('click', () => {
     document.querySelector('.tab-btn[data-tab="tab-synthesis"]')?.click();
   });
 
   document.getElementById('btnInspectorViewClaim')?.addEventListener('click', () => {
-    document.querySelector('.tab-btn[data-tab="tab-synthesis"]')?.click();
-  });
-
-  document.getElementById('btnInspectorViewEvidence')?.addEventListener('click', () => {
     document.querySelector('.tab-btn[data-tab="tab-synthesis"]')?.click();
   });
 
@@ -1170,7 +1264,7 @@ function renderEdgeInspector(edge) {
   const tNode = nodes.find(n => n.id === edge.target);
 
   graphInspectorContent.innerHTML = `
-    <div class="section-title-sm">GRAPH EDGE INSPECTOR</div>
+    <div class="section-title-sm">RELATIONSHIP INSPECTOR</div>
     <div class="insp-row">
       <div class="insp-label">Relationship</div>
       <div class="insp-val highlight" style="font-size:0.95rem; font-family: var(--font-mono);">${(edge.relation || 'RELATED_TO').toUpperCase()}</div>
@@ -1183,6 +1277,19 @@ function renderEdgeInspector(edge) {
     <div class="insp-row">
       <div class="insp-label">To Node</div>
       <div class="insp-val" style="font-weight:600;">${tNode ? tNode.label : edge.target}</div>
+    </div>
+    <div class="insp-divider"></div>
+    <div class="insp-row">
+      <div class="insp-label">Evidence Basis</div>
+      <div class="insp-val" style="color: var(--text-secondary); font-size:0.8rem;">
+        ${sNode?.data?.snippet || tNode?.data?.snippet ? `"${sNode?.data?.snippet || tNode?.data?.snippet}"` : 'Direct structural relationship in evidence graph.'}
+      </div>
+    </div>
+    <div class="insp-row">
+      <div class="insp-label">Source</div>
+      <div class="insp-val" style="font-family: var(--font-mono); color: var(--accent); font-size:0.75rem;">
+        ${sNode?.data?.source || tNode?.data?.source || 'arXiv / Web'}
+      </div>
     </div>
   `;
 }
@@ -1200,17 +1307,36 @@ function showGraphTooltip(node, mouseEvt) {
   const d = node.data || {};
   const t = (node.type || '').toLowerCase();
 
+  let badge = node.type.toUpperCase();
+  let title = node.label;
   let sub = '';
-  if (t === 'claim') sub = `${d.status || 'SUPPORTED'} · Confidence ${d.confidence || '0.87'}`;
-  else if (t === 'paper') sub = `${d.year || '2025'} · ${d.source || 'arXiv'} · Relevance ${d.relevance || '0.91'}`;
-  else if (t === 'gap') sub = `Confidence: ${d.confidence || 'HIGH'}`;
-  else if (t === 'query') sub = `Research Question`;
-  else if (t === 'method') sub = `Methodology Artifact`;
-  else if (t === 'dataset') sub = `Evaluation Benchmark`;
-  else if (t === 'evidence') sub = `Source Passage Verified`;
+
+  if (t === 'claim') {
+    title = `Claim ${d.claim_id || ''}: ${truncateText(d.claim || node.label, 40)}`;
+    sub = `Status: ${d.status || 'SUPPORTED'} · Confidence: ${d.confidence || '0.87'} · Sources: ${d.sources_count || 4}`;
+  } else if (t === 'paper') {
+    title = d.title || node.label;
+    sub = `${d.source || 'arXiv'} · ${d.year || '2025'} · Relevance: ${d.relevance || '0.91'}`;
+  } else if (t === 'gap') {
+    title = `${d.gap_id || 'GAP 01'}: ${d.title || node.label}`;
+    sub = `Confidence: ${d.confidence || 'HIGH'} · Identified from literature`;
+  } else if (t === 'query') {
+    title = d.question || reportData?.research_question || node.label;
+    sub = `Original Research Prompt`;
+  } else if (t === 'method') {
+    title = d.name || node.label;
+    sub = d.desc || `Methodology Artifact`;
+  } else if (t === 'dataset') {
+    title = d.name || node.label;
+    sub = `Evaluation Benchmark Corpus`;
+  } else if (t === 'evidence') {
+    title = d.evidence_tag || node.label;
+    sub = `Source passage verified`;
+  }
 
   graphTooltip.innerHTML = `
-    <div class="tt-title">${node.type.toUpperCase()}: ${node.label}</div>
+    <div class="tt-badge">${badge}</div>
+    <div class="tt-title">${title}</div>
     <div class="tt-sub">${sub}</div>
   `;
 
@@ -1223,7 +1349,6 @@ function hideGraphTooltip() {
   if (graphTooltip) graphTooltip.style.display = 'none';
 }
 
-// Distance from point (px, py) to line segment (x1, y1) - (x2, y2)
 function distToSegment(px, py, x1, y1, x2, y2) {
   const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
   if (l2 === 0) return Math.hypot(px - x1, py - y1);
@@ -1241,7 +1366,7 @@ function getHitTarget(worldX, worldY) {
   for (let i = visibleNodes.length - 1; i >= 0; i--) {
     const n = visibleNodes[i];
     const dist = Math.hypot(n.x - worldX, n.y - worldY);
-    const hitRadius = (n.size || 14) + 6;
+    const hitRadius = (n.size || 15) + 6;
     if (dist <= hitRadius) {
       return { type: 'node', target: n };
     }
@@ -1266,21 +1391,20 @@ function getHitTarget(worldX, worldY) {
   return null;
 }
 
-// Canvas Interaction Event Handlers
+// Canvas Mouse Interactions
 function setupCanvasInteractions() {
   const canvas = document.getElementById('fullGraphCanvas');
   if (!canvas) return;
 
   canvas.addEventListener('wheel', (evt) => {
     evt.preventDefault();
-    const zoomFactor = evt.deltaY < 0 ? 1.1 : 0.9;
+    const zoomFactor = evt.deltaY < 0 ? 1.12 : 0.88;
     const newZoom = Math.max(0.4, Math.min(3.0, currentInvestigationState.zoomLevel * zoomFactor));
 
     const rect = canvas.getBoundingClientRect();
     const mouseX = evt.clientX - rect.left;
     const mouseY = evt.clientY - rect.top;
 
-    // Keep mouse point stationary in world coordinates
     currentInvestigationState.panX = mouseX - (mouseX - currentInvestigationState.panX) * (newZoom / currentInvestigationState.zoomLevel);
     currentInvestigationState.panY = mouseY - (mouseY - currentInvestigationState.panY) * (newZoom / currentInvestigationState.zoomLevel);
     currentInvestigationState.zoomLevel = newZoom;
@@ -1338,7 +1462,7 @@ function setupCanvasInteractions() {
       return;
     }
 
-    // Hover detection when not dragging
+    // Hover detection
     if (evt.target === canvas) {
       const screenX = evt.clientX - rect.left;
       const screenY = evt.clientY - rect.top;
@@ -1374,7 +1498,6 @@ function setupCanvasInteractions() {
   window.addEventListener('mouseup', (evt) => {
     if (currentInvestigationState.isDraggingNode || currentInvestigationState.isPanning) {
       if (!currentInvestigationState.hasDraggedFar) {
-        // Click event without drag
         const canvas = document.getElementById('fullGraphCanvas');
         if (canvas) {
           const rect = canvas.getBoundingClientRect();
@@ -1409,23 +1532,35 @@ function setupCanvasInteractions() {
   });
 }
 
-// Graph Filters & Zoom Controls
+// Window Resize Auto-Fit
+window.addEventListener('resize', () => {
+  fitGraphToViewport();
+  renderFullGraphCanvas();
+});
+
+// Graph Filters & Toolbar Handlers
 document.querySelectorAll('.node-filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.node-filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentInvestigationState.graphFilterType = btn.getAttribute('data-type');
+    fitGraphToViewport();
     renderFullGraphCanvas();
   });
 });
 
 document.getElementById('btnZoomIn')?.addEventListener('click', () => {
-  currentInvestigationState.zoomLevel = Math.min(3.0, currentInvestigationState.zoomLevel + 0.15);
+  currentInvestigationState.zoomLevel = Math.min(3.0, currentInvestigationState.zoomLevel + 0.2);
   renderFullGraphCanvas();
 });
 
 document.getElementById('btnZoomOut')?.addEventListener('click', () => {
-  currentInvestigationState.zoomLevel = Math.max(0.4, currentInvestigationState.zoomLevel - 0.15);
+  currentInvestigationState.zoomLevel = Math.max(0.4, currentInvestigationState.zoomLevel - 0.2);
+  renderFullGraphCanvas();
+});
+
+document.getElementById('btnFitGraph')?.addEventListener('click', () => {
+  fitGraphToViewport();
   renderFullGraphCanvas();
 });
 
@@ -1433,6 +1568,7 @@ document.getElementById('btnResetGraph')?.addEventListener('click', () => {
   currentInvestigationState.zoomLevel = 1.0;
   currentInvestigationState.panX = 0;
   currentInvestigationState.panY = 0;
+  fitGraphToViewport();
   clearGraphSelection();
 });
 
@@ -1442,8 +1578,8 @@ function renderFullGraphCanvas() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = canvas.parentElement.clientHeight;
+  canvas.width = canvas.parentElement.clientWidth || 900;
+  canvas.height = canvas.parentElement.clientHeight || 650;
 
   const style = getComputedStyle(document.documentElement);
   const colorPaper = style.getPropertyValue('--graph-paper').trim() || '#9A9FA3';
@@ -1456,8 +1592,32 @@ function renderFullGraphCanvas() {
   const colorTextMuted = style.getPropertyValue('--text-muted').trim() || '#687078';
   const colorBorderDim = style.getPropertyValue('--border-dim').trim() || '#252B30';
 
+  // Handle Loading & Empty States
+  if (isGraphLoading) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = colorTextPrimary;
+    ctx.font = '700 14px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('BUILDING EVIDENCE GRAPH...', canvas.width / 2, canvas.height / 2 - 10);
+    ctx.fillStyle = colorTextMuted;
+    ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.fillText('Mapping claims · Resolving sources · Connecting relationships', canvas.width / 2, canvas.height / 2 + 15);
+    return;
+  }
+
   const { nodes, edges } = getGraphData();
-  normalizeGraphPositions(nodes, canvas.width, canvas.height);
+
+  if (!nodes || nodes.length === 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = colorTextPrimary;
+    ctx.font = '700 14px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('EVIDENCE GRAPH UNAVAILABLE', canvas.width / 2, canvas.height / 2 - 10);
+    ctx.fillStyle = colorTextMuted;
+    ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.fillText('No verified relationships were returned for this investigation.', canvas.width / 2, canvas.height / 2 + 15);
+    return;
+  }
 
   const filter = currentInvestigationState.graphFilterType;
   const visibleNodes = filter === 'all' ? nodes : nodes.filter(n => n.type === 'query' || n.type === filter);
@@ -1510,24 +1670,26 @@ function renderFullGraphCanvas() {
 
       if (isHighlighted) {
         ctx.strokeStyle = colorAccent;
-        ctx.lineWidth = 2.2;
-        ctx.globalAlpha = 1.0;
+        ctx.lineWidth = 2.0;
+        ctx.globalAlpha = 0.85;
       } else if (hasActiveFocus) {
         ctx.strokeStyle = colorBorderDim;
         ctx.lineWidth = 0.8;
-        ctx.globalAlpha = 0.25;
+        ctx.globalAlpha = 0.15;
       } else {
         ctx.strokeStyle = colorBorderDim;
         ctx.lineWidth = 1.0;
-        ctx.globalAlpha = 0.7;
+        ctx.globalAlpha = 0.45;
       }
       ctx.stroke();
 
-      // Midpoint label
-      ctx.fillStyle = isHighlighted ? colorAccent : colorTextMuted;
-      ctx.font = '10px "JetBrains Mono", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(e.relation || 'related', (n1.x + n2.x) / 2, (n1.y + n2.y) / 2 - 5);
+      // Conditional Edge Label rendering: ONLY when highlighted/selected/hovered
+      if (isHighlighted) {
+        ctx.fillStyle = colorAccent;
+        ctx.font = '600 10px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(e.relation || 'related', (n1.x + n2.x) / 2, (n1.y + n2.y) / 2 - 6);
+      }
       ctx.globalAlpha = 1.0;
     }
   });
@@ -1536,7 +1698,6 @@ function renderFullGraphCanvas() {
   visibleNodes.forEach(n => {
     const isSelected = (n.id === currentInvestigationState.selectedNodeId);
     const isHovered = (n.id === currentInvestigationState.hoveredNodeId);
-    const isFocusedNode = (n.id === activeNodeId);
     const isConnectedNode = connectedNodeIds.has(n.id);
 
     let nodeColor = colorPaper;
@@ -1549,14 +1710,14 @@ function renderFullGraphCanvas() {
 
     let nodeAlpha = 1.0;
     if (hasActiveFocus && !isConnectedNode) {
-      nodeAlpha = 0.35;
+      nodeAlpha = 0.30;
     }
 
     ctx.globalAlpha = nodeAlpha;
     ctx.fillStyle = nodeColor;
 
-    const baseSize = n.size || 14;
-    const renderSize = isSelected || isHovered ? baseSize + 3 : baseSize;
+    const baseSize = n.size || 15;
+    const renderSize = isHovered ? baseSize * 1.08 : baseSize;
 
     // Draw Shape
     if (n.shape === 'circle') {
@@ -1578,7 +1739,7 @@ function renderFullGraphCanvas() {
         ctx.stroke();
       }
     } else if (n.shape === 'rect') {
-      const w = renderSize * 2.0;
+      const w = renderSize * 2.2;
       const h = renderSize * 1.4;
       ctx.fillRect(n.x - w / 2, n.y - h / 2, w, h);
       if (isSelected || isHovered) {
@@ -1595,7 +1756,7 @@ function renderFullGraphCanvas() {
         ctx.strokeRect(n.x - sz / 2, n.y - sz / 2, sz, sz);
       }
     } else if (n.shape === 'diamond') {
-      const sz = renderSize * 1.2;
+      const sz = renderSize * 1.25;
       ctx.beginPath();
       ctx.moveTo(n.x, n.y - sz);
       ctx.lineTo(n.x + sz, n.y);
@@ -1610,11 +1771,11 @@ function renderFullGraphCanvas() {
       }
     }
 
-    // Node Label
+    // Node Label: Readable 12-14px sans-serif
     ctx.fillStyle = colorTextPrimary;
-    ctx.font = (isSelected || isHovered) ? '600 11px Inter, sans-serif' : '11px Inter, sans-serif';
+    ctx.font = isSelected ? '600 14px Inter, sans-serif' : isHovered ? '600 13px Inter, sans-serif' : '12px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(n.label, n.x, n.y + renderSize + 14);
+    ctx.fillText(n.label, n.x, n.y + renderSize + 16);
     ctx.globalAlpha = 1.0;
   });
 
@@ -1629,5 +1790,10 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPage5Gaps();
   renderPage6Recommendations();
   setupCanvasInteractions();
-  setTimeout(() => renderFullGraphCanvas(), 100);
+  renderGraphOverviewInspector();
+  
+  setTimeout(() => {
+    fitGraphToViewport();
+    renderFullGraphCanvas();
+  }, 100);
 });

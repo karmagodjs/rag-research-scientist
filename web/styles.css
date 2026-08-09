@@ -620,15 +620,37 @@ body {
   transition: all 0.12s ease;
 }
 
+.segmented-control {
+  display: flex;
+  background: var(--bg-dark);
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
+  gap: 2px;
+}
+
+.node-filter-btn {
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
 .node-filter-btn:hover {
   color: var(--text-primary);
-  border-color: var(--border-subtle);
+  background: var(--bg-surface-2);
 }
 
 .node-filter-btn.active {
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-tint);
+  font-weight: 600;
 }
 
 .graph-controls {
@@ -639,7 +661,7 @@ body {
 .graph-canvas-container {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr 340px;
   position: relative;
   background: var(--bg-dark);
   overflow: hidden;
@@ -658,40 +680,55 @@ body {
 .graph-tooltip {
   position: absolute;
   pointer-events: none;
-  background: var(--bg-surface-2);
+  background: var(--bg-surface);
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  padding: 8px 12px;
+  font-size: 0.76rem;
   color: var(--text-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: none;
-  transition: opacity 100ms ease;
-  max-width: 240px;
+  transition: opacity 120ms ease;
+  max-width: 280px;
   white-space: normal;
   word-wrap: break-word;
+  line-height: 1.4;
 }
 
 .graph-tooltip .tt-title {
+  font-family: var(--font-sans);
   font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.graph-tooltip .tt-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
   color: var(--accent);
   margin-bottom: 2px;
+  text-transform: uppercase;
 }
 
 .graph-tooltip .tt-sub {
   color: var(--text-secondary);
-  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  margin-top: 4px;
+  border-top: 1px solid var(--border-dim);
+  padding-top: 4px;
 }
 
 .graph-side-inspector {
   background: var(--bg-surface);
   border-left: 1px solid var(--border-dim);
-  padding: 0.9rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   overflow-y: auto;
   max-height: 100%;
 }
@@ -699,7 +736,17 @@ body {
 .insp-divider {
   height: 1px;
   background: var(--border-dim);
-  margin: 4px 0;
+  margin: 6px 0;
+}
+
+.insp-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  background: var(--bg-dark);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
 }
 
 /* VIEW 03: LITERATURE DATABASE WORKSTATION */

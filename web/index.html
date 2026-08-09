@@ -149,18 +149,21 @@
           <!-- Graph Toolbar -->
           <div class="graph-toolbar">
             <div class="graph-filters">
-              <span class="filter-title">FILTER NODES:</span>
-              <button class="node-filter-btn active" data-type="all">ALL</button>
-              <button class="node-filter-btn" data-type="paper">PAPER</button>
-              <button class="node-filter-btn" data-type="claim">CLAIM</button>
-              <button class="node-filter-btn" data-type="method">METHOD</button>
-              <button class="node-filter-btn" data-type="dataset">DATASET</button>
-              <button class="node-filter-btn" data-type="gap">GAP</button>
+              <span class="filter-title">FILTER NODES</span>
+              <div class="segmented-control">
+                <button class="node-filter-btn active" data-type="all">ALL</button>
+                <button class="node-filter-btn" data-type="paper">PAPER</button>
+                <button class="node-filter-btn" data-type="claim">CLAIM</button>
+                <button class="node-filter-btn" data-type="method">METHOD</button>
+                <button class="node-filter-btn" data-type="dataset">DATASET</button>
+                <button class="node-filter-btn" data-type="gap">GAP</button>
+              </div>
             </div>
             <div class="graph-controls">
-              <button id="btnZoomIn" class="btn-graph-action">Zoom +</button>
-              <button id="btnZoomOut" class="btn-graph-action">Zoom -</button>
-              <button id="btnResetGraph" class="btn-graph-action">Reset View</button>
+              <button id="btnZoomIn" class="btn-graph-action" title="Zoom In">[ + ]</button>
+              <button id="btnZoomOut" class="btn-graph-action" title="Zoom Out">[ − ]</button>
+              <button id="btnFitGraph" class="btn-graph-action" title="Fit View">[ FIT ]</button>
+              <button id="btnResetGraph" class="btn-graph-action" title="Reset View">[ RESET ]</button>
             </div>
           </div>
 

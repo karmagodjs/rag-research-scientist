@@ -21,6 +21,7 @@ from retrieval.dedup import DocumentDeduplicator
 from retrieval.decomposer import QueryDecomposer
 from ranking.reranker import Reranker
 from evidence.extractor import EvidenceExtractor
+from evidence.llm_client import LLMClient
 from evidence.claims import ClaimGenerator
 from evidence.contradiction import ContradictionDetector
 from evidence.graph import EvidenceGraph
@@ -44,6 +45,14 @@ class ResearchAgent:
         )
         self.logger = logging.getLogger("ResearchAgent")
 
+        # Initialize LLM Client
+        self.llm_client = LLMClient(
+            anthropic_api_key=self.config.anthropic_api_key,
+            openai_api_key=self.config.openai_api_key,
+            gemini_api_key=self.config.gemini_api_key,
+            timeout=self.config.timeout_seconds
+        )
+
         # Initialize sub-components
         self.decomposer = QueryDecomposer()
         self.arxiv_retriever = ArxivRetriever(api_url=self.config.arxiv_api_url, timeout=self.config.timeout_seconds)
@@ -52,13 +61,14 @@ class ResearchAgent:
         self.deduplicator = DocumentDeduplicator()
         self.reranker = Reranker()
         self.extractor = EvidenceExtractor()
-        self.claim_generator = ClaimGenerator()
-        self.contradiction_detector = ContradictionDetector()
+        self.claim_generator = ClaimGenerator(llm_client=self.llm_client)
+        self.contradiction_detector = ContradictionDetector(llm_client=self.llm_client)
         self.graph_builder = EvidenceGraph()
         self.timeline_generator = TimelineGenerator()
-        self.gap_analyzer = ResearchGapAnalyzer()
+        self.gap_analyzer = ResearchGapAnalyzer(llm_client=self.llm_client)
         self.synthesizer = ReportSynthesizer()
         self.evaluator = Evaluator()
+
 
     def run(self, query: str) -> Dict[str, Any]:
         """Execute self-improving research pipeline over max_iterations."""

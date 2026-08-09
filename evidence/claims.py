@@ -1,16 +1,21 @@
 """
 Claim Generation and Dynamic Confidence Calculation module.
 Generates research claims dynamically from retrieved evidence and computes confidence scores.
+Supports LLM-backed claim synthesis with graceful heuristic fallback.
 """
 
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+from evidence.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
 
 class ClaimGenerator:
     """Generates empirically grounded research claims and calculates objective confidence scores."""
+
+    def __init__(self, llm_client: Optional[LLMClient] = None):
+        self.llm_client = llm_client
 
     def _calculate_confidence(
         self,
@@ -44,6 +49,12 @@ class ClaimGenerator:
             logger.warning("No evidence available to generate claims.")
             return []
 
+        use_llm = self.llm_client is not None and self.llm_client.is_available()
+        if use_llm:
+            logger.info("LLM mode active for claim synthesis.")
+        else:
+            logger.info("Heuristic mode active for claim synthesis (no LLM API key configured).")
+
         # Group evidence snippets by paper ID
         doc_map: Dict[str, List[Dict[str, Any]]] = {}
         for item in evidence_items:
@@ -62,15 +73,10 @@ class ClaimGenerator:
         claims = []
         for p_id, snippets in sorted_docs[:4]:
             lead_snippet = snippets[0]
-            
-            # Format clean claim text without redundant prefix
-            raw_text = lead_snippet['snippet'].strip()
-            claim_text = raw_text if len(raw_text) > 30 else f"Paper {lead_snippet['paper_title']}: {raw_text}"
-            
             supporting_sources = set(s["paper_id"] for s in snippets)
             num_sources = len(supporting_sources)
             avg_rel = sum(s["relevance_score"] for s in snippets) / len(snippets)
-            
+
             year_str = str(lead_snippet.get("published_year", "2024"))
             try:
                 year_val = int(year_str[:4])
@@ -85,6 +91,41 @@ class ClaimGenerator:
                 has_contradiction=False
             )
 
+            claim_text = ""
+            reasoning = ""
+
+            if use_llm:
+                paper_title = lead_snippet.get("paper_title", p_id)
+                snippets_text = "\n".join([f"- {s['snippet']}" for s in snippets])
+                prompt = (
+                    f"Synthesize a clear, 1-sentence scientific claim from the following evidence snippets for paper '{paper_title}':\n"
+                    f"{snippets_text}\n\n"
+                    f"Also provide a 1-sentence qualitative reasoning explaining the confidence level or caveats of this claim.\n"
+                    f"Output format:\nClaim: <1 sentence claim>\nReasoning: <1 sentence reasoning>"
+                )
+                system_prompt = "You are a scientific research synthesis assistant. Output concise, accurate scientific claims backed strictly by provided snippets."
+                response = self.llm_client.generate(prompt, system_prompt)
+
+                if response and "Claim:" in response:
+                    lines = response.split("\n")
+                    claim_line = next((l for l in lines if l.startswith("Claim:")), "")
+                    reason_line = next((l for l in lines if l.startswith("Reasoning:")), "")
+
+                    claim_text = claim_line.replace("Claim:", "").strip()
+                    qualitative_reasoning = reason_line.replace("Reasoning:", "").strip()
+
+                    if claim_text:
+                        reasoning = (
+                            f"{qualitative_reasoning} "
+                            f"(Quantitative score: {confidence} derived from {num_sources} source(s), avg relevance {avg_rel:.2f}, recency {recency})."
+                        )
+
+            # Heuristic fallback if LLM returned nothing or LLM not active
+            if not claim_text:
+                raw_text = lead_snippet['snippet'].strip()
+                claim_text = raw_text if len(raw_text) > 30 else f"Paper {lead_snippet['paper_title']}: {raw_text}"
+                reasoning = f"Calculated from {num_sources} supporting source(s), avg relevance {avg_rel:.2f}, recency score {recency}."
+
             claims.append({
                 "claim": claim_text,
                 "evidence": [
@@ -97,7 +138,7 @@ class ClaimGenerator:
                     } for s in snippets
                 ],
                 "confidence": confidence,
-                "reasoning": f"Calculated from {num_sources} supporting sources, avg relevance {avg_rel:.2f}, recency score {recency}."
+                "reasoning": reasoning
             })
 
         logger.info(f"Generated {len(claims)} evidence-grounded research claims.")

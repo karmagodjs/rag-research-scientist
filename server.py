@@ -12,12 +12,10 @@ import uuid
 import logging
 from typing import Dict, Any
 from agent import ResearchAgent, AgentConfig
+from storage import storage
 
 PORT = 8000
 WEB_DIR = os.path.join(os.path.dirname(__file__), "web")
-
-# In-memory store for research runs
-RESEARCH_STORE: Dict[str, Dict[str, Any]] = {}
 
 logger = logging.getLogger("ResearchServer")
 
@@ -51,13 +49,13 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
                 
                 report = agent.run(query)
                 report["id"] = research_id
-                RESEARCH_STORE[research_id] = report
+                storage.save(research_id, report)
 
                 self._send_json(report, status=201)
                 return
             except Exception as e:
-                logger.error(f"Error executing research pipeline: {str(e)}")
-                self._send_json({"error": str(e)}, status=500)
+                logger.exception(f"Error executing research pipeline: {e}")
+                self._send_json({"error": "An internal server error occurred while processing research request."}, status=500)
                 return
 
         self._send_json({"error": "Endpoint not found"}, status=404)
@@ -71,7 +69,7 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
             parts = path.strip("/").split("/")  # ['api', 'research', ':id', ':sub']
             if len(parts) == 3:  # GET /api/research/:id
                 research_id = parts[2]
-                report = RESEARCH_STORE.get(research_id)
+                report = storage.get(research_id)
                 if report:
                     self._send_json(report)
                 else:
@@ -81,7 +79,7 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
             elif len(parts) == 4:  # GET /api/research/:id/:sub
                 research_id = parts[2]
                 sub = parts[3]
-                report = RESEARCH_STORE.get(research_id)
+                report = storage.get(research_id)
                 if not report:
                     self._send_json({"error": "Research ID not found"}, status=404)
                     return

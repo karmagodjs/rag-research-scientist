@@ -141,7 +141,22 @@ Research results can be exported as:
 
 ---
 
+## Execution Modes: Hybrid LLM-Backed & Rule-Based Fallback
+
+RAG Research Scientist supports both **LLM-backed synthesis** and **zero-dependency rule-based heuristic execution**:
+
+| Stage | LLM-Backed Mode (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY` set) | Heuristic Fallback Mode (No API key set) |
+|---|---|---|
+| **Claim Synthesis** | Synthesizes concise, evidence-grounded claim sentences from paper snippet clusters, pairing LLM qualitative reasoning with dynamic quantitative confidence scores. | Selects lead evidence snippets per document cluster and computes empirical confidence scores. |
+| **Contradiction Analysis** | LLM evaluates semantic agreement/disagreement between claims and evidence snippets. | Keyword-set matching (`CONTRADICTION_KEYWORDS` / `SUPPORTING_KEYWORDS`) over snippet text. |
+| **Research Gap Detection** | LLM infers domain-specific research gaps and why they matter directly from evidence snippets. | Generic, domain-agnostic pattern matching (`Evaluation Deficit`, `Robustness Deficit`, etc.). |
+| **Retrieval & Reranking** | Multi-source (arXiv, Web, TF-IDF) retrieval + BM25/Cosine reranking. | Multi-source (arXiv, Web, TF-IDF) retrieval + BM25/Cosine reranking. |
+| **Evidence Graph** | NetworkX directional evidence graph construction. | NetworkX directional evidence graph construction. |
+
+---
+
 ## System architecture
+
 
 ```text
                          RESEARCH QUESTION

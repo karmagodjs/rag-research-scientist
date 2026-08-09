@@ -639,23 +639,67 @@ body {
 .graph-canvas-container {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr 300px;
   position: relative;
   background: var(--bg-dark);
+  overflow: hidden;
 }
 
 #fullGraphCanvas {
   width: 100%;
   height: 100%;
+  cursor: grab;
+}
+
+#fullGraphCanvas:active {
+  cursor: grabbing;
+}
+
+.graph-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: none;
+  transition: opacity 100ms ease;
+  max-width: 240px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.graph-tooltip .tt-title {
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.graph-tooltip .tt-sub {
+  color: var(--text-secondary);
+  font-size: 0.68rem;
 }
 
 .graph-side-inspector {
   background: var(--bg-surface);
   border-left: 1px solid var(--border-dim);
-  padding: 0.8rem;
+  padding: 0.9rem;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.insp-divider {
+  height: 1px;
+  background: var(--border-dim);
+  margin: 4px 0;
 }
 
 /* VIEW 03: LITERATURE DATABASE WORKSTATION */

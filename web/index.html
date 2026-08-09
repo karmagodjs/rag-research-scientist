@@ -167,20 +167,23 @@
           <!-- Main Canvas Area & Inspector Split -->
           <div class="graph-canvas-container">
             <canvas id="fullGraphCanvas"></canvas>
+            <div id="graphTooltip" class="graph-tooltip"></div>
             
-            <aside class="graph-side-inspector">
+            <aside class="graph-side-inspector" id="graphSideInspector">
               <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
-              <div class="insp-row">
-                <div class="insp-label">Node Label</div>
-                <div class="insp-val" id="graphNodeLabel">Click any graph node to inspect connections</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Type</div>
-                <div class="insp-val highlight" id="graphNodeType">-</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Connected Edges</div>
-                <div class="insp-val" id="graphNodeConnections">-</div>
+              <div id="graphInspectorContent">
+                <div class="insp-row">
+                  <div class="insp-label">Node Label</div>
+                  <div class="insp-val" id="graphNodeLabel">Select a node to inspect its evidence relationships.</div>
+                </div>
+                <div class="insp-row">
+                  <div class="insp-label">Type</div>
+                  <div class="insp-val highlight" id="graphNodeType">-</div>
+                </div>
+                <div class="insp-row">
+                  <div class="insp-label">Connected Edges</div>
+                  <div class="insp-val" id="graphNodeConnections">-</div>
+                </div>
               </div>
             </aside>
           </div>

@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment & Config
+.env
+.env.local
+.storage/
+
+# Generated Report Artifacts
+report.json
+report.md
+my_rag_report.json
+my_rag_report.md
+*.report.json
+*.report.md
+
+# IDE & System files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

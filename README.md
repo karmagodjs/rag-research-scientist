@@ -165,12 +165,12 @@ Research results can be exported as:
                                │
                                ▼
                   ┌──────────────────────────┐
-                  │      Deduplication        │
+                  │      Deduplication       │
                   └────────────┬─────────────┘
                                │
                                ▼
                   ┌──────────────────────────┐
-                  │       Reranking           │
+                  │       Reranking          │
                   │    BM25 / relevance      │
                   └────────────┬─────────────┘
                                │

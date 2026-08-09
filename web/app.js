@@ -72,7 +72,7 @@ const initialReport = {
       evidence: "Derived from Yes-MT 2024 & SPRING IITM 2024 evidence graph nodes.",
       novelty: "Combines dynamic retrieval-augmented verification with orthographic knowledge graph constraints.",
       difficulty: "Medium-High",
-      impact: "High"
+      impact: "HIGH"
     }
   ]
 };
@@ -85,6 +85,7 @@ const btnRunAgent = document.getElementById('btnRunAgent');
 const centerClaimsList = document.getElementById('centerClaimsList');
 const traceStageItems = document.querySelectorAll('.trace-item');
 const litTableBody = document.getElementById('litTableBody');
+const btnThemeToggle = document.getElementById('btnThemeToggle');
 
 // Right Panel Inspector Cache
 const inspHeaderTitle = document.getElementById('inspHeaderTitle');
@@ -94,6 +95,33 @@ const inspPublished = document.getElementById('inspPublished');
 const inspRelevance = document.getElementById('inspRelevance');
 const inspSnippet = document.getElementById('inspSnippet');
 const btnOpenPaperLink = document.getElementById('btnOpenPaperLink');
+
+// Theme Switcher Logic
+function initTheme() {
+  const savedTheme = localStorage.getItem('rag_workstation_theme');
+  if (savedTheme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    if (btnThemeToggle) btnThemeToggle.textContent = 'DARK MODE';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    if (btnThemeToggle) btnThemeToggle.textContent = 'LIGHT MODE';
+  }
+}
+
+btnThemeToggle?.addEventListener('click', () => {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  if (currentTheme === 'light') {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('rag_workstation_theme', 'dark');
+    if (btnThemeToggle) btnThemeToggle.textContent = 'LIGHT MODE';
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('rag_workstation_theme', 'light');
+    if (btnThemeToggle) btnThemeToggle.textContent = 'DARK MODE';
+  }
+  renderFullGraphCanvas();
+  renderAnalyticsCharts();
+});
 
 // Tab Switcher Handler
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -249,7 +277,7 @@ async function executeLiveResearch() {
           evidence: r.evidence[0] || "Derived from Evidence Graph",
           novelty: r.novelty,
           difficulty: r.difficulty || "Medium",
-          impact: r.expected_impact || "High"
+          impact: r.expected_impact || "HIGH"
         }))
       };
 
@@ -288,21 +316,26 @@ function renderPage1Claims() {
   if (!centerClaimsList || !reportData || !reportData.claims) return;
 
   if (reportData.claims.length === 0) {
-    centerClaimsList.innerHTML = `<div style="color: var(--text-muted); font-size: 0.82rem;">No claims retrieved for this topic.</div>`;
+    centerClaimsList.innerHTML = `<div style="color: var(--text-muted); font-size: 0.82rem; font-family: var(--font-mono);">No claims retrieved for this topic.</div>`;
     return;
   }
 
-  centerClaimsList.innerHTML = reportData.claims.map((c, idx) => `
+  centerClaimsList.innerHTML = reportData.claims.map((c, idx) => {
+    const statusLower = (c.status || '').toLowerCase();
+    const statusClass = statusLower === 'supported' ? 'supported' : 
+                        statusLower === 'contradicted' ? 'contradicted' : 'mixed';
+    return `
     <div class="claim-card-v2 ${idx === 0 ? 'selected' : ''}" data-idx="${idx}">
       <div class="claim-num">CLAIM ${c.claim_id}</div>
       <div class="claim-body-text">${c.claim}</div>
       <div class="claim-metrics-bar">
-        <span class="metric-tag sources">SUPPORTED BY ${c.sources_count} SOURCES</span>
-        <span class="metric-tag confidence">CONFIDENCE ${c.confidence.toFixed(2)}</span>
-        <span class="metric-tag status">STATUS ${c.status}</span>
+        <span class="metric-tag"><span class="status-dot ${statusClass}"></span>STATUS ${c.status}</span>
+        <span class="metric-tag">SOURCES ${c.sources_count}</span>
+        <span class="metric-tag">CONFIDENCE ${typeof c.confidence === 'number' ? c.confidence.toFixed(2) : c.confidence}</span>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   document.querySelectorAll('.claim-card-v2').forEach(card => {
     card.addEventListener('click', () => {
@@ -354,12 +387,12 @@ function renderLiteratureTable() {
 
   tbody.innerHTML = filtered.map((p, idx) => `
     <tr class="${idx === 0 ? 'selected' : ''}" data-idx="${idx}">
-      <td style="font-weight: 600;">${p.title}</td>
-      <td style="color: var(--text-muted);">${p.authors}</td>
-      <td style="font-family: var(--font-mono);">${p.year}</td>
-      <td><span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-cyan);">${p.source}</span></td>
-      <td style="font-family: var(--font-mono); color: var(--accent-cyan);">${typeof p.relevance === 'number' ? p.relevance.toFixed(2) : '0.90'}</td>
-      <td style="font-family: var(--font-mono);">${p.evidence_count || 5} evidence</td>
+      <td style="font-weight: 600; color: var(--text-primary);">${p.title}</td>
+      <td style="color: var(--text-secondary);">${p.authors}</td>
+      <td style="font-family: var(--font-mono); color: var(--text-secondary);">${p.year}</td>
+      <td><span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary);">${p.source}</span></td>
+      <td style="font-family: var(--font-mono); color: var(--accent); font-weight: 600;">${typeof p.relevance === 'number' ? p.relevance.toFixed(2) : '0.90'}</td>
+      <td style="font-family: var(--font-mono); color: var(--text-secondary);">${p.evidence_count || 5} evidence</td>
     </tr>
   `).join('');
 
@@ -419,7 +452,7 @@ function renderPage5Gaps() {
       
       <div class="gap-field">
         <div class="gap-field-label">CONFIDENCE</div>
-        <div class="gap-field-val" style="color: var(--accent-emerald); font-weight: 700; font-family: var(--font-mono);">${g.confidence}</div>
+        <div class="gap-field-val" style="color: var(--success); font-weight: 600; font-family: var(--font-mono);">${g.confidence}</div>
       </div>
 
       <div class="gap-actions-row">
@@ -465,12 +498,12 @@ function renderPage6Recommendations() {
 
       <div class="gap-field">
         <div class="gap-field-label">DIFFICULTY</div>
-        <div class="gap-field-val" style="font-family: var(--font-mono);">${r.difficulty}</div>
+        <div class="gap-field-val" style="font-family: var(--font-mono); color: var(--text-secondary);">${r.difficulty}</div>
       </div>
 
       <div class="gap-field">
         <div class="gap-field-label">EXPECTED IMPACT</div>
-        <div class="gap-field-val" style="color: var(--accent-cyan); font-weight: 700; font-family: var(--font-mono);">${r.impact}</div>
+        <div class="gap-field-val" style="color: var(--accent); font-weight: 600; font-family: var(--font-mono);">${r.impact}</div>
       </div>
 
       <button class="btn-gap-action btn-investigate-rec" data-title="${r.title}" style="margin-top: 6px;">[ INVESTIGATE ]</button>
@@ -501,16 +534,21 @@ function renderAnalyticsCharts() {
 
   const claimsVizList = document.getElementById('claimsVizList');
   if (claimsVizList && reportData && reportData.claims) {
-    claimsVizList.innerHTML = reportData.claims.map(c => `
-      <div style="background: var(--bg-dark); border: 1px solid var(--border-dim); padding: 8px; border-radius: 3px; margin-bottom: 6px; font-family: var(--font-mono); font-size: 0.72rem;">
-        <div style="color: var(--text-main); font-weight: 600; margin-bottom: 4px;">CLAIM ${c.claim_id}: ${c.claim.slice(0, 50)}...</div>
-        <div style="display: flex; gap: 10px;">
-          <span style="color: var(--accent-cyan);">Supported: ${c.sources_count}</span>
-          <span style="color: var(--accent-rose);">Contradicting: 0</span>
-          <span style="color: var(--accent-emerald);">Confidence: ${c.confidence}</span>
+    claimsVizList.innerHTML = reportData.claims.map(c => {
+      const statusLower = (c.status || '').toLowerCase();
+      const statusColor = statusLower === 'supported' ? 'var(--success)' : 
+                          statusLower === 'contradicted' ? 'var(--danger)' : 'var(--warning)';
+      return `
+      <div style="background: var(--bg-dark); border: 1px solid var(--border-dim); padding: 8px 10px; border-radius: var(--radius-sm); margin-bottom: 6px; font-family: var(--font-mono); font-size: 0.72rem;">
+        <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 4px;">CLAIM ${c.claim_id}: ${c.claim.slice(0, 50)}...</div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <span style="color: ${statusColor}; font-weight: 600;">Status: ${c.status}</span>
+          <span style="color: var(--text-secondary);">Supported: ${c.sources_count}</span>
+          <span style="color: var(--text-muted);">Confidence: ${c.confidence}</span>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   const matrix = document.getElementById('methodologyMatrixTable');
@@ -519,27 +557,27 @@ function renderAnalyticsCharts() {
       <table class="dense-lit-table">
         <thead>
           <tr>
-            <th>Method</th>
-            <th>Dataset</th>
-            <th>Model Architecture</th>
-            <th>Advantage</th>
-            <th>Limitation</th>
+            <th>METHOD</th>
+            <th>DATASET</th>
+            <th>ARCHITECTURE</th>
+            <th>ADVANTAGE</th>
+            <th>LIMITATION</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td style="font-weight:700;">VLM Fine-Tuning</td>
-            <td>Mozhi-LR(S) HarfBuzz</td>
-            <td>Qwen2.5-VL / GOT-OCR2.0</td>
-            <td>High layout & script accuracy</td>
-            <td>Higher compute budget</td>
+            <td style="font-weight:600; color: var(--text-primary);">VLM Fine-Tuning</td>
+            <td style="font-family: var(--font-mono); color: var(--text-secondary);">Mozhi-LR(S) HarfBuzz</td>
+            <td style="font-family: var(--font-mono); color: var(--text-secondary);">Qwen2.5-VL / GOT-OCR2.0</td>
+            <td style="color: var(--text-secondary);">High layout & script accuracy</td>
+            <td style="color: var(--text-muted);">Higher compute budget</td>
           </tr>
           <tr>
-            <td style="font-weight:700;">TrOCR Line Decoder</td>
-            <td>IndicOCR Corpus</td>
-            <td>ViT + Transformer Decoder</td>
-            <td>Fast line-level latency (40ms)</td>
-            <td>Requires line segmentation</td>
+            <td style="font-weight:600; color: var(--text-primary);">TrOCR Line Decoder</td>
+            <td style="font-family: var(--font-mono); color: var(--text-secondary);">IndicOCR Corpus</td>
+            <td style="font-family: var(--font-mono); color: var(--text-secondary);">ViT + Transformer Decoder</td>
+            <td style="color: var(--text-secondary);">Fast line-level latency (40ms)</td>
+            <td style="color: var(--text-muted);">Requires line segmentation</td>
           </tr>
         </tbody>
       </table>
@@ -549,18 +587,23 @@ function renderAnalyticsCharts() {
   const srcCanvas = document.getElementById('sourceDistCanvas');
   if (srcCanvas) {
     const ctx = srcCanvas.getContext('2d');
+    const style = getComputedStyle(document.documentElement);
+    const accentColor = style.getPropertyValue('--accent').trim() || '#C9A86A';
+    const methodColor = style.getPropertyValue('--graph-method').trim() || '#7F9BA6';
+    const textColor = style.getPropertyValue('--text-primary').trim() || '#E7E9EA';
+
     srcCanvas.width = srcCanvas.parentElement.clientWidth - 40;
     ctx.clearRect(0, 0, srcCanvas.width, 180);
     
-    ctx.fillStyle = '#00f2fe';
+    ctx.fillStyle = accentColor;
     ctx.fillRect(30, 30, 120, 90);
-    ctx.fillStyle = '#f0f6fc';
-    ctx.font = '11px Fira Code';
+    ctx.fillStyle = textColor;
+    ctx.font = '11px "JetBrains Mono", monospace';
     ctx.fillText('arXiv (3 Papers)', 35, 145);
 
-    ctx.fillStyle = '#38bdf8';
+    ctx.fillStyle = methodColor;
     ctx.fillRect(180, 80, 120, 40);
-    ctx.fillStyle = '#f0f6fc';
+    ctx.fillStyle = textColor;
     ctx.fillText('Web (0 Filtered)', 185, 145);
   }
 }
@@ -599,16 +642,26 @@ function renderFullGraphCanvas() {
   canvas.width = canvas.parentElement.clientWidth;
   canvas.height = canvas.parentElement.clientHeight;
 
+  const style = getComputedStyle(document.documentElement);
+  const colorPaper = style.getPropertyValue('--graph-paper').trim() || '#9A9FA3';
+  const colorClaim = style.getPropertyValue('--graph-claim').trim() || '#C9A86A';
+  const colorMethod = style.getPropertyValue('--graph-method').trim() || '#7F9BA6';
+  const colorGap = style.getPropertyValue('--graph-gap').trim() || '#A56B6B';
+  const colorAccent = style.getPropertyValue('--accent').trim() || '#C9A86A';
+  const colorTextPrimary = style.getPropertyValue('--text-primary').trim() || '#E7E9EA';
+  const colorTextMuted = style.getPropertyValue('--text-muted').trim() || '#687078';
+  const colorBorderDim = style.getPropertyValue('--border-dim').trim() || '#252B30';
+
   let rawNodes = [
-    { id: 'q', label: `Query: ${reportData?.research_question?.slice(0, 22) || 'Indic OCR'}...`, type: 'query', x: canvas.width / 2, y: 60, color: '#00f2fe', radius: 18 },
-    { id: 'c1', label: 'Claim 01', type: 'claim', x: canvas.width / 4, y: 180, color: '#10b981', radius: 15 },
-    { id: 'c2', label: 'Claim 02', type: 'claim', x: canvas.width / 2, y: 180, color: '#10b981', radius: 15 },
-    { id: 'c3', label: 'Claim 03', type: 'claim', x: (canvas.width / 4) * 3, y: 180, color: '#10b981', radius: 15 },
-    { id: 'p1', label: 'Paper: Top Source', type: 'paper', x: canvas.width / 5, y: 320, color: '#8b5cf6', radius: 13 },
-    { id: 'p2', label: 'Paper: Ref Paper', type: 'paper', x: canvas.width / 2, y: 320, color: '#8b5cf6', radius: 13 },
-    { id: 'p3', label: 'Paper: Bench Study', type: 'paper', x: (canvas.width / 5) * 4, y: 320, color: '#8b5cf6', radius: 13 },
-    { id: 'm1', label: 'Method: Synthesis', type: 'method', x: canvas.width / 3, y: 440, color: '#38bdf8', radius: 12 },
-    { id: 'g1', label: 'Gap: Domain Deficit', type: 'gap', x: (canvas.width / 3) * 2, y: 440, color: '#f43f5e', radius: 12 }
+    { id: 'q', label: `Query: ${reportData?.research_question?.slice(0, 22) || 'Indic OCR'}...`, type: 'query', shape: 'circle', x: canvas.width / 2, y: 60, color: colorTextPrimary, size: 18 },
+    { id: 'c1', label: 'Claim 01', type: 'claim', shape: 'rect', x: canvas.width / 4, y: 180, color: colorClaim, size: 16 },
+    { id: 'c2', label: 'Claim 02', type: 'claim', shape: 'rect', x: canvas.width / 2, y: 180, color: colorClaim, size: 16 },
+    { id: 'c3', label: 'Claim 03', type: 'claim', shape: 'rect', x: (canvas.width / 4) * 3, y: 180, color: colorClaim, size: 16 },
+    { id: 'p1', label: 'Paper: Top Source', type: 'paper', shape: 'circle', x: canvas.width / 5, y: 320, color: colorPaper, size: 14 },
+    { id: 'p2', label: 'Paper: Ref Paper', type: 'paper', shape: 'circle', x: canvas.width / 2, y: 320, color: colorPaper, size: 14 },
+    { id: 'p3', label: 'Paper: Bench Study', type: 'paper', shape: 'circle', x: (canvas.width / 5) * 4, y: 320, color: colorPaper, size: 14 },
+    { id: 'm1', label: 'Method: Synthesis', type: 'method', shape: 'diamond', x: canvas.width / 3, y: 440, color: colorMethod, size: 15 },
+    { id: 'g1', label: 'Gap: Domain Deficit', type: 'gap', shape: 'square', x: (canvas.width / 3) * 2, y: 440, color: colorGap, size: 14 }
   ];
 
   const filter = currentInvestigationState.graphFilterType;
@@ -630,6 +683,7 @@ function renderFullGraphCanvas() {
   ctx.save();
   ctx.scale(currentInvestigationState.zoomLevel, currentInvestigationState.zoomLevel);
 
+  // Draw Edges
   edges.forEach(e => {
     const n1 = nodes.find(n => n.id === e.from);
     const n2 = nodes.find(n => n.id === e.to);
@@ -638,33 +692,67 @@ function renderFullGraphCanvas() {
       ctx.beginPath();
       ctx.moveTo(n1.x, n1.y);
       ctx.lineTo(n2.x, n2.y);
-      ctx.strokeStyle = isHighlighted ? 'rgba(0, 242, 254, 0.9)' : 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = isHighlighted ? 2.5 : 1.2;
+      ctx.strokeStyle = isHighlighted ? colorAccent : colorBorderDim;
+      ctx.lineWidth = isHighlighted ? 2.0 : 1.0;
       ctx.stroke();
 
-      ctx.fillStyle = isHighlighted ? '#00f2fe' : '#484f58';
-      ctx.font = '10px Fira Code, monospace';
+      ctx.fillStyle = isHighlighted ? colorAccent : colorTextMuted;
+      ctx.font = '10px "JetBrains Mono", monospace';
       ctx.fillText(e.label, (n1.x + n2.x) / 2, (n1.y + n2.y) / 2 - 5);
     }
   });
 
+  // Draw Nodes
   nodes.forEach(n => {
     const isSelected = n.id === currentInvestigationState.selectedNodeId;
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, isSelected ? n.radius + 3 : n.radius, 0, Math.PI * 2);
     ctx.fillStyle = n.color;
-    ctx.fill();
 
-    if (isSelected) {
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+    if (n.shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, isSelected ? n.size + 3 : n.size, 0, Math.PI * 2);
+      ctx.fill();
+      if (isSelected) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    } else if (n.shape === 'rect') {
+      const w = isSelected ? 36 : 30;
+      const h = isSelected ? 22 : 18;
+      ctx.fillRect(n.x - w / 2, n.y - h / 2, w, h);
+      if (isSelected) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(n.x - w / 2, n.y - h / 2, w, h);
+      }
+    } else if (n.shape === 'diamond') {
+      const sz = isSelected ? n.size + 4 : n.size;
+      ctx.beginPath();
+      ctx.moveTo(n.x, n.y - sz);
+      ctx.lineTo(n.x + sz, n.y);
+      ctx.lineTo(n.x, n.y + sz);
+      ctx.lineTo(n.x - sz, n.y);
+      ctx.closePath();
+      ctx.fill();
+      if (isSelected) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    } else if (n.shape === 'square') {
+      const sz = isSelected ? (n.size + 3) * 2 : n.size * 2;
+      ctx.fillRect(n.x - sz / 2, n.y - sz / 2, sz, sz);
+      if (isSelected) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(n.x - sz / 2, n.y - sz / 2, sz, sz);
+      }
     }
 
-    ctx.fillStyle = '#f0f6fc';
-    ctx.font = isSelected ? 'bold 11px Inter' : '11px Inter';
+    ctx.fillStyle = colorTextPrimary;
+    ctx.font = isSelected ? '600 11px Inter, sans-serif' : '11px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(n.label, n.x, n.y + n.radius + 14);
+    ctx.fillText(n.label, n.x, n.y + n.size + 14);
   });
 
   ctx.restore();
@@ -674,7 +762,7 @@ function renderFullGraphCanvas() {
     const x = (evt.clientX - rect.left) / currentInvestigationState.zoomLevel;
     const y = (evt.clientY - rect.top) / currentInvestigationState.zoomLevel;
 
-    const clicked = nodes.find(n => Math.hypot(n.x - x, n.y - y) <= n.radius + 4);
+    const clicked = nodes.find(n => Math.hypot(n.x - x, n.y - y) <= n.size + 6);
     if (clicked) {
       currentInvestigationState.selectedNodeId = clicked.id;
       document.getElementById('graphNodeLabel').textContent = clicked.label;
@@ -693,6 +781,7 @@ function renderFullGraphCanvas() {
 
 // Initial Load
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   renderPage1Claims();
   renderLiteratureTable();
   renderPage5Gaps();

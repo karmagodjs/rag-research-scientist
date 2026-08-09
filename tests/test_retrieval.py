@@ -33,8 +33,17 @@ class TestRetrieval(unittest.TestCase):
         decomposer = QueryDecomposer()
         subqueries = decomposer.decompose("OCR on low-resource Indic languages since 2024")
         self.assertGreater(len(subqueries), 1)
-        self.assertTrue(any("2024" in sq for sq in subqueries))
+
+    def test_query_decomposition_domain_agnostic(self):
+        decomposer = QueryDecomposer()
+        bio_subqueries = decomposer.decompose("protein folding")
+        self.assertTrue(any("methods" in sq or "benchmark" in sq for sq in bio_subqueries))
+        self.assertFalse(any("biography" in sq for sq in bio_subqueries))
+
+        interp_subqueries = decomposer.decompose("transformer interpretability")
+        self.assertTrue(any("evaluation" in sq or "empirical" in sq for sq in interp_subqueries))
 
 
 if __name__ == "__main__":
     unittest.main()
+

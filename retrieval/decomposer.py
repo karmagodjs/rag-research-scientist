@@ -1,6 +1,6 @@
 """
 Dynamic Query Decomposition and Planning module.
-Converts high-level user questions into targeted search queries across domains.
+Converts high-level user research questions into targeted search subqueries across domains.
 """
 
 import re
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class QueryDecomposer:
     """Dynamic query planner breaking down research questions into multi-faceted subqueries."""
 
-    TECHNICAL_KEYWORDS = {"ocr", "model", "vlm", "transformer", "code", "neural", "rag", "retrieval", "dataset"}
+    BIOGRAPHY_KEYWORDS = {"biography", "who is", "life of", "memoir", "profile of"}
 
     def decompose(self, user_query: str) -> List[str]:
         """Generate focused search subqueries dynamically based on query domain."""
@@ -23,25 +23,27 @@ class QueryDecomposer:
         words = [w for w in re.findall(r"\w+", clean_query) if len(w) > 2]
         query_terms_lower = set(w.lower() for w in words)
 
-        # Check if technical/scientific or general topic
-        is_technical = bool(query_terms_lower.intersection(self.TECHNICAL_KEYWORDS))
+        # Check if query is explicitly asking for biographical information
+        is_biographical = bool(query_terms_lower.intersection(self.BIOGRAPHY_KEYWORDS)) or any(k in clean_query.lower() for k in self.BIOGRAPHY_KEYWORDS)
 
-        if is_technical:
+        if is_biographical:
             sub_aspects = [
-                "analysis and benchmark",
-                "methodology overview",
-                "evaluation metrics",
-                "recent developments"
+                "biography and background",
+                "key achievements and contributions",
+                "recent developments and updates",
+                "overview and analysis"
             ]
         else:
             sub_aspects = [
-                "biography and background",
-                "key developments 2025",
-                "news and public statements",
-                "analysis overview"
+                "state of the art and methods",
+                "benchmark and evaluation",
+                "empirical study and challenges",
+                "recent developments and review"
             ]
 
-        base_topic = " ".join([w for w in words if w.lower() not in {"find", "best", "approaches", "for", "since", "the", "and"}])
+        stop_words = {"find", "best", "approaches", "for", "since", "the", "and", "with", "from", "using", "study", "studies"}
+        base_terms = [w for w in words if w.lower() not in stop_words]
+        base_topic = " ".join(base_terms) if base_terms else clean_query
 
         for aspect in sub_aspects:
             sq = f"{base_topic} {aspect}".strip()

@@ -117,11 +117,11 @@ The system constructs a NetworkX graph connecting research entities and their re
 Example relationships:
 
 ```text
-Paper ──supports──→ Claim
-Paper ──provides_evidence──→ Evidence
-Evidence ──supports──→ Claim
-Paper ──evaluates──→ Claim
-Claim ──contradicts──→ Claim
+Paper ── supports --→ Claim
+Paper ── provides_evidence --→ Evidence
+Evidence ── supports --→ Claim
+Paper ── evaluates --→ Claim
+Claim ── contradicts --→ Claim
 ```
 
 ### Research gap detection

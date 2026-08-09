@@ -1,5 +1,6 @@
 """
 Web Search Retriever implementation using optional Tavily API or DuckDuckGo Lite / HTML search.
+Includes defensive HTML parsing and graceful degradation.
 """
 
 import requests
@@ -64,13 +65,15 @@ class WebRetriever(BaseRetriever):
                         metadata={"score": res.get("score", 0.0)}
                     )
                     documents.append(doc)
+            else:
+                logger.warning(f"Tavily web search returned non-200 status code: {req.status_code}")
         except Exception as e:
-            logger.error(f"Tavily web search failed for '{query}': {str(e)}")
+            logger.warning(f"Tavily web search failed for '{query}': {str(e)}")
 
         return documents
 
     def _search_ddg_lite(self, query: str, top_k: int) -> List[Document]:
-        """DuckDuckGo Lite search for robust general web query retrieval."""
+        """DuckDuckGo Lite search for robust general web query retrieval with defensive parsing."""
         url = "https://lite.duckduckgo.com/lite/"
         documents = []
         try:
@@ -80,18 +83,28 @@ class WebRetriever(BaseRetriever):
                 "Content-Type": "application/x-www-form-urlencoded"
             }
             resp = requests.post(url, data={"q": query}, headers=headers, timeout=self.timeout)
+
+            if resp.status_code != 200:
+                logger.warning(f"DDG Lite request failed with HTTP status {resp.status_code} for query '{query}'. Returning empty results.")
+                return []
+
             html = resp.text
 
             # Extract links, titles, and snippets from DDG Lite HTML tables
-            # Pattern matching title link: <a class="result-link" href="...">Title</a>
-            # Pattern matching snippet: <td class="result-snippet">Snippet</td>
             link_matches = re.findall(r'<a[^>]+class=["\']result-link["\'][^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>', html, re.DOTALL)
             snippet_matches = re.findall(r'<td[^>]+class=["\']result-snippet["\'][^>]*>(.*?)</td>', html, re.DOTALL)
+
+            if not link_matches:
+                logger.warning(f"DDG Lite HTML structure change detected or no results found for query '{query}'. Returning empty list.")
+                return []
 
             for idx in range(min(top_k, len(link_matches))):
                 raw_url, title_raw = link_matches[idx]
                 clean_title = re.sub(r"<[^>]+>", "", title_raw).strip()
                 
+                if not clean_title:
+                    continue
+
                 snippet_raw = snippet_matches[idx] if idx < len(snippet_matches) else clean_title
                 clean_snippet = re.sub(r"<[^>]+>", "", snippet_raw).strip()
 
@@ -106,12 +119,17 @@ class WebRetriever(BaseRetriever):
                 url_match = re.search(r"uddg=([^&]+)", raw_url)
                 clean_url = urllib.parse.unquote(url_match.group(1)) if url_match else raw_url
 
+                if not clean_url:
+                    continue
+
+                full_url = clean_url if clean_url.startswith("http") else f"https://duckduckgo.com{clean_url}"
+
                 doc = Document(
-                    id=f"web_{abs(hash(clean_url))}",
+                    id=f"web_{abs(hash(full_url))}",
                     title=clean_title,
                     authors=["Web Contributor"],
                     abstract=clean_snippet,
-                    url=clean_url if clean_url.startswith("http") else f"https://duckduckgo.com{clean_url}",
+                    url=full_url,
                     published=pub_year,
                     source="web",
                     content=f"Title: {clean_title}\nSnippet: {clean_snippet}"
@@ -119,6 +137,6 @@ class WebRetriever(BaseRetriever):
                 documents.append(doc)
 
         except Exception as e:
-            logger.error(f"DDG Lite web search failed for '{query}': {str(e)}")
+            logger.warning(f"DDG Lite web search failed for '{query}': {str(e)}. Gracefully returning empty result list.")
 
         return documents

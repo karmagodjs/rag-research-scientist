@@ -541,19 +541,9 @@ async function executeLiveResearch() {
   }
 }
 
-// Trace Stage Selection
-traceStageItems.forEach(item => {
-  item.addEventListener('click', () => {
-    traceStageItems.forEach(s => s.classList.remove('active'));
-    item.classList.add('active');
-    const stageId = item.getAttribute('data-stage');
-    const outputText = reportData?.stage_outputs?.[stageId] || "Stage details executing...";
-    document.getElementById('traceLogText').textContent = `Stage ${stageId}: ${outputText}`;
-  });
-});
-
 // View 01 Claims Render
 function renderPage1Claims() {
+  const centerClaimsList = document.getElementById('centerClaimsList');
   if (!centerClaimsList || !reportData || !reportData.claims) return;
 
   if (reportData.claims.length === 0) {
@@ -592,13 +582,24 @@ function renderPage1Claims() {
 
 function updateInspector(claim) {
   if (!claim) return;
+  const inspHeaderTitle = document.getElementById('inspHeaderTitle');
+  const inspPaperTitle = document.getElementById('inspPaperTitle');
+  const inspSource = document.getElementById('inspSource');
+  const inspPublished = document.getElementById('inspPublished');
+  const inspRelevance = document.getElementById('inspRelevance');
+  const inspSnippet = document.getElementById('inspSnippet');
+  const btnOpenPaperLink = document.getElementById('btnOpenPaperLink');
+
   if (inspHeaderTitle) inspHeaderTitle.textContent = claim.evidence_tag || "EVIDENCE INSPECTOR";
   if (inspPaperTitle) inspPaperTitle.textContent = claim.paper_title;
   if (inspSource) inspSource.textContent = claim.source;
   if (inspPublished) inspPublished.textContent = claim.published;
   if (inspRelevance) inspRelevance.textContent = typeof claim.relevance === 'number' ? claim.relevance.toFixed(2) : claim.relevance;
   if (inspSnippet) inspSnippet.textContent = `"${claim.snippet}"`;
-  if (btnOpenPaperLink) btnOpenPaperLink.href = claim.paper_url;
+  if (btnOpenPaperLink) {
+    btnOpenPaperLink.href = claim.paper_url || "#";
+    btnOpenPaperLink.classList.remove('disabled');
+  }
 }
 
 // View 03 Literature Browser & Drawer
@@ -1802,9 +1803,10 @@ function initGraph() {
 }
 
 function initTrace() {
-  document.querySelectorAll('.trace-item').forEach(item => {
+  const traceStageItems = document.querySelectorAll('.trace-item');
+  traceStageItems.forEach(item => {
     item.addEventListener('click', () => {
-      document.querySelectorAll('.trace-item').forEach(s => s.classList.remove('active'));
+      traceStageItems.forEach(s => s.classList.remove('active'));
       item.classList.add('active');
       const stageId = item.getAttribute('data-stage');
       const outputText = reportData?.stage_outputs?.[stageId] || "Stage details executing...";

@@ -1,7 +1,3 @@
-"""
-Dynamic Query Decomposition and Planning module.
-Converts high-level user research questions into targeted search subqueries across domains.
-"""
 
 import re
 import logging
@@ -11,12 +7,10 @@ logger = logging.getLogger(__name__)
 
 
 class QueryDecomposer:
-    """Dynamic query planner breaking down research questions into multi-faceted subqueries."""
 
     BIOGRAPHY_KEYWORDS = {"biography", "who is", "life of", "memoir", "profile of"}
 
     def decompose(self, user_query: str) -> List[str]:
-        """Generate focused search subqueries dynamically based on query domain."""
         clean_query = user_query.strip()
         from retrieval.query_utils import detect_exact_paper_query
 
@@ -34,7 +28,7 @@ class QueryDecomposer:
         words = [w for w in re.findall(r"\w+", clean_query) if len(w) > 2]
         query_terms_lower = set(w.lower() for w in words)
 
-        # Check if query is explicitly asking for biographical information
+
         is_biographical = bool(query_terms_lower.intersection(self.BIOGRAPHY_KEYWORDS)) or any(k in clean_query.lower() for k in self.BIOGRAPHY_KEYWORDS)
 
         if is_biographical:

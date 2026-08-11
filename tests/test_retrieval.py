@@ -1,6 +1,3 @@
-"""
-Unit tests for retrieval modules (arXiv, web, deduplication, decomposition).
-"""
 
 import unittest
 from retrieval.base import Document
@@ -48,37 +45,36 @@ class TestRetrieval(unittest.TestCase):
         from retrieval.query_utils import detect_exact_paper_query
         from ranking.reranker import Reranker
 
-        # Test Case 1: Exact Title
+
         is_exact, title, author = detect_exact_paper_query("Attention Is All You Need")
         self.assertTrue(is_exact)
         self.assertEqual(title, "attention is all you need")
 
-        # Test Case 2: Title + paper
+
         is_exact, title, author = detect_exact_paper_query("Attention Is All You Need paper")
         self.assertTrue(is_exact)
         self.assertEqual(title, "attention is all you need")
 
-        # Test Case 3: Author + Title
+
         is_exact, title, author = detect_exact_paper_query("Vaswani Attention Is All You Need")
         self.assertTrue(is_exact)
         self.assertEqual(author, "vaswani")
 
-        # Test Case 4: Exploratory query
+
         is_exact, title, author = detect_exact_paper_query("recent transformer attention research")
         self.assertFalse(is_exact)
 
-        # Test Case 5: Broad topic query
+
         is_exact, title, author = detect_exact_paper_query("papers about attention mechanisms")
         self.assertFalse(is_exact)
 
-        # Test Ranking Promotion
+
         reranker = Reranker()
         docs = [
             Document(id="d1", title="Survey of Attention Mechanisms", authors=["A. Smith"], abstract="General survey of attention in deep learning.", url="u1", published="2024", source="s1"),
             Document(id="d2", title="Attention Is All You Need", authors=["Ashish Vaswani", "Noam Shazeer"], abstract="We propose the Transformer, a novel architecture.", url="u2", published="2017", source="arXiv"),
             Document(id="d3", title="Efficient Attention Models for Vision", authors=["B. Jones"], abstract="Optimized attention mechanisms for vision models.", url="u3", published="2023", source="s3"),
         ]
-        
         ranked = reranker.rerank("Attention Is All You Need paper", docs)
         self.assertEqual(ranked[0].title, "Attention Is All You Need")
 
@@ -86,7 +82,7 @@ class TestRetrieval(unittest.TestCase):
         from ranking.reranker import Reranker
         from agent import ResearchAgent
 
-        # Test Reranker handling malformed documents or None attributes
+
         reranker = Reranker()
         malformed_docs = [
             Document(id="m1", title="", authors=None, abstract=None, url="u1", published="2025", source="s1"),
@@ -96,7 +92,7 @@ class TestRetrieval(unittest.TestCase):
         self.assertTrue(len(ranked) > 0)
         self.assertEqual(ranked[0].title, "Attention Is All You Need")
 
-        # Test end-to-end Agent execution with both exact title and exploratory queries
+
         agent = ResearchAgent()
         report_exact = agent.run("Attention Is All You Need")
         self.assertIsNotNone(report_exact)
@@ -123,13 +119,11 @@ class TestRetrieval(unittest.TestCase):
         from retrieval.base import Document
 
         agent = ResearchAgent()
-        
         def failing_search(query, top_k=3):
             raise RuntimeError("Network cable unplugged")
 
         agent.arxiv_retriever.search = failing_search
-        
-        # Pipeline should continue using web/canonical results despite ArXiv failure
+
         report = agent.run("BERT")
         self.assertIsNotNone(report)
         self.assertIn("citation_list", report)

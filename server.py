@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-Lightweight Web Dashboard Server for RAG Research Scientist Agent.
-Implements REST API endpoints for research execution, evidence graph retrieval, and static web serving.
-"""
-
 import http.server
 import socketserver
 import os
@@ -33,7 +28,6 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(json.dumps(data).encode("utf-8"))
 
     def do_POST(self):
-        """Handle POST /api/research requests to trigger research agent."""
         if self.path.rstrip('/') in ["/api/research", "/api"]:
             content_length = int(self.headers.get("Content-Length", 0))
             post_data = self.rfile.read(content_length)
@@ -46,7 +40,6 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
                 research_id = f"res_{uuid.uuid4().hex[:8]}"
                 config = AgentConfig(max_papers=max_papers, max_iterations=iterations)
                 agent = ResearchAgent(config=config)
-                
                 report = agent.run(query)
                 report["id"] = research_id
                 storage.save(research_id, report)
@@ -61,13 +54,14 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
         self._send_json({"error": "Endpoint not found"}, status=404)
 
     def do_GET(self):
-        """Handle GET requests for static files and REST API endpoints."""
         path = self.path
 
-        # REST API Routes
+
         if path.startswith("/api/research"):
-            parts = path.strip("/").split("/")  # ['api', 'research', ':id', ':sub']
-            if len(parts) == 3:  # GET /api/research/:id
+            parts = path.strip("/").split("/")  
+
+            if len(parts) == 3:  
+
                 research_id = parts[2]
                 report = storage.get(research_id)
                 if report:
@@ -76,7 +70,8 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
                     self._send_json({"error": "Research ID not found"}, status=404)
                 return
 
-            elif len(parts) == 4:  # GET /api/research/:id/:sub
+            elif len(parts) == 4:  
+
                 research_id = parts[2]
                 sub = parts[3]
                 report = storage.get(research_id)
@@ -102,7 +97,7 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
                     self._send_json({"error": f"Invalid sub-resource {sub}"}, status=404)
                 return
 
-        # Serve static web files
+
         super().do_GET()
 
 

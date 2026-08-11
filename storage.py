@@ -1,7 +1,3 @@
-"""
-Persistent Storage module for RAG Research Scientist Agent.
-Supports Vercel KV / Upstash Redis REST API, persistent file storage fallback, and in-memory caching.
-"""
 
 import os
 import json
@@ -12,13 +8,12 @@ from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
-# Global fallback in-memory store
+
 _IN_MEMORY_STORE: Dict[str, Dict[str, Any]] = {}
 _LOCAL_FILE_DIR = os.getenv("STORAGE_DIR", os.path.join(os.path.dirname(__file__), ".storage"))
 
 
 class PersistentStorage:
-    """Unified storage interface supporting Vercel KV / Redis, local disk, and in-memory fallbacks."""
 
     def __init__(self):
         self.kv_url = os.getenv("KV_REST_API_URL") or os.getenv("UPSTASH_REDIS_REST_URL")
@@ -35,7 +30,6 @@ class PersistentStorage:
                 pass
 
     def save(self, research_id: str, data: Dict[str, Any]) -> bool:
-        """Save research report by ID."""
         _IN_MEMORY_STORE[research_id] = data
 
         if self.has_kv:
@@ -57,7 +51,7 @@ class PersistentStorage:
             except Exception as e:
                 logger.warning(f"Failed to save to Vercel KV: {e}. Saved to fallback store.")
 
-        # Local disk fallback
+
         try:
             file_path = os.path.join(_LOCAL_FILE_DIR, f"{research_id}.json")
             with open(file_path, "w", encoding="utf-8") as f:
@@ -68,7 +62,6 @@ class PersistentStorage:
         return True
 
     def get(self, research_id: str) -> Optional[Dict[str, Any]]:
-        """Retrieve research report by ID."""
         if research_id in _IN_MEMORY_STORE:
             return _IN_MEMORY_STORE[research_id]
 
@@ -94,7 +87,7 @@ class PersistentStorage:
             except Exception as e:
                 logger.warning(f"Failed to fetch from Vercel KV: {e}")
 
-        # Local disk fallback
+
         try:
             file_path = os.path.join(_LOCAL_FILE_DIR, f"{research_id}.json")
             if os.path.exists(file_path):

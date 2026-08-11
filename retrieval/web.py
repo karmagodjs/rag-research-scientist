@@ -1,7 +1,3 @@
-"""
-Web Search Retriever implementation using optional Tavily API or DuckDuckGo Lite / HTML search.
-Includes defensive HTML parsing and graceful degradation.
-"""
 
 import requests
 import json
@@ -17,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class WebRetriever(BaseRetriever):
-    """Retriever for general web search results, news, and online documents."""
 
     def __init__(self, tavily_api_key: Optional[str] = None, timeout: int = 2):
         super().__init__(name="web")
@@ -25,7 +20,6 @@ class WebRetriever(BaseRetriever):
         self.timeout = timeout
 
     def search(self, query: str, top_k: int = 10) -> List[Document]:
-        """Execute web search and convert results into normalized Documents."""
         is_exact, clean_title, author_hint = detect_exact_paper_query(query)
         if is_exact and clean_title:
             search_query = f'"{clean_title}" paper' if not author_hint else f'"{clean_title}" paper {author_hint}'
@@ -38,7 +32,6 @@ class WebRetriever(BaseRetriever):
             return self._search_ddg_lite(search_query, top_k)
 
     def _search_tavily(self, query: str, top_k: int) -> List[Document]:
-        """Search via Tavily API if key is provided in environment."""
         url = "https://api.tavily.com/search"
         payload = json.dumps({
             "api_key": self.tavily_api_key,
@@ -57,7 +50,6 @@ class WebRetriever(BaseRetriever):
                     url_str = res.get("url", "")
                     title = res.get("title", f"Web Result {idx+1}")
                     snippet = res.get("content", "")
-                    
                     year_match = re.search(r"\b(202[0-6])\b", snippet + " " + title)
                     pub_year = year_match.group(1) if year_match else "2025"
 
@@ -81,7 +73,6 @@ class WebRetriever(BaseRetriever):
         return documents
 
     def _search_ddg_lite(self, query: str, top_k: int) -> List[Document]:
-        """DuckDuckGo Lite search for robust general web query retrieval with defensive parsing."""
         url = "https://lite.duckduckgo.com/lite/"
         documents = []
         try:
@@ -98,7 +89,7 @@ class WebRetriever(BaseRetriever):
 
             html = resp.text
 
-            # Extract links, titles, and snippets from DDG Lite HTML tables
+
             link_matches = re.findall(r'<a[^>]+class=["\']result-link["\'][^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>', html, re.DOTALL)
             snippet_matches = re.findall(r'<td[^>]+class=["\']result-snippet["\'][^>]*>(.*?)</td>', html, re.DOTALL)
 
@@ -109,7 +100,6 @@ class WebRetriever(BaseRetriever):
             for idx in range(min(top_k, len(link_matches))):
                 raw_url, title_raw = link_matches[idx]
                 clean_title = re.sub(r"<[^>]+>", "", title_raw).strip()
-                
                 if not clean_title:
                     continue
 
@@ -119,11 +109,11 @@ class WebRetriever(BaseRetriever):
                 if not clean_snippet or len(clean_snippet) < 10:
                     clean_snippet = f"Web result regarding {query}. {clean_title}"
 
-                # Extract year
+
                 year_match = re.search(r"\b(202[0-6])\b", clean_snippet + " " + clean_title)
                 pub_year = year_match.group(1) if year_match else "2025"
 
-                # Clean redirect URL if needed
+
                 url_match = re.search(r"uddg=([^&]+)", raw_url)
                 clean_url = urllib.parse.unquote(url_match.group(1)) if url_match else raw_url
 

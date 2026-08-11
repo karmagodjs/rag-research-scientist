@@ -1,7 +1,3 @@
-"""
-LLM Client Helper for RAG Research Scientist Agent.
-Supports Anthropic, OpenAI, and Gemini APIs with graceful fallback when no API key is provided.
-"""
 
 import os
 import json
@@ -14,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class LLMClient:
-    """Lightweight LLM client supporting Anthropic, OpenAI, and Gemini APIs without external dependencies."""
 
     def __init__(
         self,
@@ -42,11 +37,9 @@ class LLMClient:
             logger.info("No LLM API key configured. Operating in heuristic fallback mode.")
 
     def is_available(self) -> bool:
-        """Check if any LLM API provider is configured."""
         return self.provider is not None
 
     def generate(self, prompt: str, system_prompt: str = "") -> Optional[str]:
-        """Send prompt to configured LLM provider and return response text."""
         if not self.is_available():
             return None
 

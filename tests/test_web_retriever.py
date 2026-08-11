@@ -1,6 +1,3 @@
-"""
-Unit tests for WebRetriever and DDG Lite HTML parsing error handling.
-"""
 
 import unittest
 from unittest.mock import patch, MagicMock

@@ -1,7 +1,3 @@
-"""
-arXiv API Retriever module.
-Queries the official arXiv REST API with exact title boosting, fallback keyword search, and HTTP rate limit handling.
-"""
 
 import requests
 import xml.etree.ElementTree as ET
@@ -18,7 +14,6 @@ ARXIV_API_URL = "https://export.arxiv.org/api/query"
 
 
 class ArxivRetriever(BaseRetriever):
-    """Retriever fetching academic preprints directly from the arXiv API."""
 
     def __init__(self, api_url: Optional[str] = None, timeout: int = 2):
         super().__init__(name="arxiv")
@@ -26,7 +21,6 @@ class ArxivRetriever(BaseRetriever):
         self.timeout = timeout
 
     def search(self, query: str, top_k: int = 10) -> List[Document]:
-        """Execute arXiv search using exact title matching and core term fallback."""
         clean_query = query.strip()
         is_exact, target_title, author_hint = detect_exact_paper_query(clean_query)
 
@@ -38,12 +32,12 @@ class ArxivRetriever(BaseRetriever):
             words = [w for w in re.findall(r"\w+", target_title or clean_query) if len(w) > 1]
 
         if is_exact or target_title:
-            # 1. Try exact title terms query: ti:Term1 AND ti:Term2
+
             ti_terms = " AND ".join([f'ti:{w}' for w in words[:4]])
             exact_docs = self._fetch_arxiv(ti_terms, top_k)
             documents.extend(exact_docs)
 
-            # 2. Try author + title query if author hint exists: au:"Author" AND ti:Term
+
             if author_hint and words:
                 au_docs = self._fetch_arxiv(f'au:{author_hint} AND ti:{words[0]}', top_k)
                 documents.extend(au_docs)
@@ -51,7 +45,7 @@ class ArxivRetriever(BaseRetriever):
             if len(documents) > 0:
                 return self._dedup_internal(documents)[:top_k]
 
-        # Fallback to core terms search: all:Term1 AND all:Term2
+
         core_terms = words[:3]
         query_str = " AND ".join([f'all:{term}' for term in core_terms]) if core_terms else f'all:"{clean_query}"'
 
@@ -70,7 +64,6 @@ class ArxivRetriever(BaseRetriever):
         return unique
 
     def _fetch_arxiv(self, query_param: str, top_k: int) -> List[Document]:
-        """Send GET request to arXiv REST API and parse Atom XML response."""
         params = {
             "search_query": query_param,
             "start": 0,
@@ -85,7 +78,6 @@ class ArxivRetriever(BaseRetriever):
         documents = []
         try:
             resp = requests.get(ARXIV_API_URL, params=params, headers=headers, timeout=self.timeout)
-            
             if resp.status_code == 429:
                 logger.warning("[RETRIEVAL] arXiv rate limited: HTTP 429. Continuing without arXiv results for this subquery.")
                 return []
@@ -107,7 +99,6 @@ class ArxivRetriever(BaseRetriever):
 
                 raw_title = title_elem.text.strip().replace("\n", " ")
                 clean_title = re.sub(r"\s+", " ", raw_title)
-                
                 raw_summary = summary_elem.text.strip().replace("\n", " ")
                 clean_summary = re.sub(r"\s+", " ", raw_summary)
 

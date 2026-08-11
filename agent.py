@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-RAG Research Scientist Agent — Core Orchestration Module
-Executes end-to-end evidence-grounded research agent pipeline with dynamic self-improvement loops.
-"""
-
 import sys
 import os
 import json
@@ -11,7 +6,7 @@ import argparse
 import logging
 from typing import List, Dict, Any
 
-# Internal imports
+
 from config import AgentConfig
 from retrieval.base import Document
 from retrieval.arxiv import ArxivRetriever
@@ -32,12 +27,10 @@ from evaluation.evaluator import Evaluator
 
 
 class ResearchAgent:
-    """Production-grade RAG Research Scientist Agent orchestrator."""
 
     def __init__(self, config: AgentConfig = None):
         self.config = config or AgentConfig()
-        
-        # Setup logging
+
         log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         logging.basicConfig(
             level=getattr(logging, self.config.log_level.upper(), logging.INFO),
@@ -45,7 +38,7 @@ class ResearchAgent:
         )
         self.logger = logging.getLogger("ResearchAgent")
 
-        # Initialize LLM Client
+
         self.llm_client = LLMClient(
             anthropic_api_key=self.config.anthropic_api_key,
             openai_api_key=self.config.openai_api_key,
@@ -53,7 +46,7 @@ class ResearchAgent:
             timeout=self.config.timeout_seconds
         )
 
-        # Initialize sub-components
+
         self.decomposer = QueryDecomposer()
         self.arxiv_retriever = ArxivRetriever(api_url=self.config.arxiv_api_url, timeout=self.config.timeout_seconds)
         self.web_retriever = WebRetriever(tavily_api_key=self.config.tavily_api_key, timeout=self.config.timeout_seconds)
@@ -71,28 +64,27 @@ class ResearchAgent:
 
 
     def run(self, query: str) -> Dict[str, Any]:
-        """Execute self-improving research pipeline over max_iterations."""
         self.logger.info(f"Starting Research Pipeline for query: '{query}'")
-        
         all_documents: List[Document] = []
         raw_retrieved_count = 0
         iteration = 0
         current_queries = [query]
 
-        # 1. Self-Improvement Retrieval Loop
+
         while iteration < self.config.max_iterations:
             iteration += 1
             self.logger.info(f"--- Self-Improvement Loop Iteration {iteration}/{self.config.max_iterations} ---")
 
-            # Query Decomposition
+
             subqueries = []
             for q in current_queries:
                 subqueries.extend(self.decomposer.decompose(q))
-            subqueries = list(dict.fromkeys(subqueries))[:4]  # unique top subqueries
+            subqueries = list(dict.fromkeys(subqueries))[:4]  
+
 
             iteration_docs: List[Document] = []
 
-            # Retrieve across subqueries and multi-sources in parallel
+
             from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 
             def fetch_single_subquery(sq: str) -> List[Document]:
@@ -132,26 +124,26 @@ class ResearchAgent:
 
             raw_retrieved_count += len(iteration_docs)
 
-            # Deduplication
+
             from retrieval.canonical_papers import get_canonical_papers
             candidate_pool = all_documents + iteration_docs + get_canonical_papers()
             combined_pool = self.deduplicator.deduplicate(candidate_pool)
             all_documents = combined_pool
 
-            # Rerank document pool
+
             ranked_docs = self.reranker.rerank(query, all_documents, top_k=self.config.max_papers)
             all_documents = ranked_docs
 
-            # Check if evidence gap requires another iteration
+
             if len(all_documents) >= 5 or iteration >= self.config.max_iterations:
                 self.logger.info("Sufficient document pool retrieved or max iterations reached.")
                 break
             else:
-                # Formulate refined queries for next iteration
+
                 self.logger.info("Document pool sparse; reformulating search queries for self-improvement step.")
                 current_queries = [f"{query} survey benchmark", f"{query} systematic evaluation"]
 
-        # If zero documents retrieved from all sources
+
         if not all_documents:
             self.logger.warning("RETRIEVAL_FAILURE: Zero documents were retrieved from any source.")
             return {
@@ -173,32 +165,32 @@ class ResearchAgent:
                 "citation_list": []
             }
 
-        # 2. Semantic Index Update
+
         self.semantic_retriever.set_corpus(all_documents)
 
-        # 3. Evidence Extraction
+
         evidence_snippets = self.extractor.extract_evidence(all_documents, query)
 
-        # 4. Claim Generation & Confidence Calculation
+
         claims = self.claim_generator.generate_claims(evidence_snippets)
 
-        # 5. Contradiction Analysis
+
         contradictions = [
             self.contradiction_detector.analyze_claim(c, evidence_snippets)
             for c in claims
         ]
 
-        # 6. Evidence Graph Construction
+
         evidence_graph = self.graph_builder.build_graph(query, claims, contradictions, all_documents)
 
-        # 7. Timeline Generation
+
         timeline = self.timeline_generator.generate_timeline(all_documents)
 
-        # 8. Research Gap & Next Step Analysis
+
         gaps = self.gap_analyzer.detect_gaps(evidence_snippets)
         next_research = self.gap_analyzer.propose_next_research(gaps, evidence_graph)
 
-        # 9. Retrieval & System Statistics
+
         stats = {
             "total_documents": len(all_documents),
             "raw_documents": raw_retrieved_count,
@@ -206,7 +198,7 @@ class ResearchAgent:
             "iterations": iteration,
         }
 
-        # 10. Report Synthesis
+
         full_report = self.synthesizer.build_full_report(
             query=query,
             documents=all_documents,
@@ -254,24 +246,24 @@ def main():
             print(f"[!] Benchmark file not found at {bench_path}")
         return
 
-    # Execute research agent run
+
     print(f"[*] Executing Research Scientist Agent for: '{args.query}'...")
     report = agent.run(args.query)
 
-    # Save JSON report
+
     if args.output:
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2)
         print(f"[OK] Saved JSON report to {args.output}")
 
-    # Save Markdown report
+
     if args.markdown:
         md_text = agent.synthesizer.render_markdown(report)
         with open(args.markdown, "w", encoding="utf-8") as f:
             f.write(md_text)
         print(f"[OK] Saved Markdown report to {args.markdown}")
 
-    # Print summary to stdout
+
     print(f"\nCompleted analysis. Retrieved {report.get('retrieval_statistics', {}).get('total_documents', 0)} documents.")
     print(f"Generated {len(report.get('claims', []))} claims and {len(report.get('what_to_research_next', []))} future research proposals.\n")
 

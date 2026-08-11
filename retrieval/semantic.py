@@ -1,6 +1,3 @@
-"""
-Semantic Retriever implementation using vector/TF-IDF similarity over local index or corpus.
-"""
 
 import math
 import re
@@ -12,14 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 class SemanticRetriever(BaseRetriever):
-    """Semantic vector/TF-IDF retriever operating over a candidate Document pool."""
 
     def __init__(self, corpus: List[Document] = None):
         super().__init__(name="semantic")
         self.corpus: List[Document] = corpus or []
 
     def set_corpus(self, corpus: List[Document]):
-        """Update candidate document corpus."""
         self.corpus = corpus
 
     def _tokenize(self, text: str) -> List[str]:
@@ -38,7 +33,6 @@ class SemanticRetriever(BaseRetriever):
         return score
 
     def search(self, query: str, top_k: int = 10) -> List[Document]:
-        """Rank documents in the corpus semantically against query."""
         if not self.corpus:
             logger.info("SemanticRetriever corpus is empty.")
             return []

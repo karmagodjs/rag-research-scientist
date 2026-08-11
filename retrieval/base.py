@@ -1,6 +1,3 @@
-"""
-Base interfaces and data schemas for multi-source retrieval.
-"""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -10,14 +7,15 @@ import datetime
 
 @dataclass
 class Document:
-    """Normalized document schema across all retrieval sources."""
     id: str
     title: str
     authors: List[str]
     abstract: str
     url: str
-    published: str  # YYYY or YYYY-MM-DD
-    source: str     # arxiv, web, semantic, etc.
+    published: str  
+
+    source: str     
+
     content: str = ""
     doi: Optional[str] = None
     arxiv_id: Optional[str] = None
@@ -40,12 +38,10 @@ class Document:
 
 
 class BaseRetriever(ABC):
-    """Abstract Base Class for document retrievers."""
 
     def __init__(self, name: str):
         self.name = name
 
     @abstractmethod
     def search(self, query: str, top_k: int = 10) -> List[Document]:
-        """Search and return normalized Document objects."""
         pass

@@ -1,8 +1,3 @@
-"""
-Research Gap Analyzer and Next-Step Proposal module.
-Infere open research gaps dynamically from literature patterns and constructs actionable research proposals.
-Supports LLM-backed gap inference with generic non-domain-specific heuristic fallback.
-"""
 
 import json
 import logging
@@ -13,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class ResearchGapAnalyzer:
-    """Detects literature gaps dynamically and formulates evidence-backed research proposals."""
 
     GENERIC_GAP_PATTERNS = [
         ("evaluation", "Evaluation Deficit", "Insufficient standardized benchmarks across diverse real-world conditions."),
@@ -27,7 +21,6 @@ class ResearchGapAnalyzer:
         self.llm_client = llm_client
 
     def detect_gaps(self, evidence_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Infer open research gaps dynamically from retrieved evidence snippets."""
         use_llm = self.llm_client is not None and self.llm_client.is_available()
 
         if use_llm:
@@ -111,7 +104,7 @@ class ResearchGapAnalyzer:
                     "why_it_matters": why_matters
                 })
 
-        # Generic fallback if specific keywords are absent in small evidence pools
+
         if not detected_gaps and evidence_list:
             detected_gaps.append({
                 "gap": "Cross-Domain Generalization Deficit in Complex Regimes",
@@ -122,7 +115,7 @@ class ResearchGapAnalyzer:
                         "source_url": evidence_list[0]["source_url"]
                     }
                 ],
-                "why_it_matters": "Current literature lacks comprehensive empirical verification across diverse operating environments."
+                "why_it_matters": "The retrieved papers don't test this under varied real-world conditions, so it's unclear how well it holds up outside the original setup."
             })
 
         logger.info(f"Detected {len(detected_gaps)} literature gaps.")
@@ -133,7 +126,6 @@ class ResearchGapAnalyzer:
         gaps: List[Dict[str, Any]],
         evidence_graph: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """Construct actionable research directions anchored in the evidence graph."""
         proposals = []
 
         for idx, gap in enumerate(gaps[:4]):

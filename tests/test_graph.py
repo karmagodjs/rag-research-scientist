@@ -1,6 +1,3 @@
-"""
-Unit tests for evidence graph construction and NetworkX compatibility.
-"""
 
 import unittest
 from evidence.graph import EvidenceGraph

@@ -1,7 +1,3 @@
-"""
-Reranker module for scoring and ordering retrieved documents.
-Implements BM25 keyword relevance with dominant exact paper title matching priority.
-"""
 
 import math
 import re
@@ -14,14 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 class Reranker:
-    """BM25 relevance scoring reranker with title match priority."""
 
     def __init__(self, k1: float = 1.5, b: float = 0.75):
         self.k1 = k1
         self.b = b
 
     def rerank(self, query: str, documents: List[Document], top_k: int = 10) -> List[Document]:
-        """Rank documents using BM25 relevance score + exact title similarity boost."""
         if not documents:
             return []
 
@@ -35,11 +29,11 @@ class Reranker:
 
         query_terms = [w.lower() for w in re.findall(r"\w+", query) if len(w) > 1]
 
-        # Calculate average document length
+
         doc_lengths = [len(re.findall(r"\w+", doc.content or "")) for doc in documents]
         avg_dl = sum(doc_lengths) / len(doc_lengths) if doc_lengths else 1.0
 
-        # Calculate document frequencies
+
         df = {}
         for term in set(query_terms):
             df[term] = sum(1 for doc in documents if term in (doc.content or "").lower())
@@ -52,7 +46,7 @@ class Reranker:
             dl = len(doc_terms)
             bm25_score = 0.0
 
-            # BM25 Score
+
             for term in query_terms:
                 if term not in df or df[term] == 0:
                     continue
@@ -62,7 +56,7 @@ class Reranker:
                 denominator = tf + self.k1 * (1.0 - self.b + self.b * (dl / avg_dl))
                 bm25_score += idf * (numerator / denominator)
 
-            # Title Match Assessment with Exception Isolation
+
             try:
                 title_info = calculate_title_score(
                     query_title=clean_title_query if clean_title_query else query,
@@ -77,7 +71,7 @@ class Reranker:
                 logger.warning(f"Title matching failed for '{doc.title}': {e}")
                 title_score, exact_match, near_exact = 0.0, False, False
 
-            # Calculate composite final score
+
             if exact_match:
                 final_score = 100.0 + title_score
             elif near_exact:
@@ -102,7 +96,7 @@ class Reranker:
             )
             scored_docs.append((final_score, doc))
 
-        # Sort descending by score
+
         scored_docs.sort(key=lambda x: x[0], reverse=True)
         ranked = [doc for score, doc in scored_docs[:top_k]]
 

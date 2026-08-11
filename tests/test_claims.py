@@ -1,6 +1,3 @@
-"""
-Unit tests for claim generation and dynamic confidence calculation.
-"""
 
 import unittest
 from evidence.claims import ClaimGenerator
@@ -12,7 +9,7 @@ class TestClaims(unittest.TestCase):
         self.generator = ClaimGenerator()
 
     def test_dynamic_confidence_score(self):
-        # 3 sources, high relevance (0.9), recency 1.0, no contradiction
+
         score_high = self.generator._calculate_confidence(
             num_sources=3,
             avg_relevance=0.9,
@@ -21,7 +18,7 @@ class TestClaims(unittest.TestCase):
         )
         self.assertGreaterEqual(score_high, 0.8)
 
-        # 1 source, low relevance (0.3), recency 0.5, with contradiction
+
         score_low = self.generator._calculate_confidence(
             num_sources=1,
             avg_relevance=0.3,

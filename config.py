@@ -1,7 +1,3 @@
-"""
-Configuration settings for RAG Research Scientist Agent.
-Loads settings from environment variables and CLI parameters.
-"""
 
 import os
 from dataclasses import dataclass, field
@@ -10,7 +6,6 @@ from typing import Optional
 
 @dataclass
 class AgentConfig:
-    """Agent configuration options."""
     max_papers: int = 30
     top_k_rerank: int = 10
     max_iterations: int = 1

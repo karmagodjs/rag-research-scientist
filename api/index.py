@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import sys
 import json
@@ -5,7 +6,7 @@ import uuid
 import logging
 from urllib.parse import urlparse
 
-# Add parent directory to Python path for Vercel Serverless Function imports
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from http.server import BaseHTTPRequestHandler
@@ -44,7 +45,7 @@ class handler(BaseHTTPRequestHandler):
                 data = json.loads(post_data.decode('utf-8')) if post_data else {}
                 query = data.get('query', 'OCR on low-resource Indic languages since 2024')
                 max_papers = min(int(data.get('max_papers', 10)), 15)
-                # Cap iterations to 1 and timeout to 5s in serverless environment to prevent function timeout
+
                 iterations = 1 if os.getenv('VERCEL') else min(int(data.get('iterations', 1)), 2)
 
                 config = AgentConfig(
@@ -73,8 +74,10 @@ class handler(BaseHTTPRequestHandler):
         path = parsed.path.rstrip('/')
 
         if path.startswith("/api/research"):
-            parts = path.strip("/").split("/")  # ['api', 'research', ':id', ':sub']
-            if len(parts) == 3:  # GET /api/research/:id
+            parts = path.strip("/").split("/")  
+
+            if len(parts) == 3:  
+
                 research_id = parts[2]
                 report = storage.get(research_id)
                 if report:
@@ -83,7 +86,8 @@ class handler(BaseHTTPRequestHandler):
                     self._send_json({"error": "Research ID not found"}, status=404)
                 return
 
-            elif len(parts) == 4:  # GET /api/research/:id/:sub
+            elif len(parts) == 4:  
+
                 research_id = parts[2]
                 sub = parts[3]
                 report = storage.get(research_id)

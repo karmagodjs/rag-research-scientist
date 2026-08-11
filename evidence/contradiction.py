@@ -1,8 +1,3 @@
-"""
-Contradiction Detection and Analysis module.
-Analyzes evidence for agreement, disagreement, and inconclusive status across papers.
-Supports LLM-backed agreement judgment with keyword heuristic fallback.
-"""
 
 import re
 import json
@@ -14,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class ContradictionDetector:
-    """Detects supporting, contradicting, and inconclusive evidence for generated claims."""
 
     CONTRADICTION_KEYWORDS = {
         "however", "fails", "failed", "struggles", "inferior", "contrast", 
@@ -30,9 +24,7 @@ class ContradictionDetector:
         self.llm_client = llm_client
 
     def analyze_claim(self, claim: Dict[str, Any], all_evidence: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Analyze evidence items against a claim to detect agreement or disagreement."""
         use_llm = self.llm_client is not None and self.llm_client.is_available()
-        
         if use_llm:
             logger.info(f"LLM mode active for contradiction analysis of claim: '{claim.get('claim', '')[:40]}...'")
             return self._analyze_claim_llm(claim, all_evidence)
@@ -53,7 +45,7 @@ class ContradictionDetector:
                 "status": "insufficient"
             }
 
-        # Filter snippets with minimal word overlap to reduce prompt size
+
         claim_words = set(re.findall(r"\w+", claim_text.lower()))
         relevant_evidence = []
         for ev in all_evidence:
@@ -80,7 +72,7 @@ class ContradictionDetector:
         parsed = False
         if response:
             try:
-                # Extract JSON block
+
                 json_str = response
                 if "{" in json_str and "}" in json_str:
                     json_str = json_str[json_str.find("{"):json_str.rfind("}")+1]
@@ -106,7 +98,7 @@ class ContradictionDetector:
         if not parsed:
             return self._analyze_claim_heuristic(claim, all_evidence)
 
-        # Determine status
+
         if len(supporting) > 0 and len(contradicting) > 0:
             status = "mixed"
         elif len(supporting) > 0:
@@ -133,12 +125,11 @@ class ContradictionDetector:
         for ev in all_evidence:
             snippet = ev["snippet"].lower()
             snippet_words = set(re.findall(r"\w+", snippet))
-            
-            # Check overlap
+
             if len(claim_words.intersection(snippet_words)) < 2:
                 continue
 
-            # Check for contradiction indicators
+
             has_contra = any(kw in snippet for kw in self.CONTRADICTION_KEYWORDS)
             has_supp = any(kw in snippet for kw in self.SUPPORTING_KEYWORDS)
 
@@ -153,7 +144,7 @@ class ContradictionDetector:
             elif has_supp or ev["paper_id"] in [e["paper_id"] for e in claim.get("evidence", [])]:
                 supporting.append(ev_entry)
 
-        # Determine status
+
         if len(supporting) > 0 and len(contradicting) > 0:
             status = "mixed"
         elif len(supporting) > 0:

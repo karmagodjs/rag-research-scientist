@@ -1,6 +1,3 @@
-"""
-Unit tests for PersistentStorage and Vercel/Local Server API routes.
-"""
 
 import unittest
 import json

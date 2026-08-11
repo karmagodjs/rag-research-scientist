@@ -1,8 +1,3 @@
-"""
-Claim Generation and Dynamic Confidence Calculation module.
-Generates research claims dynamically from retrieved evidence and computes confidence scores.
-Supports LLM-backed claim synthesis with graceful heuristic fallback.
-"""
 
 import logging
 from typing import List, Dict, Any, Optional
@@ -12,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 class ClaimGenerator:
-    """Generates empirically grounded research claims and calculates objective confidence scores."""
 
     def __init__(self, llm_client: Optional[LLMClient] = None):
         self.llm_client = llm_client
@@ -24,13 +18,6 @@ class ClaimGenerator:
         recency_score: float,
         has_contradiction: bool
     ) -> float:
-        """
-        Calculates confidence score dynamically using measurable evidence factors:
-        1. Number of independent supporting sources (weight: 0.35)
-        2. Average evidence relevance score (weight: 0.35)
-        3. Recency of publication (weight: 0.15)
-        4. Agreement / Absence of contradiction (weight: 0.15)
-        """
         source_factor = min(1.0, num_sources / 3.0)
         relevance_factor = min(1.0, max(0.0, avg_relevance))
         agreement_factor = 0.5 if has_contradiction else 1.0
@@ -44,7 +31,6 @@ class ClaimGenerator:
         return round(min(1.0, max(0.0, confidence)), 2)
 
     def generate_claims(self, evidence_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Cluster evidence into claims and compute confidence scores dynamically."""
         if not evidence_items:
             logger.warning("No evidence available to generate claims.")
             return []
@@ -55,7 +41,7 @@ class ClaimGenerator:
         else:
             logger.info("Heuristic mode active for claim synthesis (no LLM API key configured).")
 
-        # Group evidence snippets by paper ID
+
         doc_map: Dict[str, List[Dict[str, Any]]] = {}
         for item in evidence_items:
             p_id = item["paper_id"]
@@ -63,7 +49,7 @@ class ClaimGenerator:
                 doc_map[p_id] = []
             doc_map[p_id].append(item)
 
-        # Sort documents by max relevance score of their snippets
+
         sorted_docs = sorted(
             doc_map.items(),
             key=lambda x: max(s["relevance_score"] for s in x[1]),
@@ -120,7 +106,7 @@ class ClaimGenerator:
                             f"(Quantitative score: {confidence} derived from {num_sources} source(s), avg relevance {avg_rel:.2f}, recency {recency})."
                         )
 
-            # Heuristic fallback if LLM returned nothing or LLM not active
+
             if not claim_text:
                 raw_text = lead_snippet['snippet'].strip()
                 claim_text = raw_text if len(raw_text) > 30 else f"Paper {lead_snippet['paper_title']}: {raw_text}"

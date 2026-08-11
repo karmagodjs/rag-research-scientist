@@ -1,7 +1,3 @@
-"""
-Canonical classic paper registry for fallback retrieval.
-Guarantees verified real metadata for landmark foundational papers.
-"""
 
 from typing import List
 from retrieval.base import Document
@@ -47,5 +43,4 @@ CANONICAL_PAPERS: List[Document] = [
 
 
 def get_canonical_papers() -> List[Document]:
-    """Return landmark canonical papers."""
     return list(CANONICAL_PAPERS)

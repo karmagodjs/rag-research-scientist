@@ -302,7 +302,6 @@ function renderInitialEmptyState() {
   if (centerClaimsList) {
     centerClaimsList.innerHTML = `
       <div class="empty-workspace-card">
-        <div class="empty-icon">🔬</div>
         <div class="empty-title">Awaiting Research Prompt</div>
         <div class="empty-sub">Type a question in the composer above or choose a suggestion below to start an evidence synthesis.</div>
       </div>

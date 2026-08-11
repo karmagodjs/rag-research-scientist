@@ -20,7 +20,7 @@ ARXIV_API_URL = "https://export.arxiv.org/api/query"
 class ArxivRetriever(BaseRetriever):
     """Retriever fetching academic preprints directly from the arXiv API."""
 
-    def __init__(self, api_url: Optional[str] = None, timeout: int = 6):
+    def __init__(self, api_url: Optional[str] = None, timeout: int = 2):
         super().__init__(name="arxiv")
         self.api_url = api_url or ARXIV_API_URL
         self.timeout = timeout

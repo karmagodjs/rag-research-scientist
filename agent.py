@@ -111,7 +111,7 @@ class ResearchAgent:
                 future_to_sq = {executor.submit(fetch_single_subquery, sq): sq for sq in subqueries}
                 for future in as_completed(future_to_sq):
                     try:
-                        iteration_docs.extend(future.result(timeout=4.0))
+                        iteration_docs.extend(future.result(timeout=2.5))
                     except Exception as e:
                         self.logger.warning(f"Subquery retrieval worker failed: {e}")
 

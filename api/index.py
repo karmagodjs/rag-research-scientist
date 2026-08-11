@@ -37,7 +37,7 @@ class handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path.rstrip('/')
 
-        if path == '/api/research' or path == '/api':
+        if '/research' in path or '/api' in path or path in ['', '/', '/api/index.py']:
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length) if content_length > 0 else b''
             try:

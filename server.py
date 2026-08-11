@@ -34,7 +34,7 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         """Handle POST /api/research requests to trigger research agent."""
-        if self.path == "/api/research":
+        if self.path.rstrip('/') in ["/api/research", "/api"]:
             content_length = int(self.headers.get("Content-Length", 0))
             post_data = self.rfile.read(content_length)
             try:

@@ -523,10 +523,14 @@ async function executeLiveResearch() {
 
   } catch (err) {
     console.error("Research Agent API Execution Error:", err);
-    document.getElementById('executiveFindingText').textContent = `API Error: ${err.message}. Make sure 'python server.py' is running on http://localhost:8000.`;
+    const execFinding = document.getElementById('executiveFindingText');
+    if (execFinding) {
+      execFinding.innerHTML = `<strong style="color: var(--danger);">RESEARCH EXECUTION FAILED</strong><br><span class="finding-subtext">Unable to execute research (${err.message}). Check Vercel logs or verify local python server.</span>`;
+    }
     document.querySelectorAll('.trace-item').forEach(item => {
+      item.classList.remove('active');
       const statusEl = item.querySelector('.trace-status');
-      if (statusEl && statusEl.textContent === 'RUNNING') {
+      if (statusEl && (statusEl.textContent === 'RUNNING' || item.getAttribute('data-stage') === '01')) {
         statusEl.className = 'trace-status status-failed';
         statusEl.textContent = 'FAILED';
       }

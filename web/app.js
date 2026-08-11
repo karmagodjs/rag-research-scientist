@@ -115,28 +115,9 @@ const initialReport = {
 
 reportData = null;
 
-// DOM Cache
-const queryInput = document.getElementById('queryInput');
-const btnRunAgent = document.getElementById('btnRunAgent');
-const centerClaimsList = document.getElementById('centerClaimsList');
-const traceStageItems = document.querySelectorAll('.trace-item');
-const litTableBody = document.getElementById('litTableBody');
-const btnThemeToggle = document.getElementById('btnThemeToggle');
-const graphTooltip = document.getElementById('graphTooltip');
-const graphSideInspector = document.getElementById('graphSideInspector');
-const graphInspectorContent = document.getElementById('graphInspectorContent');
-
-// Right Panel Inspector Cache
-const inspHeaderTitle = document.getElementById('inspHeaderTitle');
-const inspPaperTitle = document.getElementById('inspPaperTitle');
-const inspSource = document.getElementById('inspSource');
-const inspPublished = document.getElementById('inspPublished');
-const inspRelevance = document.getElementById('inspRelevance');
-const inspSnippet = document.getElementById('inspSnippet');
-const btnOpenPaperLink = document.getElementById('btnOpenPaperLink');
-
 // Theme Switcher Logic
 function initTheme() {
+  const btnThemeToggle = document.getElementById('btnThemeToggle');
   const savedTheme = localStorage.getItem('rag_workstation_theme');
   if (savedTheme === 'light') {
     document.documentElement.setAttribute('data-theme', 'light');
@@ -145,51 +126,59 @@ function initTheme() {
     document.documentElement.removeAttribute('data-theme');
     if (btnThemeToggle) btnThemeToggle.textContent = 'LIGHT MODE';
   }
-}
 
-btnThemeToggle?.addEventListener('click', () => {
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-  if (currentTheme === 'light') {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('rag_workstation_theme', 'dark');
-    if (btnThemeToggle) btnThemeToggle.textContent = 'LIGHT MODE';
-  } else {
-    document.documentElement.setAttribute('data-theme', 'light');
-    localStorage.setItem('rag_workstation_theme', 'light');
-    if (btnThemeToggle) btnThemeToggle.textContent = 'DARK MODE';
-  }
-  renderFullGraphCanvas();
-  renderAnalyticsCharts();
-});
-
-// Navigation Tab Switcher Handler
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => {
-      b.classList.remove('active');
-      b.setAttribute('aria-selected', 'false');
-    });
-    document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
-
-    btn.classList.add('active');
-    btn.setAttribute('aria-selected', 'true');
-    const target = btn.getAttribute('data-tab');
-    document.getElementById(target).classList.add('active');
-
-    if (target === 'tab-graph') {
-      setTimeout(() => {
-        fitGraphToViewport();
-        renderFullGraphCanvas();
-      }, 50);
+  btnThemeToggle?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    if (currentTheme === 'light') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('rag_workstation_theme', 'dark');
+      if (btnThemeToggle) btnThemeToggle.textContent = 'LIGHT MODE';
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('rag_workstation_theme', 'light');
+      if (btnThemeToggle) btnThemeToggle.textContent = 'DARK MODE';
     }
-    if (target === 'tab-analytics') {
+    try {
+      renderFullGraphCanvas();
       renderAnalyticsCharts();
+    } catch (e) {
+      console.error("Theme toggle render error:", e);
     }
   });
-});
+}
+
+// Navigation Tab Switcher Handler
+function initNavigation() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      const target = btn.getAttribute('data-tab');
+      const targetEl = document.getElementById(target);
+      if (targetEl) targetEl.classList.add('active');
+
+      if (target === 'tab-graph') {
+        setTimeout(() => {
+          fitGraphToViewport();
+          renderFullGraphCanvas();
+        }, 50);
+      }
+      if (target === 'tab-analytics') {
+        renderAnalyticsCharts();
+      }
+    });
+  });
+}
 
 // Research Query Composer Logic
 function autoResizeTextarea() {
+  const queryInput = document.getElementById('queryInput');
   if (!queryInput) return;
   queryInput.style.height = "auto";
   const scrollH = queryInput.scrollHeight;
@@ -202,6 +191,8 @@ function autoResizeTextarea() {
 }
 
 function updateRunButtonState() {
+  const btnRunAgent = document.getElementById('btnRunAgent');
+  const queryInput = document.getElementById('queryInput');
   if (!btnRunAgent) return;
   if (btnRunAgent.classList.contains('is-loading')) return;
   const hasText = queryInput && queryInput.value.trim().length > 0;
@@ -220,6 +211,7 @@ let currentPlaceholderIdx = 0;
 let placeholderTimer = null;
 
 function initPlaceholderRotation() {
+  const queryInput = document.getElementById('queryInput');
   if (!queryInput) return;
   if (placeholderTimer) clearInterval(placeholderTimer);
   placeholderTimer = setInterval(() => {
@@ -230,42 +222,66 @@ function initPlaceholderRotation() {
   }, 4500);
 }
 
-// Live Research Agent Backend API Call & Event Listeners
-btnRunAgent?.addEventListener('click', executeLiveResearch);
+function initComposer() {
+  const queryInput = document.getElementById('queryInput');
+  const btnRunAgent = document.getElementById('btnRunAgent');
 
-queryInput?.addEventListener('input', () => {
-  autoResizeTextarea();
-  updateRunButtonState();
-});
-
-queryInput?.addEventListener('focus', () => {
-  autoResizeTextarea();
-});
-
-queryInput?.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    executeLiveResearch();
+  if (queryInput) {
+    queryInput.value = "";
+    autoResizeTextarea();
+    updateRunButtonState();
   }
-});
 
-// Search Suggestion Chips Click Handlers
-document.querySelectorAll('.suggestion-chip').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const q = btn.getAttribute('data-query');
-    if (queryInput && q) {
-      queryInput.value = q;
-      autoResizeTextarea();
-      updateRunButtonState();
-      queryInput.focus();
+  btnRunAgent?.addEventListener('click', executeLiveResearch);
+
+  queryInput?.addEventListener('input', () => {
+    autoResizeTextarea();
+    updateRunButtonState();
+  });
+
+  queryInput?.addEventListener('focus', () => {
+    autoResizeTextarea();
+  });
+
+  queryInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      executeLiveResearch();
     }
   });
-});
 
-// Render Clean Initial Empty State
+  initPlaceholderRotation();
+}
+
+function initSuggestions() {
+  const queryInput = document.getElementById('queryInput');
+  document.querySelectorAll('.suggestion-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = btn.getAttribute('data-query');
+      if (queryInput && q) {
+        queryInput.value = q;
+        autoResizeTextarea();
+        updateRunButtonState();
+        queryInput.focus();
+      }
+    });
+  });
+}
+
 function renderInitialEmptyState() {
   const centerTitle = document.getElementById('centerQueryTitle');
   const execFinding = document.getElementById('executiveFindingText');
+  const centerClaimsList = document.getElementById('centerClaimsList');
+  const inspPaperTitle = document.getElementById('inspPaperTitle');
+  const inspSource = document.getElementById('inspSource');
+  const inspPublished = document.getElementById('inspPublished');
+  const inspRelevance = document.getElementById('inspRelevance');
+  const inspSnippet = document.getElementById('inspSnippet');
+  const btnOpenPaperLink = document.getElementById('btnOpenPaperLink');
+  const litTableBody = document.getElementById('litTableBody');
+  const litCountLabel = document.getElementById('litCountLabel');
+  const page5GapsContainer = document.getElementById('page5GapsContainer');
+  const page6RecsContainer = document.getElementById('page6RecsContainer');
   
   if (centerTitle) centerTitle.textContent = "RESEARCH WORKSPACE";
   if (execFinding) {
@@ -308,78 +324,72 @@ function renderInitialEmptyState() {
   if (litTableBody) {
     litTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem; font-family: var(--font-mono);">No literature papers loaded. Run an investigation to retrieve sources.</td></tr>`;
   }
-  const litCountLabel = document.getElementById('litCountLabel');
   if (litCountLabel) litCountLabel.textContent = "LITERATURE — 0 PAPERS";
 
-  const page5GapsContainer = document.getElementById('page5GapsContainer');
   if (page5GapsContainer) {
     page5GapsContainer.innerHTML = `<div class="empty-workspace-card" style="margin-top: 1rem;"><div class="empty-title">No Research Gaps Detected</div><div class="empty-sub">Run an investigation to synthesize open literature gaps.</div></div>`;
   }
 
-  const page6RecsContainer = document.getElementById('page6RecsContainer');
   if (page6RecsContainer) {
     page6RecsContainer.innerHTML = `<div class="empty-workspace-card" style="margin-top: 1rem;"><div class="empty-title">No Next Research Directions</div><div class="empty-sub">Run an investigation to derive graph-grounded research directions.</div></div>`;
   }
 }
 
-// Initialize composer and empty state on load
-if (queryInput) {
-  queryInput.value = ""; // Ensure fresh load starts empty
-  autoResizeTextarea();
-  updateRunButtonState();
-  initPlaceholderRotation();
+function initExports() {
+  document.getElementById('btnExportJson')?.addEventListener('click', () => {
+    if (!reportData) {
+      alert("No research report available yet. Please run an investigation first.");
+      return;
+    }
+    const jsonStr = JSON.stringify(reportData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `research_report_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnExportMarkdown')?.addEventListener('click', () => {
+    if (!reportData) {
+      alert("No research report available yet. Please run an investigation first.");
+      return;
+    }
+    let md = `# Research Synthesis Report\n\n`;
+    md += `**Research Question:** ${reportData.research_question || ''}\n\n`;
+    md += `## Executive Finding\n${reportData.executive_summary || ''}\n\n`;
+    md += `## Key Claims\n`;
+    (reportData.claims || []).forEach(c => {
+      md += `### Claim ${c.claim_id}: ${c.claim}\n`;
+      md += `- **Status:** ${c.status} | **Confidence:** ${c.confidence}\n`;
+      md += `- **Paper:** ${c.paper_title} (${c.source}, ${c.published})\n`;
+      md += `- **Snippet:** "${c.snippet}"\n\n`;
+    });
+    md += `## Literature Papers\n`;
+    (reportData.papers || []).forEach(p => {
+      md += `- **${p.title}** by ${p.authors} (${p.year}, ${p.source}) - [Link](${p.url})\n`;
+    });
+    md += `\n## Open Research Gaps\n`;
+    (reportData.open_research_gaps || []).forEach(g => {
+      md += `### ${g.gap_id}: ${g.title}\n`;
+      md += `- **Evidence:** ${g.evidence}\n- **Implication:** ${g.implication}\n\n`;
+    });
+    md += `\n## Next Research Directions\n`;
+    (reportData.what_to_research_next || []).forEach(r => {
+      md += `### ${r.num}. ${r.title}\n`;
+      md += `- **Why:** ${r.why}\n- **Impact:** ${r.impact}\n\n`;
+    });
+
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `research_report_${Date.now()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 }
-
-renderInitialEmptyState();
-
-// Export JSON & Export Markdown Downloads
-document.getElementById('btnExportJson')?.addEventListener('click', () => {
-  if (!reportData) return;
-  const jsonStr = JSON.stringify(reportData, null, 2);
-  const blob = new Blob([jsonStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `research_report_${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-document.getElementById('btnExportMarkdown')?.addEventListener('click', () => {
-  if (!reportData) return;
-  let md = `# Research Synthesis Report\n\n`;
-  md += `**Research Question:** ${reportData.research_question || ''}\n\n`;
-  md += `## Executive Finding\n${reportData.executive_summary || ''}\n\n`;
-  md += `## Key Claims\n`;
-  (reportData.claims || []).forEach(c => {
-    md += `### Claim ${c.claim_id}: ${c.claim}\n`;
-    md += `- **Status:** ${c.status} | **Confidence:** ${c.confidence}\n`;
-    md += `- **Paper:** ${c.paper_title} (${c.source}, ${c.published})\n`;
-    md += `- **Snippet:** "${c.snippet}"\n\n`;
-  });
-  md += `## Literature Papers\n`;
-  (reportData.papers || []).forEach(p => {
-    md += `- **${p.title}** by ${p.authors} (${p.year}, ${p.source}) - [Link](${p.url})\n`;
-  });
-  md += `\n## Open Research Gaps\n`;
-  (reportData.open_research_gaps || []).forEach(g => {
-    md += `### ${g.gap_id}: ${g.title}\n`;
-    md += `- **Evidence:** ${g.evidence}\n- **Implication:** ${g.implication}\n\n`;
-  });
-  md += `\n## Next Research Directions\n`;
-  (reportData.what_to_research_next || []).forEach(r => {
-    md += `### ${r.num}. ${r.title}\n`;
-    md += `- **Why:** ${r.why}\n- **Impact:** ${r.impact}\n\n`;
-  });
-
-  const blob = new Blob([md], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `research_report_${Date.now()}.md`;
-  a.click();
-  URL.revokeObjectURL(url);
-});
 
 async function executeLiveResearch() {
   const query = queryInput ? queryInput.value.trim() : "";
@@ -1734,272 +1744,98 @@ function setupCanvasInteractions() {
     hideGraphTooltip();
     currentInvestigationState.hoveredNodeId = null;
     currentInvestigationState.hoveredEdge = null;
+    renderFullGraphCan// Window Resize Auto-Fit & Graph Toolbar Handlers
+function initGraphToolbar() {
+  document.querySelectorAll('.node-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.node-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentInvestigationState.graphFilterType = btn.getAttribute('data-type');
+      fitGraphToViewport();
+      renderFullGraphCanvas();
+    });
+  });
+
+  document.getElementById('btnZoomIn')?.addEventListener('click', () => {
+    currentInvestigationState.zoomLevel = Math.min(3.0, currentInvestigationState.zoomLevel + 0.2);
     renderFullGraphCanvas();
   });
-}
 
-// Window Resize Auto-Fit
-window.addEventListener('resize', () => {
-  fitGraphToViewport();
-  renderFullGraphCanvas();
-});
+  document.getElementById('btnZoomOut')?.addEventListener('click', () => {
+    currentInvestigationState.zoomLevel = Math.max(0.4, currentInvestigationState.zoomLevel - 0.2);
+    renderFullGraphCanvas();
+  });
 
-// Graph Filters & Toolbar Handlers
-document.querySelectorAll('.node-filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.node-filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentInvestigationState.graphFilterType = btn.getAttribute('data-type');
+  document.getElementById('btnFitGraph')?.addEventListener('click', () => {
     fitGraphToViewport();
     renderFullGraphCanvas();
   });
-});
 
-document.getElementById('btnZoomIn')?.addEventListener('click', () => {
-  currentInvestigationState.zoomLevel = Math.min(3.0, currentInvestigationState.zoomLevel + 0.2);
-  renderFullGraphCanvas();
-});
-
-document.getElementById('btnZoomOut')?.addEventListener('click', () => {
-  currentInvestigationState.zoomLevel = Math.max(0.4, currentInvestigationState.zoomLevel - 0.2);
-  renderFullGraphCanvas();
-});
-
-document.getElementById('btnFitGraph')?.addEventListener('click', () => {
-  fitGraphToViewport();
-  renderFullGraphCanvas();
-});
-
-document.getElementById('btnResetGraph')?.addEventListener('click', () => {
-  currentInvestigationState.zoomLevel = 1.0;
-  currentInvestigationState.panX = 0;
-  currentInvestigationState.panY = 0;
-  fitGraphToViewport();
-  clearGraphSelection();
-});
-
-// Render Full Canvas Evidence Graph
-function renderFullGraphCanvas() {
-  const canvas = document.getElementById('fullGraphCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  canvas.width = canvas.parentElement.clientWidth || 900;
-  canvas.height = canvas.parentElement.clientHeight || 650;
-
-  const style = getComputedStyle(document.documentElement);
-  const colorPaper = style.getPropertyValue('--graph-paper').trim() || '#9A9FA3';
-  const colorClaim = style.getPropertyValue('--graph-claim').trim() || '#C9A86A';
-  const colorMethod = style.getPropertyValue('--graph-method').trim() || '#7F9BA6';
-  const colorGap = style.getPropertyValue('--graph-gap').trim() || '#A56B6B';
-  const colorAccent = style.getPropertyValue('--accent').trim() || '#C9A86A';
-  const colorSuccess = style.getPropertyValue('--success').trim() || '#7FA68A';
-  const colorTextPrimary = style.getPropertyValue('--text-primary').trim() || '#E7E9EA';
-  const colorTextMuted = style.getPropertyValue('--text-muted').trim() || '#687078';
-  const colorBorderDim = style.getPropertyValue('--border-dim').trim() || '#252B30';
-
-  // Handle Loading & Empty States
-  if (isGraphLoading) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = colorTextPrimary;
-    ctx.font = '700 14px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('BUILDING EVIDENCE GRAPH...', canvas.width / 2, canvas.height / 2 - 10);
-    ctx.fillStyle = colorTextMuted;
-    ctx.font = '12px "JetBrains Mono", monospace';
-    ctx.fillText('Mapping claims · Resolving sources · Connecting relationships', canvas.width / 2, canvas.height / 2 + 15);
-    return;
-  }
-
-  const { nodes, edges } = getGraphData();
-
-  if (!nodes || nodes.length === 0) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = colorTextPrimary;
-    ctx.font = '700 14px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('EVIDENCE GRAPH UNAVAILABLE', canvas.width / 2, canvas.height / 2 - 10);
-    ctx.fillStyle = colorTextMuted;
-    ctx.font = '12px "JetBrains Mono", monospace';
-    ctx.fillText('No verified relationships were returned for this investigation.', canvas.width / 2, canvas.height / 2 + 15);
-    return;
-  }
-
-  const filter = currentInvestigationState.graphFilterType;
-  const visibleNodes = filter === 'all' ? nodes : nodes.filter(n => n.type === 'query' || n.type === filter);
-  const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
-  const visibleEdges = edges.filter(e => visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target));
-
-  // Determine active highlight sets
-  const activeNodeId = currentInvestigationState.selectedNodeId || currentInvestigationState.hoveredNodeId;
-  const activeEdge = currentInvestigationState.selectedEdge || currentInvestigationState.hoveredEdge;
-
-  let connectedNodeIds = new Set();
-  let connectedEdgeSet = new Set();
-
-  if (activeNodeId) {
-    connectedNodeIds.add(activeNodeId);
-    visibleEdges.forEach(e => {
-      if (e.source === activeNodeId) {
-        connectedNodeIds.add(e.target);
-        connectedEdgeSet.add(e);
-      }
-      if (e.target === activeNodeId) {
-        connectedNodeIds.add(e.source);
-        connectedEdgeSet.add(e);
-      }
-    });
-  } else if (activeEdge) {
-    connectedEdgeSet.add(activeEdge);
-    connectedNodeIds.add(activeEdge.source);
-    connectedNodeIds.add(activeEdge.target);
-  }
-
-  const hasActiveFocus = Boolean(activeNodeId || activeEdge);
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  ctx.save();
-  ctx.translate(currentInvestigationState.panX, currentInvestigationState.panY);
-  ctx.scale(currentInvestigationState.zoomLevel, currentInvestigationState.zoomLevel);
-
-  // 1. Draw Edges
-  visibleEdges.forEach(e => {
-    const n1 = nodes.find(n => n.id === e.source);
-    const n2 = nodes.find(n => n.id === e.target);
-    if (n1 && n2) {
-      const isHighlighted = connectedEdgeSet.has(e);
-
-      ctx.beginPath();
-      ctx.moveTo(n1.x, n1.y);
-      ctx.lineTo(n2.x, n2.y);
-
-      if (isHighlighted) {
-        ctx.strokeStyle = colorAccent;
-        ctx.lineWidth = 2.0;
-        ctx.globalAlpha = 0.85;
-      } else if (hasActiveFocus) {
-        ctx.strokeStyle = colorBorderDim;
-        ctx.lineWidth = 0.8;
-        ctx.globalAlpha = 0.15;
-      } else {
-        ctx.strokeStyle = colorBorderDim;
-        ctx.lineWidth = 1.0;
-        ctx.globalAlpha = 0.45;
-      }
-      ctx.stroke();
-
-      // Conditional Edge Label rendering: ONLY when highlighted/selected/hovered
-      if (isHighlighted) {
-        ctx.fillStyle = colorAccent;
-        ctx.font = '600 10px "JetBrains Mono", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(e.relation || 'related', (n1.x + n2.x) / 2, (n1.y + n2.y) / 2 - 6);
-      }
-      ctx.globalAlpha = 1.0;
-    }
+  document.getElementById('btnResetGraph')?.addEventListener('click', () => {
+    currentInvestigationState.zoomLevel = 1.0;
+    currentInvestigationState.panX = 0;
+    currentInvestigationState.panY = 0;
+    fitGraphToViewport();
+    clearGraphSelection();
   });
 
-  // 2. Draw Nodes
-  visibleNodes.forEach(n => {
-    const isSelected = (n.id === currentInvestigationState.selectedNodeId);
-    const isHovered = (n.id === currentInvestigationState.hoveredNodeId);
-    const isConnectedNode = connectedNodeIds.has(n.id);
-
-    let nodeColor = colorPaper;
-    if (n.type === 'claim') nodeColor = colorClaim;
-    else if (n.type === 'method') nodeColor = colorMethod;
-    else if (n.type === 'gap') nodeColor = colorGap;
-    else if (n.type === 'query') nodeColor = colorTextPrimary;
-    else if (n.type === 'evidence') nodeColor = colorSuccess;
-    else if (n.type === 'dataset') nodeColor = '#8E9A8B';
-
-    let nodeAlpha = 1.0;
-    if (hasActiveFocus && !isConnectedNode) {
-      nodeAlpha = 0.30;
+  window.addEventListener('resize', () => {
+    try {
+      fitGraphToViewport();
+      renderFullGraphCanvas();
+    } catch (e) {
+      console.error("Canvas resize error:", e);
     }
-
-    ctx.globalAlpha = nodeAlpha;
-    ctx.fillStyle = nodeColor;
-
-    const baseSize = n.size || 15;
-    const renderSize = isHovered ? baseSize * 1.08 : baseSize;
-
-    // Draw Shape
-    if (n.shape === 'circle') {
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, renderSize, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (n.type === 'query') {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, renderSize + 4, 0, Math.PI * 2);
-        ctx.strokeStyle = colorAccent;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
-
-      if (isSelected || isHovered) {
-        ctx.strokeStyle = colorAccent;
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-      }
-    } else if (n.shape === 'rect') {
-      const w = renderSize * 2.2;
-      const h = renderSize * 1.4;
-      ctx.fillRect(n.x - w / 2, n.y - h / 2, w, h);
-      if (isSelected || isHovered) {
-        ctx.strokeStyle = colorAccent;
-        ctx.lineWidth = 2.5;
-        ctx.strokeRect(n.x - w / 2, n.y - h / 2, w, h);
-      }
-    } else if (n.shape === 'square') {
-      const sz = renderSize * 1.8;
-      ctx.fillRect(n.x - sz / 2, n.y - sz / 2, sz, sz);
-      if (isSelected || isHovered) {
-        ctx.strokeStyle = colorAccent;
-        ctx.lineWidth = 2.5;
-        ctx.strokeRect(n.x - sz / 2, n.y - sz / 2, sz, sz);
-      }
-    } else if (n.shape === 'diamond') {
-      const sz = renderSize * 1.25;
-      ctx.beginPath();
-      ctx.moveTo(n.x, n.y - sz);
-      ctx.lineTo(n.x + sz, n.y);
-      ctx.lineTo(n.x, n.y + sz);
-      ctx.lineTo(n.x - sz, n.y);
-      ctx.closePath();
-      ctx.fill();
-      if (isSelected || isHovered) {
-        ctx.strokeStyle = colorAccent;
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-      }
-    }
-
-    // Node Label: Readable 12-14px sans-serif
-    ctx.fillStyle = colorTextPrimary;
-    ctx.font = isSelected ? '600 14px Inter, sans-serif' : isHovered ? '600 13px Inter, sans-serif' : '12px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(n.label, n.x, n.y + renderSize + 16);
-    ctx.globalAlpha = 1.0;
   });
-
-  ctx.restore();
 }
 
-// Initial Load
-document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
-  renderPage1Claims();
-  renderLiteratureTable();
-  renderPage5Gaps();
-  renderPage6Recommendations();
+function initGraph() {
   setupCanvasInteractions();
+  initGraphToolbar();
   renderGraphOverviewInspector();
-  
   setTimeout(() => {
     fitGraphToViewport();
     renderFullGraphCanvas();
   }, 100);
-});
+}
+
+function initTrace() {
+  document.querySelectorAll('.trace-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.trace-item').forEach(s => s.classList.remove('active'));
+      item.classList.add('active');
+      const stageId = item.getAttribute('data-stage');
+      const outputText = reportData?.stage_outputs?.[stageId] || "Stage details executing...";
+      const traceLogText = document.getElementById('traceLogText');
+      if (traceLogText) {
+        traceLogText.textContent = `Stage ${stageId}: ${outputText}`;
+      }
+    });
+  });
+}
+
+function initLiterature() {
+  document.getElementById('litSearchInput')?.addEventListener('input', renderLiteratureTable);
+  document.getElementById('litSourceFilter')?.addEventListener('change', renderLiteratureTable);
+  document.getElementById('litYearFilter')?.addEventListener('change', renderLiteratureTable);
+  document.getElementById('litSortSelect')?.addEventListener('change', renderLiteratureTable);
+}
+
+// Master Application Initialization & Subsystem Error Isolation
+function initApp() {
+  try { initTheme(); } catch (err) { console.error("Theme init failed", err); }
+  try { initNavigation(); } catch (err) { console.error("Navigation init failed", err); }
+  try { initComposer(); } catch (err) { console.error("Composer init failed", err); }
+  try { initSuggestions(); } catch (err) { console.error("Suggestions init failed", err); }
+  try { initExports(); } catch (err) { console.error("Exports init failed", err); }
+  try { initLiterature(); } catch (err) { console.error("Literature init failed", err); }
+  try { initGraph(); } catch (err) { console.error("Graph init failed", err); }
+  try { initTrace(); } catch (err) { console.error("Trace init failed", err); }
+  try { renderInitialEmptyState(); } catch (err) { console.error("Empty state render failed", err); }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}

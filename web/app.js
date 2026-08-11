@@ -800,7 +800,6 @@ function renderAnalyticsCharts() {
     `;
   }
 
-  const claimsVizList = document.getElementById('claimsVizList');
   if (claimsVizList && reportData && reportData.claims) {
     claimsVizList.innerHTML = reportData.claims.map(c => {
       const statusLower = (c.status || '').toLowerCase();
@@ -819,7 +818,6 @@ function renderAnalyticsCharts() {
     }).join('');
   }
 
-  const matrix = document.getElementById('methodologyMatrixTable');
   if (matrix) {
     matrix.innerHTML = `
       <table class="dense-lit-table">
@@ -1744,7 +1742,11 @@ function setupCanvasInteractions() {
     hideGraphTooltip();
     currentInvestigationState.hoveredNodeId = null;
     currentInvestigationState.hoveredEdge = null;
-    renderFullGraphCan// Window Resize Auto-Fit & Graph Toolbar Handlers
+    renderFullGraphCanvas();
+  });
+}
+
+// Window Resize Auto-Fit & Graph Toolbar Handlers
 function initGraphToolbar() {
   document.querySelectorAll('.node-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {

@@ -106,6 +106,35 @@ class TestRetrieval(unittest.TestCase):
         self.assertIsNotNone(report_broad)
         self.assertIn("citation_list", report_broad)
 
+    def test_arxiv_429_rate_limit_fallback(self):
+        from unittest.mock import MagicMock, patch
+        from retrieval.arxiv import ArxivRetriever
+
+        retriever = ArxivRetriever()
+        mock_resp = MagicMock()
+        mock_resp.status_code = 429
+
+        with patch("requests.get", return_value=mock_resp):
+            docs = retriever.search("BERT")
+            self.assertEqual(docs, [])
+
+    def test_future_exception_and_timeout_isolation(self):
+        from agent import ResearchAgent
+        from retrieval.base import Document
+
+        agent = ResearchAgent()
+        
+        def failing_search(query, top_k=3):
+            raise RuntimeError("Network cable unplugged")
+
+        agent.arxiv_retriever.search = failing_search
+        
+        # Pipeline should continue using web/canonical results despite ArXiv failure
+        report = agent.run("BERT")
+        self.assertIsNotNone(report)
+        self.assertIn("citation_list", report)
+        self.assertNotEqual(report.get("status"), "HTTP 500")
+
 
 if __name__ == "__main__":
     unittest.main()

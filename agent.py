@@ -93,27 +93,42 @@ class ResearchAgent:
             iteration_docs: List[Document] = []
 
             # Retrieve across subqueries and multi-sources in parallel
-            from concurrent.futures import ThreadPoolExecutor, as_completed
+            from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 
             def fetch_single_subquery(sq: str) -> List[Document]:
                 docs = []
                 try:
                     docs.extend(self.arxiv_retriever.search(sq, top_k=3))
                 except Exception as e:
-                    self.logger.warning(f"ArXiv retriever failed for '{sq}': {e}")
+                    self.logger.warning(f"[RETRIEVAL] ArXiv retriever failed for '{sq}': {e}")
                 try:
                     docs.extend(self.web_retriever.search(sq, top_k=2))
                 except Exception as e:
-                    self.logger.warning(f"Web retriever failed for '{sq}': {e}")
+                    self.logger.warning(f"[RETRIEVAL] Web retriever failed for '{sq}': {e}")
                 return docs
 
+            completed_subqueries = 0
             with ThreadPoolExecutor(max_workers=4) as executor:
                 future_to_sq = {executor.submit(fetch_single_subquery, sq): sq for sq in subqueries}
-                for future in as_completed(future_to_sq):
-                    try:
-                        iteration_docs.extend(future.result(timeout=2.5))
-                    except Exception as e:
-                        self.logger.warning(f"Subquery retrieval worker failed: {e}")
+                total_subqueries = len(future_to_sq)
+                self.logger.info(f"[RETRIEVAL] Starting {total_subqueries} subqueries")
+
+                try:
+                    for future in as_completed(future_to_sq, timeout=8.0):
+                        sq_name = future_to_sq[future]
+                        try:
+                            res = future.result()
+                            if res:
+                                iteration_docs.extend(res)
+                            completed_subqueries += 1
+                            self.logger.info(f"[RETRIEVAL] Subquery completed: {completed_subqueries}/{total_subqueries}")
+                        except Exception as e:
+                            self.logger.warning(f"[RETRIEVAL] Subquery worker error for '{sq_name}': {e}")
+                except FuturesTimeoutError:
+                    timed_out_count = total_subqueries - completed_subqueries
+                    self.logger.warning(f"[RETRIEVAL] Subquery timed out: {timed_out_count} subqueries did not finish in time. Continuing with partial results.")
+
+            self.logger.info(f"[RETRIEVAL] Continuing with partial results. Total candidates: {len(iteration_docs)}")
 
             raw_retrieved_count += len(iteration_docs)
 

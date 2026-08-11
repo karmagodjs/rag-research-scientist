@@ -86,9 +86,12 @@ class ArxivRetriever(BaseRetriever):
         try:
             resp = requests.get(ARXIV_API_URL, params=params, headers=headers, timeout=self.timeout)
             
-            if resp.status_code != 200:
-                logger.warning(f"arXiv API returned status {resp.status_code}")
-                return documents
+            if resp.status_code == 429:
+                logger.warning("[RETRIEVAL] arXiv rate limited: HTTP 429. Continuing without arXiv results for this subquery.")
+                return []
+            elif resp.status_code != 200:
+                logger.warning(f"[RETRIEVAL] arXiv API returned HTTP status {resp.status_code}")
+                return []
 
             root = ET.fromstring(resp.text)
             ns = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas/atom"}

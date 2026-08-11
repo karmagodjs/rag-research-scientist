@@ -177,8 +177,8 @@ function initNavigation() {
 }
 
 // Research Query Composer Logic
-function autoResizeTextarea() {
-  const queryInput = document.getElementById('queryInput');
+function autoResizeTextarea(el) {
+  const queryInput = el || document.getElementById('queryInput');
   if (!queryInput) return;
   queryInput.style.height = "auto";
   const scrollH = queryInput.scrollHeight;
@@ -223,45 +223,56 @@ function initPlaceholderRotation() {
 }
 
 function initComposer() {
-  const queryInput = document.getElementById('queryInput');
-  const btnRunAgent = document.getElementById('btnRunAgent');
+  const queryInput = document.getElementById("queryInput");
+  const btnRunAgent = document.getElementById("btnRunAgent");
 
-  if (queryInput) {
-    queryInput.value = "";
-    autoResizeTextarea();
-    updateRunButtonState();
+  if (!queryInput || !btnRunAgent) {
+    console.error("Composer elements not found");
+    return;
   }
 
-  btnRunAgent?.addEventListener('click', executeLiveResearch);
+  queryInput.value = "";
 
-  queryInput?.addEventListener('input', () => {
-    autoResizeTextarea();
-    updateRunButtonState();
+  function updateComposerState() {
+    const hasText = queryInput.value.trim().length > 0;
+    btnRunAgent.disabled = !hasText;
+  }
+
+  queryInput.addEventListener("input", () => {
+    autoResizeTextarea(queryInput);
+    updateComposerState();
   });
 
-  queryInput?.addEventListener('focus', () => {
-    autoResizeTextarea();
+  queryInput.addEventListener("focus", () => {
+    autoResizeTextarea(queryInput);
   });
 
-  queryInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
+  queryInput.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Enter" &&
+      (event.ctrlKey || event.metaKey)
+    ) {
+      event.preventDefault();
       executeLiveResearch();
     }
   });
 
+  btnRunAgent.addEventListener("click", executeLiveResearch);
+
+  updateComposerState();
   initPlaceholderRotation();
 }
 
 function initSuggestions() {
-  const queryInput = document.getElementById('queryInput');
   document.querySelectorAll('.suggestion-chip').forEach(btn => {
     btn.addEventListener('click', () => {
+      const queryInput = document.getElementById('queryInput');
+      const btnRunAgent = document.getElementById('btnRunAgent');
       const q = btn.getAttribute('data-query');
       if (queryInput && q) {
         queryInput.value = q;
-        autoResizeTextarea();
-        updateRunButtonState();
+        autoResizeTextarea(queryInput);
+        if (btnRunAgent) btnRunAgent.disabled = false;
         queryInput.focus();
       }
     });
@@ -392,6 +403,8 @@ function initExports() {
 }
 
 async function executeLiveResearch() {
+  const queryInput = document.getElementById('queryInput');
+  const btnRunAgent = document.getElementById('btnRunAgent');
   const query = queryInput ? queryInput.value.trim() : "";
   if (!query) return;
 
@@ -412,9 +425,15 @@ async function executeLiveResearch() {
     }
   }
 
-  document.getElementById('executiveFindingText').textContent = "Running Multi-Source Agent Pipeline... Querying arXiv API and Web search...";
+  const execFinding = document.getElementById('executiveFindingText');
+  if (execFinding) {
+    execFinding.textContent = "Running Multi-Source Agent Pipeline... Querying arXiv API and Web search...";
+  }
   isGraphLoading = true;
   renderFullGraphCanvas();
+
+  console.log("[RESEARCH] Starting query:", query);
+  console.log("[RESEARCH] Sending POST /api/research");
 
   try {
     const response = await fetch('/api/research', {
@@ -427,14 +446,19 @@ async function executeLiveResearch() {
       })
     });
 
+    console.log("[RESEARCH] Response:", response.status);
+
     if (!response.ok) {
       throw new Error(`Server returned HTTP ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("[RESEARCH] Result received:", data);
     
     if (data.status === "RETRIEVAL_FAILURE") {
-      document.getElementById('executiveFindingText').textContent = `RETRIEVAL_FAILURE: No real documents found for '${query}'. Zero fake evidence generated per system rules.`;
+      if (execFinding) {
+        execFinding.textContent = `RETRIEVAL_FAILURE: No real documents found for '${query}'. Zero fake evidence generated per system rules.`;
+      }
     } else {
       reportData = {
         research_question: data.research_question || query,
@@ -509,8 +533,9 @@ async function executeLiveResearch() {
       const stage06 = document.querySelector('.trace-item[data-stage="06"]');
       if (stage06) stage06.classList.add('active');
 
-      document.getElementById('centerQueryTitle').textContent = reportData.research_question;
-      document.getElementById('executiveFindingText').textContent = reportData.executive_summary;
+      const centerTitle = document.getElementById('centerQueryTitle');
+      if (centerTitle) centerTitle.textContent = reportData.research_question;
+      if (execFinding) execFinding.textContent = reportData.executive_summary;
       
       renderPage1Claims();
       renderLiteratureTable();
@@ -522,7 +547,7 @@ async function executeLiveResearch() {
     }
 
   } catch (err) {
-    console.error("Research Agent API Execution Error:", err);
+    console.error("[RESEARCH] API execution failed:", err);
     const execFinding = document.getElementById('executiveFindingText');
     if (execFinding) {
       execFinding.innerHTML = `<strong style="color: var(--danger);">RESEARCH EXECUTION FAILED</strong><br><span class="finding-subtext">Unable to execute research (${err.message}). Check Vercel logs or verify local python server.</span>`;
@@ -539,7 +564,8 @@ async function executeLiveResearch() {
     if (btnRunAgent) {
       btnRunAgent.classList.remove('is-loading');
       btnRunAgent.setAttribute('aria-label', 'Run research');
-      updateRunButtonState();
+      const hasText = queryInput && queryInput.value.trim().length > 0;
+      btnRunAgent.disabled = !hasText;
     }
     isGraphLoading = false;
   }

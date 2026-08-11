@@ -1822,6 +1822,232 @@ function initGraphToolbar() {
   });
 }
 
+// Render Full Canvas Evidence Graph
+function renderFullGraphCanvas() {
+  const canvas = document.getElementById('fullGraphCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const parent = canvas.parentElement;
+  if (!parent || parent.clientWidth <= 0 || parent.clientHeight <= 0) return;
+
+  canvas.width = parent.clientWidth;
+  canvas.height = parent.clientHeight;
+
+  const style = getComputedStyle(document.documentElement);
+  const colorPaper = style.getPropertyValue('--graph-paper').trim() || '#9A9FA3';
+  const colorClaim = style.getPropertyValue('--graph-claim').trim() || '#C9A86A';
+  const colorMethod = style.getPropertyValue('--graph-method').trim() || '#7F9BA6';
+  const colorGap = style.getPropertyValue('--graph-gap').trim() || '#A56B6B';
+  const colorAccent = style.getPropertyValue('--accent').trim() || '#C9A86A';
+  const colorSuccess = style.getPropertyValue('--success').trim() || '#7FA68A';
+  const colorTextPrimary = style.getPropertyValue('--text-primary').trim() || '#E7E9EA';
+  const colorTextMuted = style.getPropertyValue('--text-muted').trim() || '#687078';
+  const colorBorderDim = style.getPropertyValue('--border-dim').trim() || '#252B30';
+
+  // Handle Loading & Empty States
+  if (isGraphLoading) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = colorTextPrimary;
+    ctx.font = '700 14px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('BUILDING EVIDENCE GRAPH...', canvas.width / 2, canvas.height / 2 - 10);
+    ctx.fillStyle = colorTextMuted;
+    ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.fillText('Mapping claims · Resolving sources · Connecting relationships', canvas.width / 2, canvas.height / 2 + 15);
+    return;
+  }
+
+  if (!reportData) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = colorTextPrimary;
+    ctx.font = '700 14px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('NO EVIDENCE GRAPH', canvas.width / 2, canvas.height / 2 - 10);
+    ctx.fillStyle = colorTextMuted;
+    ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.fillText('Run a research investigation to populate the evidence graph.', canvas.width / 2, canvas.height / 2 + 15);
+    return;
+  }
+
+  const { nodes, edges } = getGraphData();
+
+  if (!nodes || nodes.length === 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = colorTextPrimary;
+    ctx.font = '700 14px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('NO EVIDENCE GRAPH', canvas.width / 2, canvas.height / 2 - 10);
+    ctx.fillStyle = colorTextMuted;
+    ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.fillText('Run a research investigation to populate the evidence graph.', canvas.width / 2, canvas.height / 2 + 15);
+    return;
+  }
+
+  const filter = currentInvestigationState.graphFilterType;
+  const visibleNodes = filter === 'all' ? nodes : nodes.filter(n => n.type === 'query' || n.type === filter);
+  const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
+  const visibleEdges = edges.filter(e => visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target));
+
+  // Determine active highlight sets
+  const activeNodeId = currentInvestigationState.selectedNodeId || currentInvestigationState.hoveredNodeId;
+  const activeEdge = currentInvestigationState.selectedEdge || currentInvestigationState.hoveredEdge;
+
+  let connectedNodeIds = new Set();
+  let connectedEdgeSet = new Set();
+
+  if (activeNodeId) {
+    connectedNodeIds.add(activeNodeId);
+    visibleEdges.forEach(e => {
+      if (e.source === activeNodeId) {
+        connectedNodeIds.add(e.target);
+        connectedEdgeSet.add(e);
+      }
+      if (e.target === activeNodeId) {
+        connectedNodeIds.add(e.source);
+        connectedEdgeSet.add(e);
+      }
+    });
+  } else if (activeEdge) {
+    connectedEdgeSet.add(activeEdge);
+    connectedNodeIds.add(activeEdge.source);
+    connectedNodeIds.add(activeEdge.target);
+  }
+
+  const hasActiveFocus = Boolean(activeNodeId || activeEdge);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.translate(currentInvestigationState.panX, currentInvestigationState.panY);
+  ctx.scale(currentInvestigationState.zoomLevel, currentInvestigationState.zoomLevel);
+
+  // 1. Draw Edges
+  visibleEdges.forEach(e => {
+    const n1 = nodes.find(n => n.id === e.source);
+    const n2 = nodes.find(n => n.id === e.target);
+    if (n1 && n2) {
+      const isHighlighted = connectedEdgeSet.has(e);
+
+      ctx.beginPath();
+      ctx.moveTo(n1.x, n1.y);
+      ctx.lineTo(n2.x, n2.y);
+
+      if (isHighlighted) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2.0;
+        ctx.globalAlpha = 0.85;
+      } else if (hasActiveFocus) {
+        ctx.strokeStyle = colorBorderDim;
+        ctx.lineWidth = 0.8;
+        ctx.globalAlpha = 0.15;
+      } else {
+        ctx.strokeStyle = colorBorderDim;
+        ctx.lineWidth = 1.0;
+        ctx.globalAlpha = 0.45;
+      }
+      ctx.stroke();
+
+      // Conditional Edge Label rendering: ONLY when highlighted/selected/hovered
+      if (isHighlighted) {
+        ctx.fillStyle = colorAccent;
+        ctx.font = '600 10px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(e.relation || 'related', (n1.x + n2.x) / 2, (n1.y + n2.y) / 2 - 6);
+      }
+      ctx.globalAlpha = 1.0;
+    }
+  });
+
+  // 2. Draw Nodes
+  visibleNodes.forEach(n => {
+    const isSelected = (n.id === currentInvestigationState.selectedNodeId);
+    const isHovered = (n.id === currentInvestigationState.hoveredNodeId);
+    const isConnectedNode = connectedNodeIds.has(n.id);
+
+    let nodeColor = colorPaper;
+    if (n.type === 'claim') nodeColor = colorClaim;
+    else if (n.type === 'method') nodeColor = colorMethod;
+    else if (n.type === 'gap') nodeColor = colorGap;
+    else if (n.type === 'query') nodeColor = colorTextPrimary;
+    else if (n.type === 'evidence') nodeColor = colorSuccess;
+    else if (n.type === 'dataset') nodeColor = '#8E9A8B';
+
+    let nodeAlpha = 1.0;
+    if (hasActiveFocus && !isConnectedNode) {
+      nodeAlpha = 0.30;
+    }
+
+    ctx.globalAlpha = nodeAlpha;
+    ctx.fillStyle = nodeColor;
+
+    const baseSize = n.size || 15;
+    const renderSize = isHovered ? baseSize * 1.08 : baseSize;
+
+    // Draw Shape
+    if (n.shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, renderSize, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (n.type === 'query') {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, renderSize + 4, 0, Math.PI * 2);
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      if (isSelected || isHovered) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+    } else if (n.shape === 'rect') {
+      const w = renderSize * 2.2;
+      const h = renderSize * 1.4;
+      ctx.fillRect(n.x - w / 2, n.y - h / 2, w, h);
+      if (isSelected || isHovered) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(n.x - w / 2, n.y - h / 2, w, h);
+      }
+    } else if (n.shape === 'square') {
+      const sz = renderSize * 1.8;
+      ctx.fillRect(n.x - sz / 2, n.y - sz / 2, sz, sz);
+      if (isSelected || isHovered) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(n.x - sz / 2, n.y - sz / 2, sz, sz);
+      }
+    } else if (n.shape === 'diamond') {
+      const sz = renderSize * 1.25;
+      ctx.beginPath();
+      ctx.moveTo(n.x, n.y - sz);
+      ctx.lineTo(n.x + sz, n.y);
+      ctx.lineTo(n.x, n.y + sz);
+      ctx.lineTo(n.x - sz, n.y);
+      ctx.closePath();
+      ctx.fill();
+      if (isSelected || isHovered) {
+        ctx.strokeStyle = colorAccent;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+    }
+
+    // Node Label: Readable 12-14px sans-serif
+    ctx.fillStyle = colorTextPrimary;
+    ctx.font = isSelected ? '600 14px Inter, sans-serif' : isHovered ? '600 13px Inter, sans-serif' : '12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(n.label, n.x, n.y + renderSize + 16);
+    ctx.globalAlpha = 1.0;
+  });
+
+  ctx.restore();
+}
+
 function initGraph() {
   setupCanvasInteractions();
   initGraphToolbar();

@@ -18,8 +18,19 @@ class QueryDecomposer:
     def decompose(self, user_query: str) -> List[str]:
         """Generate focused search subqueries dynamically based on query domain."""
         clean_query = user_query.strip()
-        subqueries = [clean_query]  # Primary query
+        from retrieval.query_utils import detect_exact_paper_query
 
+        is_exact, target_title, author_hint = detect_exact_paper_query(clean_query)
+        if is_exact:
+            subqueries = [clean_query]
+            if target_title and target_title != clean_query.lower():
+                subqueries.append(target_title)
+            if author_hint and target_title:
+                subqueries.append(f"{author_hint} {target_title}")
+            subqueries.append(f'"{target_title}" paper')
+            return list(dict.fromkeys(subqueries))[:3]
+
+        subqueries = [clean_query]
         words = [w for w in re.findall(r"\w+", clean_query) if len(w) > 2]
         query_terms_lower = set(w.lower() for w in words)
 

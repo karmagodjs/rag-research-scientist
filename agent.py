@@ -109,16 +109,18 @@ class ResearchAgent:
 
             with ThreadPoolExecutor(max_workers=4) as executor:
                 future_to_sq = {executor.submit(fetch_single_subquery, sq): sq for sq in subqueries}
-                for future in as_completed(future_to_sq, timeout=5.0):
+                for future in as_completed(future_to_sq):
                     try:
-                        iteration_docs.extend(future.result())
+                        iteration_docs.extend(future.result(timeout=4.0))
                     except Exception as e:
                         self.logger.warning(f"Subquery retrieval worker failed: {e}")
 
             raw_retrieved_count += len(iteration_docs)
 
             # Deduplication
-            combined_pool = self.deduplicator.deduplicate(all_documents + iteration_docs)
+            from retrieval.canonical_papers import get_canonical_papers
+            candidate_pool = all_documents + iteration_docs + get_canonical_papers()
+            combined_pool = self.deduplicator.deduplicate(candidate_pool)
             all_documents = combined_pool
 
             # Rerank document pool

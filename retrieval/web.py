@@ -11,6 +11,8 @@ import urllib.parse
 from typing import List, Optional
 from retrieval.base import BaseRetriever, Document
 
+from retrieval.query_utils import detect_exact_paper_query
+
 logger = logging.getLogger(__name__)
 
 
@@ -24,10 +26,16 @@ class WebRetriever(BaseRetriever):
 
     def search(self, query: str, top_k: int = 10) -> List[Document]:
         """Execute web search and convert results into normalized Documents."""
-        if self.tavily_api_key:
-            return self._search_tavily(query, top_k)
+        is_exact, clean_title, author_hint = detect_exact_paper_query(query)
+        if is_exact and clean_title:
+            search_query = f'"{clean_title}" paper' if not author_hint else f'"{clean_title}" paper {author_hint}'
         else:
-            return self._search_ddg_lite(query, top_k)
+            search_query = query
+
+        if self.tavily_api_key:
+            return self._search_tavily(search_query, top_k)
+        else:
+            return self._search_ddg_lite(search_query, top_k)
 
     def _search_tavily(self, query: str, top_k: int) -> List[Document]:
         """Search via Tavily API if key is provided in environment."""

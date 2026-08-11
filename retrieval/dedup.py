@@ -8,6 +8,8 @@ import logging
 from typing import List
 from retrieval.base import Document
 
+from retrieval.query_utils import normalize_title
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,9 +21,7 @@ class DocumentDeduplicator:
 
     def _normalize_title(self, title: str) -> str:
         """Clean and normalize title string."""
-        title = title.lower()
-        title = re.sub(r"[^\w\s]", "", title)
-        return " ".join(title.split())
+        return normalize_title(title)
 
     def _jaccard_similarity(self, str1: str, str2: str) -> float:
         """Compute word-level Jaccard similarity between titles."""

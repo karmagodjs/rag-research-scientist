@@ -1,6 +1,6 @@
 """
 Reranker module for scoring and ordering retrieved documents.
-Implements BM25 keyword relevance with title match boosting.
+Implements BM25 keyword relevance with dominant exact paper title matching priority.
 """
 
 import math
@@ -8,6 +8,7 @@ import re
 import logging
 from typing import List
 from retrieval.base import Document
+from retrieval.query_utils import detect_exact_paper_query, calculate_title_score
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +25,11 @@ class Reranker:
         if not documents:
             return []
 
+        is_exact_query, clean_title_query, author_hint = detect_exact_paper_query(query)
+        logger.info(f"[RETRIEVAL] query = '{query}'")
+        logger.info(f"[EXACT QUERY DETECTED] {is_exact_query}")
+
         query_terms = [w.lower() for w in re.findall(r"\w+", query) if len(w) > 1]
-        if not query_terms:
-            return documents[:top_k]
 
         # Calculate average document length
         doc_lengths = [len(re.findall(r"\w+", doc.content)) for doc in documents]
@@ -43,7 +46,7 @@ class Reranker:
         for idx, doc in enumerate(documents):
             doc_terms = [w.lower() for w in re.findall(r"\w+", doc.content)]
             dl = len(doc_terms)
-            score = 0.0
+            bm25_score = 0.0
 
             # BM25 Score
             for term in query_terms:
@@ -53,22 +56,47 @@ class Reranker:
                 idf = math.log((num_docs - df[term] + 0.5) / (df[term] + 0.5) + 1.0)
                 numerator = tf * (self.k1 + 1.0)
                 denominator = tf + self.k1 * (1.0 - self.b + self.b * (dl / avg_dl))
-                score += idf * (numerator / denominator)
+                bm25_score += idf * (numerator / denominator)
 
-            # Title Match Boost
-            clean_title_words = set(re.findall(r"\w+", doc.title.lower()))
-            clean_query_words = set(query_terms)
-            overlap = len(clean_title_words.intersection(clean_query_words))
-            if overlap > 0:
-                title_similarity = overlap / max(len(clean_query_words), 1)
-                score += title_similarity * 15.0  # Heavy boost for title matches
+            # Title Match Assessment
+            title_info = calculate_title_score(
+                query_title=clean_title_query if clean_title_query else query,
+                candidate_title=doc.title,
+                candidate_authors=doc.authors,
+                author_hint=author_hint
+            )
 
-            doc.metadata["bm25_score"] = round(score, 4)
-            scored_docs.append((score, doc))
+            title_score = title_info["score"]
+            exact_match = title_info["exact_match"]
+            near_exact = title_info["near_exact"]
+
+            # Calculate composite final score
+            if exact_match:
+                final_score = 100.0 + title_score
+            elif near_exact:
+                final_score = 50.0 + title_score
+            elif is_exact_query and title_score >= 0.8:
+                final_score = 25.0 + title_score
+            else:
+                # Composite weighting: 50% title score, 25% BM25 score, 25% semantic score
+                semantic_score = doc.metadata.get("score", 0.70)
+                if not isinstance(semantic_score, (int, float)):
+                    semantic_score = 0.70
+                final_score = (0.50 * title_score) + (0.25 * min(bm25_score, 10.0) / 10.0) + (0.25 * semantic_score)
+
+            doc.metadata["bm25_score"] = round(bm25_score, 4)
+            doc.metadata["title_score"] = round(title_score, 4)
+            doc.metadata["final_score"] = round(final_score, 4)
+
+            logger.info(
+                f"[RANKING] title='{doc.title}', title_score={title_score:.2f}, "
+                f"bm25_score={bm25_score:.2f}, final_score={final_score:.2f}"
+            )
+            scored_docs.append((final_score, doc))
 
         # Sort descending by score
         scored_docs.sort(key=lambda x: x[0], reverse=True)
         ranked = [doc for score, doc in scored_docs[:top_k]]
-        
+
         logger.info(f"Reranked {len(documents)} documents -> top {len(ranked)} documents.")
         return ranked

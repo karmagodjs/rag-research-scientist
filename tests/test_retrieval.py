@@ -44,6 +44,45 @@ class TestRetrieval(unittest.TestCase):
         self.assertTrue(any("evaluation" in sq or "empirical" in sq for sq in interp_subqueries))
 
 
+    def test_exact_paper_query_detection_and_ranking(self):
+        from retrieval.query_utils import detect_exact_paper_query
+        from ranking.reranker import Reranker
+
+        # Test Case 1: Exact Title
+        is_exact, title, author = detect_exact_paper_query("Attention Is All You Need")
+        self.assertTrue(is_exact)
+        self.assertEqual(title, "attention is all you need")
+
+        # Test Case 2: Title + paper
+        is_exact, title, author = detect_exact_paper_query("Attention Is All You Need paper")
+        self.assertTrue(is_exact)
+        self.assertEqual(title, "attention is all you need")
+
+        # Test Case 3: Author + Title
+        is_exact, title, author = detect_exact_paper_query("Vaswani Attention Is All You Need")
+        self.assertTrue(is_exact)
+        self.assertEqual(author, "vaswani")
+
+        # Test Case 4: Exploratory query
+        is_exact, title, author = detect_exact_paper_query("recent transformer attention research")
+        self.assertFalse(is_exact)
+
+        # Test Case 5: Broad topic query
+        is_exact, title, author = detect_exact_paper_query("papers about attention mechanisms")
+        self.assertFalse(is_exact)
+
+        # Test Ranking Promotion
+        reranker = Reranker()
+        docs = [
+            Document(id="d1", title="Survey of Attention Mechanisms", authors=["A. Smith"], abstract="General survey of attention in deep learning.", url="u1", published="2024", source="s1"),
+            Document(id="d2", title="Attention Is All You Need", authors=["Ashish Vaswani", "Noam Shazeer"], abstract="We propose the Transformer, a novel architecture.", url="u2", published="2017", source="arXiv"),
+            Document(id="d3", title="Efficient Attention Models for Vision", authors=["B. Jones"], abstract="Optimized attention mechanisms for vision models.", url="u3", published="2023", source="s3"),
+        ]
+        
+        ranked = reranker.rerank("Attention Is All You Need paper", docs)
+        self.assertEqual(ranked[0].title, "Attention Is All You Need")
+
+
 if __name__ == "__main__":
     unittest.main()
 

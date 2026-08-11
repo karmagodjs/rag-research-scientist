@@ -6,11 +6,11 @@ Queries the official arXiv REST API with exact title boosting, fallback keyword 
 import requests
 import xml.etree.ElementTree as ET
 import urllib.parse
-import time
 import logging
 import re
 from typing import List, Optional
 from retrieval.base import BaseRetriever, Document
+from retrieval.query_utils import detect_exact_paper_query
 
 logger = logging.getLogger(__name__)
 
@@ -20,24 +20,54 @@ ARXIV_API_URL = "https://export.arxiv.org/api/query"
 class ArxivRetriever(BaseRetriever):
     """Retriever fetching academic preprints directly from the arXiv API."""
 
-    def __init__(self, api_url: Optional[str] = None, timeout: int = 4):
+    def __init__(self, api_url: Optional[str] = None, timeout: int = 6):
         super().__init__(name="arxiv")
         self.api_url = api_url or ARXIV_API_URL
         self.timeout = timeout
 
     def search(self, query: str, top_k: int = 10) -> List[Document]:
-        """Execute arXiv search using core terms."""
+        """Execute arXiv search using exact title matching and core term fallback."""
         clean_query = query.strip()
-        STOP_WORDS = {"find", "best", "approaches", "for", "since", "with", "from", "using", "paper", "study", "analysis", "compare", "recent", "analyze", "investigate"}
-        words = [w for w in re.findall(r"\w+", clean_query) if len(w) > 2 and w.lower() not in STOP_WORDS]
-        
-        if not words:
-            query_str = f'all:"{clean_query}"'
-        else:
-            core_terms = words[:3]
-            query_str = " AND ".join([f'all:{term}' for term in core_terms])
+        is_exact, target_title, author_hint = detect_exact_paper_query(clean_query)
 
-        return self._fetch_arxiv(query_str, top_k)
+        documents = []
+
+        STOP_WORDS = {"find", "best", "approaches", "for", "since", "with", "from", "using", "paper", "study", "analysis", "compare", "recent", "analyze", "investigate", "the", "a", "an", "of", "to", "in", "on", "is", "all", "you", "it", "and", "or", "are", "be", "that", "this", "which"}
+        words = [w for w in re.findall(r"\w+", target_title or clean_query) if len(w) > 2 and w.lower() not in STOP_WORDS]
+        if not words:
+            words = [w for w in re.findall(r"\w+", target_title or clean_query) if len(w) > 1]
+
+        if is_exact or target_title:
+            # 1. Try exact title terms query: ti:Term1 AND ti:Term2
+            ti_terms = " AND ".join([f'ti:{w}' for w in words[:4]])
+            exact_docs = self._fetch_arxiv(ti_terms, top_k)
+            documents.extend(exact_docs)
+
+            # 2. Try author + title query if author hint exists: au:"Author" AND ti:Term
+            if author_hint and words:
+                au_docs = self._fetch_arxiv(f'au:{author_hint} AND ti:{words[0]}', top_k)
+                documents.extend(au_docs)
+
+            if len(documents) > 0:
+                return self._dedup_internal(documents)[:top_k]
+
+        # Fallback to core terms search: all:Term1 AND all:Term2
+        core_terms = words[:3]
+        query_str = " AND ".join([f'all:{term}' for term in core_terms]) if core_terms else f'all:"{clean_query}"'
+
+        fallback_docs = self._fetch_arxiv(query_str, top_k)
+        documents.extend(fallback_docs)
+
+        return self._dedup_internal(documents)[:top_k]
+
+    def _dedup_internal(self, docs: List[Document]) -> List[Document]:
+        seen = set()
+        unique = []
+        for d in docs:
+            if d.id not in seen:
+                seen.add(d.id)
+                unique.append(d)
+        return unique
 
     def _fetch_arxiv(self, query_param: str, top_k: int) -> List[Document]:
         """Send GET request to arXiv REST API and parse Atom XML response."""
@@ -48,10 +78,13 @@ class ArxivRetriever(BaseRetriever):
             "sortBy": "relevance",
             "sortOrder": "descending"
         }
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
 
         documents = []
         try:
-            resp = requests.get(ARXIV_API_URL, params=params, timeout=self.timeout)
+            resp = requests.get(ARXIV_API_URL, params=params, headers=headers, timeout=self.timeout)
             
             if resp.status_code != 200:
                 logger.warning(f"arXiv API returned status {resp.status_code}")
@@ -100,6 +133,5 @@ class ArxivRetriever(BaseRetriever):
                 documents.append(doc)
 
         except Exception as e:
-            logger.error(f"Failed to query arXiv for '{query_param}': {str(e)}")
-
-        return documents
+            logger.warning(f"arXiv API search failed for '{query_param}': {str(e)}. Returning empty list.")
+            return documents

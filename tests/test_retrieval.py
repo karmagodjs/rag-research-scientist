@@ -82,6 +82,30 @@ class TestRetrieval(unittest.TestCase):
         ranked = reranker.rerank("Attention Is All You Need paper", docs)
         self.assertEqual(ranked[0].title, "Attention Is All You Need")
 
+    def test_exact_title_failure_fallback_does_not_crash(self):
+        from ranking.reranker import Reranker
+        from agent import ResearchAgent
+
+        # Test Reranker handling malformed documents or None attributes
+        reranker = Reranker()
+        malformed_docs = [
+            Document(id="m1", title="", authors=None, abstract=None, url="u1", published="2025", source="s1"),
+            Document(id="m2", title="Attention Is All You Need", authors=["Ashish Vaswani"], abstract="Transformer paper.", url="u2", published="2017", source="arXiv")
+        ]
+        ranked = reranker.rerank("Attention Is All You Need", malformed_docs)
+        self.assertTrue(len(ranked) > 0)
+        self.assertEqual(ranked[0].title, "Attention Is All You Need")
+
+        # Test end-to-end Agent execution with both exact title and exploratory queries
+        agent = ResearchAgent()
+        report_exact = agent.run("Attention Is All You Need")
+        self.assertIsNotNone(report_exact)
+        self.assertIn("citation_list", report_exact)
+
+        report_broad = agent.run("recent research on transformer attention mechanisms")
+        self.assertIsNotNone(report_broad)
+        self.assertIn("citation_list", report_broad)
+
 
 if __name__ == "__main__":
     unittest.main()

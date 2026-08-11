@@ -54,8 +54,8 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(report, status=201)
                 return
             except Exception as e:
-                logger.exception(f"Error executing research pipeline: {e}")
-                self._send_json({"error": "An internal server error occurred while processing research request."}, status=500)
+                logger.exception("Research execution failed")
+                self._send_json({"error": f"An internal server error occurred while processing research request: {str(e)}"}, status=500)
                 return
 
         self._send_json({"error": "Endpoint not found"}, status=404)

@@ -134,4 +134,6 @@ class ArxivRetriever(BaseRetriever):
 
         except Exception as e:
             logger.warning(f"arXiv API search failed for '{query_param}': {str(e)}. Returning empty list.")
-            return documents
+            return []
+
+        return documents

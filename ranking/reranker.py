@@ -25,26 +25,30 @@ class Reranker:
         if not documents:
             return []
 
-        is_exact_query, clean_title_query, author_hint = detect_exact_paper_query(query)
-        logger.info(f"[RETRIEVAL] query = '{query}'")
-        logger.info(f"[EXACT QUERY DETECTED] {is_exact_query}")
+        try:
+            is_exact_query, clean_title_query, author_hint = detect_exact_paper_query(query)
+            logger.info(f"[RETRIEVAL] query = '{query}'")
+            logger.info(f"[EXACT QUERY DETECTED] {is_exact_query}")
+        except Exception as e:
+            logger.warning(f"Exact query detection failed: {e}. Falling back to standard search.")
+            is_exact_query, clean_title_query, author_hint = False, query, None
 
         query_terms = [w.lower() for w in re.findall(r"\w+", query) if len(w) > 1]
 
         # Calculate average document length
-        doc_lengths = [len(re.findall(r"\w+", doc.content)) for doc in documents]
+        doc_lengths = [len(re.findall(r"\w+", doc.content or "")) for doc in documents]
         avg_dl = sum(doc_lengths) / len(doc_lengths) if doc_lengths else 1.0
 
         # Calculate document frequencies
         df = {}
         for term in set(query_terms):
-            df[term] = sum(1 for doc in documents if term in doc.content.lower())
+            df[term] = sum(1 for doc in documents if term in (doc.content or "").lower())
 
         num_docs = len(documents)
 
         scored_docs = []
         for idx, doc in enumerate(documents):
-            doc_terms = [w.lower() for w in re.findall(r"\w+", doc.content)]
+            doc_terms = [w.lower() for w in re.findall(r"\w+", doc.content or "")]
             dl = len(doc_terms)
             bm25_score = 0.0
 
@@ -58,17 +62,20 @@ class Reranker:
                 denominator = tf + self.k1 * (1.0 - self.b + self.b * (dl / avg_dl))
                 bm25_score += idf * (numerator / denominator)
 
-            # Title Match Assessment
-            title_info = calculate_title_score(
-                query_title=clean_title_query if clean_title_query else query,
-                candidate_title=doc.title,
-                candidate_authors=doc.authors,
-                author_hint=author_hint
-            )
-
-            title_score = title_info["score"]
-            exact_match = title_info["exact_match"]
-            near_exact = title_info["near_exact"]
+            # Title Match Assessment with Exception Isolation
+            try:
+                title_info = calculate_title_score(
+                    query_title=clean_title_query if clean_title_query else query,
+                    candidate_title=doc.title or "",
+                    candidate_authors=doc.authors or [],
+                    author_hint=author_hint
+                )
+                title_score = title_info.get("score", 0.0)
+                exact_match = title_info.get("exact_match", False)
+                near_exact = title_info.get("near_exact", False)
+            except Exception as e:
+                logger.warning(f"Title matching failed for '{doc.title}': {e}")
+                title_score, exact_match, near_exact = 0.0, False, False
 
             # Calculate composite final score
             if exact_match:
@@ -78,12 +85,13 @@ class Reranker:
             elif is_exact_query and title_score >= 0.8:
                 final_score = 25.0 + title_score
             else:
-                # Composite weighting: 50% title score, 25% BM25 score, 25% semantic score
-                semantic_score = doc.metadata.get("score", 0.70)
+                semantic_score = doc.metadata.get("score", 0.70) if doc.metadata else 0.70
                 if not isinstance(semantic_score, (int, float)):
                     semantic_score = 0.70
                 final_score = (0.50 * title_score) + (0.25 * min(bm25_score, 10.0) / 10.0) + (0.25 * semantic_score)
 
+            if doc.metadata is None:
+                doc.metadata = {}
             doc.metadata["bm25_score"] = round(bm25_score, 4)
             doc.metadata["title_score"] = round(title_score, 4)
             doc.metadata["final_score"] = round(final_score, 4)

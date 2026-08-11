@@ -113,7 +113,7 @@ const initialReport = {
   ]
 };
 
-reportData = initialReport;
+reportData = null;
 
 // DOM Cache
 const queryInput = document.getElementById('queryInput');
@@ -249,13 +249,88 @@ queryInput?.addEventListener('keydown', (e) => {
   }
 });
 
-// Initialize composer state on load
+// Search Suggestion Chips Click Handlers
+document.querySelectorAll('.suggestion-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const q = btn.getAttribute('data-query');
+    if (queryInput && q) {
+      queryInput.value = q;
+      autoResizeTextarea();
+      updateRunButtonState();
+      queryInput.focus();
+    }
+  });
+});
+
+// Render Clean Initial Empty State
+function renderInitialEmptyState() {
+  const centerTitle = document.getElementById('centerQueryTitle');
+  const execFinding = document.getElementById('executiveFindingText');
+  
+  if (centerTitle) centerTitle.textContent = "RESEARCH WORKSPACE";
+  if (execFinding) {
+    execFinding.innerHTML = `<strong>No investigation running</strong><br><span class="finding-subtext">Ask a research question above to begin an evidence-grounded investigation across arXiv and scientific literature.</span>`;
+  }
+
+  if (centerClaimsList) {
+    centerClaimsList.innerHTML = `
+      <div class="empty-workspace-card">
+        <div class="empty-icon">🔬</div>
+        <div class="empty-title">Awaiting Research Prompt</div>
+        <div class="empty-sub">Type a question in the composer above or choose a suggestion below to start an evidence synthesis.</div>
+      </div>
+    `;
+  }
+
+  document.querySelectorAll('.trace-item').forEach(item => {
+    item.classList.remove('active');
+    const statusEl = item.querySelector('.trace-status');
+    if (statusEl) {
+      statusEl.className = 'trace-status status-ready';
+      statusEl.textContent = 'READY';
+    }
+  });
+  const traceLogText = document.getElementById('traceLogText');
+  if (traceLogText) {
+    traceLogText.textContent = "System ready. Ask a research question above to execute the multi-agent pipeline.";
+  }
+
+  if (inspPaperTitle) inspPaperTitle.textContent = "No evidence selected";
+  if (inspSource) inspSource.textContent = "-";
+  if (inspPublished) inspPublished.textContent = "-";
+  if (inspRelevance) inspRelevance.textContent = "-";
+  if (inspSnippet) inspSnippet.textContent = "Run an investigation to populate verified evidence.";
+  if (btnOpenPaperLink) {
+    btnOpenPaperLink.href = "#";
+    btnOpenPaperLink.classList.add('disabled');
+  }
+
+  if (litTableBody) {
+    litTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem; font-family: var(--font-mono);">No literature papers loaded. Run an investigation to retrieve sources.</td></tr>`;
+  }
+  const litCountLabel = document.getElementById('litCountLabel');
+  if (litCountLabel) litCountLabel.textContent = "LITERATURE — 0 PAPERS";
+
+  const page5GapsContainer = document.getElementById('page5GapsContainer');
+  if (page5GapsContainer) {
+    page5GapsContainer.innerHTML = `<div class="empty-workspace-card" style="margin-top: 1rem;"><div class="empty-title">No Research Gaps Detected</div><div class="empty-sub">Run an investigation to synthesize open literature gaps.</div></div>`;
+  }
+
+  const page6RecsContainer = document.getElementById('page6RecsContainer');
+  if (page6RecsContainer) {
+    page6RecsContainer.innerHTML = `<div class="empty-workspace-card" style="margin-top: 1rem;"><div class="empty-title">No Next Research Directions</div><div class="empty-sub">Run an investigation to derive graph-grounded research directions.</div></div>`;
+  }
+}
+
+// Initialize composer and empty state on load
 if (queryInput) {
   queryInput.value = ""; // Ensure fresh load starts empty
   autoResizeTextarea();
   updateRunButtonState();
   initPlaceholderRotation();
 }
+
+renderInitialEmptyState();
 
 // Export JSON & Export Markdown Downloads
 document.getElementById('btnExportJson')?.addEventListener('click', () => {
@@ -307,7 +382,7 @@ document.getElementById('btnExportMarkdown')?.addEventListener('click', () => {
 });
 
 async function executeLiveResearch() {
-  const query = queryInput.value.trim();
+  const query = queryInput ? queryInput.value.trim() : "";
   if (!query) return;
 
   if (btnRunAgent) {
@@ -315,6 +390,18 @@ async function executeLiveResearch() {
     btnRunAgent.classList.add('is-loading');
     btnRunAgent.setAttribute('aria-label', 'Executing research...');
   }
+
+  // Update trace stage 01 to RUNNING
+  const stage01 = document.querySelector('.trace-item[data-stage="01"]');
+  if (stage01) {
+    stage01.classList.add('active');
+    const statusEl = stage01.querySelector('.trace-status');
+    if (statusEl) {
+      statusEl.className = 'trace-status status-running';
+      statusEl.textContent = 'RUNNING';
+    }
+  }
+
   document.getElementById('executiveFindingText').textContent = "Running Multi-Source Agent Pipeline... Querying arXiv API and Web search...";
   isGraphLoading = true;
   renderFullGraphCanvas();
@@ -400,6 +487,18 @@ async function executeLiveResearch() {
       cachedGraphNodes = null;
       cachedGraphEdges = null;
 
+      // Update trace items to DONE
+      document.querySelectorAll('.trace-item').forEach(item => {
+        item.classList.remove('active');
+        const statusEl = item.querySelector('.trace-status');
+        if (statusEl) {
+          statusEl.className = 'trace-status status-done';
+          statusEl.textContent = 'DONE';
+        }
+      });
+      const stage06 = document.querySelector('.trace-item[data-stage="06"]');
+      if (stage06) stage06.classList.add('active');
+
       document.getElementById('centerQueryTitle').textContent = reportData.research_question;
       document.getElementById('executiveFindingText').textContent = reportData.executive_summary;
       
@@ -415,6 +514,13 @@ async function executeLiveResearch() {
   } catch (err) {
     console.error("Research Agent API Execution Error:", err);
     document.getElementById('executiveFindingText').textContent = `API Error: ${err.message}. Make sure 'python server.py' is running on http://localhost:8000.`;
+    document.querySelectorAll('.trace-item').forEach(item => {
+      const statusEl = item.querySelector('.trace-status');
+      if (statusEl && statusEl.textContent === 'RUNNING') {
+        statusEl.className = 'trace-status status-failed';
+        statusEl.textContent = 'FAILED';
+      }
+    });
   } finally {
     if (btnRunAgent) {
       btnRunAgent.classList.remove('is-loading');
@@ -581,7 +687,7 @@ function renderPage5Gaps() {
       </div>
 
       <div class="gap-actions-row">
-        <button class="btn-gap-action">[ VIEW SUPPORTING PAPERS ]</button>
+        <button class="btn-gap-action btn-view-gap-papers">[ VIEW SUPPORTING PAPERS ]</button>
         <button class="btn-gap-action btn-investigate-gap" data-title="${g.title}">[ INVESTIGATE THIS GAP ]</button>
       </div>
     </div>
@@ -594,8 +700,15 @@ function renderPage5Gaps() {
         queryInput.value = title;
         autoResizeTextarea();
         updateRunButtonState();
+        queryInput.focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-      executeLiveResearch();
+    });
+  });
+
+  document.querySelectorAll('.btn-view-gap-papers').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelector('.tab-btn[data-tab="tab-literature"]')?.click();
     });
   });
 }
@@ -646,8 +759,9 @@ function renderPage6Recommendations() {
         queryInput.value = title;
         autoResizeTextarea();
         updateRunButtonState();
+        queryInput.focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-      executeLiveResearch();
     });
   });
 }
@@ -655,13 +769,24 @@ function renderPage6Recommendations() {
 // View 04 Visualizations
 function renderAnalyticsCharts() {
   const funnel = document.getElementById('funnelChart');
+  const claimsVizList = document.getElementById('claimsVizList');
+  const matrix = document.getElementById('methodologyMatrixTable');
+
+  if (!reportData || !reportData.papers || reportData.papers.length === 0) {
+    const noDataHtml = `<div class="empty-workspace-card" style="padding: 1rem;"><div class="empty-title">NO VERIFIED DATA</div><div class="empty-sub">Run an investigation to synthesize real data.</div></div>`;
+    if (funnel) funnel.innerHTML = noDataHtml;
+    if (claimsVizList) claimsVizList.innerHTML = noDataHtml;
+    if (matrix) matrix.innerHTML = noDataHtml;
+    return;
+  }
+
   if (funnel) {
     funnel.innerHTML = `
       <div class="funnel-stage"><span>01 Decomposed Subqueries</span><strong>4</strong></div>
-      <div class="funnel-stage"><span>02 Raw Retrieved Documents</span><strong>${(reportData?.papers?.length || 3) * 3}</strong></div>
-      <div class="funnel-stage"><span>03 Deduplicated Papers</span><strong>${reportData?.papers?.length || 3}</strong></div>
-      <div class="funnel-stage"><span>04 Reranked Papers</span><strong>${reportData?.papers?.length || 3}</strong></div>
-      <div class="funnel-stage"><span>05 Verified Evidence</span><strong>${(reportData?.claims?.length || 3) * 5}</strong></div>
+      <div class="funnel-stage"><span>02 Raw Retrieved Documents</span><strong>${(reportData.papers.length) * 3}</strong></div>
+      <div class="funnel-stage"><span>03 Deduplicated Papers</span><strong>${reportData.papers.length}</strong></div>
+      <div class="funnel-stage"><span>04 Reranked Passages</span><strong>${reportData.papers.length * 2}</strong></div>
+      <div class="funnel-stage"><span>05 Verified Evidence Claims</span><strong>${reportData.claims?.length || 0}</strong></div>
     `;
   }
 

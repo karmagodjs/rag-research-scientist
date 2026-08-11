@@ -50,30 +50,43 @@
       </div>
     </header>
 
-    <!-- Global Query Bar -->
+    <!-- Global Query Bar & Suggestions -->
     <div class="query-bar-container">
-      <div class="research-composer" id="researchComposer">
-        <textarea id="queryInput" placeholder="What do you want to investigate?" aria-label="Research question" rows="1"></textarea>
-        <div class="composer-controls">
-          <div class="composer-controls-left">
-            <button type="button" class="composer-plus-btn" aria-label="Add research material or context" title="Add research material or context">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 1V13M1 7H13" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
+      <div class="composer-wrapper">
+        <div class="research-composer" id="researchComposer">
+          <textarea id="queryInput" placeholder="What do you want to investigate?" aria-label="Research question" rows="1"></textarea>
+          <div class="composer-controls">
+            <div class="composer-controls-left">
+              <button type="button" class="composer-plus-btn" aria-label="Add research material or context" title="Add research material or context">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 1V13M1 7H13" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="composer-controls-right">
+              <span class="composer-hint" title="Press Ctrl + Enter to submit">Ctrl <span class="kbd-icon">↵</span></span>
+              <button type="button" id="btnRunAgent" class="composer-run-btn" aria-label="Run research" disabled>
+                <svg class="run-icon-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 13V3M8 3L3.5 7.5M8 3L12.5 7.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg class="run-icon-spinner" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="8" cy="8" r="6" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10" stroke-linecap="round">
+                    <animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/>
+                  </circle>
+                </svg>
+              </button>
+            </div>
           </div>
-          <div class="composer-controls-right">
-            <span class="composer-hint" title="Press Ctrl + Enter to submit">Ctrl <span class="kbd-icon">↵</span></span>
-            <button type="button" id="btnRunAgent" class="composer-run-btn" aria-label="Run research" disabled>
-              <svg class="run-icon-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 13V3M8 3L3.5 7.5M8 3L12.5 7.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <svg class="run-icon-spinner" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="8" cy="8" r="6" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10" stroke-linecap="round">
-                  <animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/>
-                </circle>
-              </svg>
-            </button>
+        </div>
+
+        <!-- Search Suggestions -->
+        <div class="composer-suggestions">
+          <span class="suggestions-label">TRY AN INVESTIGATION</span>
+          <div class="suggestions-list">
+            <button type="button" class="suggestion-chip" data-query="Compare recent vision-language models for OCR on low-resource Indic scripts and identify unexplored research gaps.">Compare recent VLMs for OCR</button>
+            <button type="button" class="suggestion-chip" data-query="Find research gaps and benchmark limitations in low-resource NLP.">Find gaps in low-resource NLP</button>
+            <button type="button" class="suggestion-chip" data-query="Analyze conflicting evidence across recent scientific papers.">Analyze conflicting evidence</button>
+            <button type="button" class="suggestion-chip" data-query="Investigate retrieval-augmented scientific discovery agents and evidence synthesis pipelines.">Investigate scientific discovery agents</button>
           </div>
         </div>
       </div>
@@ -90,20 +103,76 @@
           <aside class="col-trace">
             <div class="section-title-sm">RESEARCH TRACE</div>
             <div class="trace-list" id="traceStageList">
-              <div class="trace-item" data-stage="01"><span class="trace-num">01</span><span class="trace-label">Query Planner</span><span class="trace-status">DONE</span></div>
-              <div class="trace-item" data-stage="02"><span class="trace-num">02</span><span class="trace-label">Multi-Retrieval</span><span class="trace-status">DONE</span></div>
-              <div class="trace-item" data-stage="03"><span class="trace-num">03</span><span class="trace-label">Deduplication</span><span class="trace-status">DONE</span></div>
-              <div class="trace-item" data-stage="04"><span class="trace-num">04</span><span class="trace-label">Reranker</span><span class="trace-status">DONE</span></div>
-              <div class="trace-item" data-stage="05"><span class="trace-num">05</span><span class="trace-label">Evidence Extraction</span><span class="trace-status">DONE</span></div>
-              <div class="trace-item active" data-stage="06"><span class="trace-num">06</span><span class="trace-label">Claim Analysis</span><span class="trace-status">ACTIVE</span></div>
-              <div class="trace-item" data-stage="07"><span class="trace-num">07</span><span class="trace-label">Contradiction Analysis</span><span class="trace-status">DONE</span></div>
-              <div class="trace-item" data-stage="08"><span class="trace-num">08</span><span class="trace-label">Synthesis</span><span class="trace-status">DONE</span></div>
+              <div class="trace-item" data-stage="01">
+                <span class="trace-num">01</span>
+                <div class="trace-info">
+                  <span class="trace-label">Query Planner</span>
+                  <span class="trace-sub">Decompose question</span>
+                </div>
+                <span class="trace-status status-ready">READY</span>
+              </div>
+              <div class="trace-item" data-stage="02">
+                <span class="trace-num">02</span>
+                <div class="trace-info">
+                  <span class="trace-label">Multi-Retrieval</span>
+                  <span class="trace-sub">arXiv + Web search</span>
+                </div>
+                <span class="trace-status status-ready">READY</span>
+              </div>
+              <div class="trace-item" data-stage="03">
+                <span class="trace-num">03</span>
+                <div class="trace-info">
+                  <span class="trace-label">Deduplication</span>
+                  <span class="trace-sub">Remove duplicates</span>
+                </div>
+                <span class="trace-status status-ready">READY</span>
+              </div>
+              <div class="trace-item" data-stage="04">
+                <span class="trace-num">04</span>
+                <div class="trace-info">
+                  <span class="trace-label">Reranker</span>
+                  <span class="trace-sub">Rank passages</span>
+                </div>
+                <span class="trace-status status-ready">READY</span>
+              </div>
+              <div class="trace-item" data-stage="05">
+                <span class="trace-num">05</span>
+                <div class="trace-info">
+                  <span class="trace-label">Evidence Extraction</span>
+                  <span class="trace-sub">Extract passages</span>
+                </div>
+                <span class="trace-status status-ready">READY</span>
+              </div>
+              <div class="trace-item" data-stage="06">
+                <span class="trace-num">06</span>
+                <div class="trace-info">
+                  <span class="trace-label">Claim Analysis</span>
+                  <span class="trace-sub">Build claims</span>
+                </div>
+                <span class="trace-status status-ready">READY</span>
+              </div>
+              <div class="trace-item" data-stage="07">
+                <span class="trace-num">07</span>
+                <div class="trace-info">
+                  <span class="trace-label">Contradiction Analysis</span>
+                  <span class="trace-sub">Detect disagreement</span>
+                </div>
+                <span class="trace-status status-ready">READY</span>
+              </div>
+              <div class="trace-item" data-stage="08">
+                <span class="trace-num">08</span>
+                <div class="trace-info">
+                  <span class="trace-label">Synthesis</span>
+                  <span class="trace-sub">Produce conclusion</span>
+                </div>
+                <span class="trace-status status-ready">READY</span>
+              </div>
             </div>
 
             <div class="trace-output-box">
               <div class="section-title-sm">STAGE EXECUTION LOG</div>
               <div class="trace-log-text" id="traceLogText">
-                Stage 06 (Claim Analysis): Synthesized evidence-grounded claims with calculated confidence scores.
+                System ready. Ask a research question above to execute the multi-agent pipeline.
               </div>
             </div>
           </aside>
@@ -112,13 +181,14 @@
           <article class="col-synthesis">
             <div class="synthesis-header">
               <div class="meta-label">RESEARCH QUESTION</div>
-              <h1 class="research-question-text" id="centerQueryTitle">OCR on low-resource Indic languages since 2024</h1>
+              <h1 class="research-question-text" id="centerQueryTitle">RESEARCH WORKSPACE</h1>
             </div>
 
             <div class="section-block">
               <div class="section-title-sm">EXECUTIVE FINDING</div>
               <div class="executive-finding-box" id="executiveFindingText">
-                Scientific evidence synthesis compiled across verified documents. Transitioning to end-to-end Vision-Language Models (VLMs) and HarfBuzz synthetic font rendering pipelines provides the highest accuracy gains for low-resource Indic scripts.
+                <strong>No investigation running</strong><br>
+                <span class="finding-subtext">Ask a research question above to begin an evidence-grounded investigation across arXiv and scientific literature.</span>
               </div>
             </div>
 
@@ -135,27 +205,27 @@
             <div class="inspector-card">
               <div class="insp-row">
                 <div class="insp-label">Paper</div>
-                <div class="insp-val" id="inspPaperTitle">Select a claim to inspect evidence</div>
+                <div class="insp-val" id="inspPaperTitle">No evidence selected</div>
               </div>
               <div class="insp-row">
                 <div class="insp-label">Source</div>
-                <div class="insp-val" id="inspSource">arXiv</div>
+                <div class="insp-val" id="inspSource">-</div>
               </div>
               <div class="insp-row">
                 <div class="insp-label">Published</div>
-                <div class="insp-val" id="inspPublished">2025</div>
+                <div class="insp-val" id="inspPublished">-</div>
               </div>
               <div class="insp-row">
                 <div class="insp-label">Relevance</div>
-                <div class="insp-val highlight" id="inspRelevance">0.91</div>
+                <div class="insp-val highlight" id="inspRelevance">-</div>
               </div>
               <div class="insp-row">
                 <div class="insp-label">Evidence Passage</div>
                 <div class="insp-val passage-quote" id="inspSnippet">
-                  "Click on any claim in the center panel to inspect supporting source passages."
+                  Run an investigation to populate verified evidence.
                 </div>
               </div>
-              <a id="btnOpenPaperLink" href="#" target="_blank" class="btn-open-paper">[ OPEN PAPER ]</a>
+              <a id="btnOpenPaperLink" href="#" target="_blank" class="btn-open-paper disabled">[ OPEN PAPER ]</a>
             </div>
           </aside>
 

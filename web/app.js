@@ -188,11 +188,74 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// Live Research Agent Backend API Call
+// Research Query Composer Logic
+function autoResizeTextarea() {
+  if (!queryInput) return;
+  queryInput.style.height = "auto";
+  const scrollH = queryInput.scrollHeight;
+  queryInput.style.height = Math.min(scrollH, 220) + "px";
+  if (scrollH > 220) {
+    queryInput.style.overflowY = "auto";
+  } else {
+    queryInput.style.overflowY = "hidden";
+  }
+}
+
+function updateRunButtonState() {
+  if (!btnRunAgent) return;
+  if (btnRunAgent.classList.contains('is-loading')) return;
+  const hasText = queryInput && queryInput.value.trim().length > 0;
+  btnRunAgent.disabled = !hasText;
+}
+
+// Rotating Placeholder Examples
+const placeholderExamples = [
+  "What do you want to investigate?",
+  "Compare recent vision-language models for OCR...",
+  "Find research gaps in low-resource NLP...",
+  "Investigate retrieval-augmented scientific discovery...",
+  "Analyze evidence across recent papers..."
+];
+let currentPlaceholderIdx = 0;
+let placeholderTimer = null;
+
+function initPlaceholderRotation() {
+  if (!queryInput) return;
+  if (placeholderTimer) clearInterval(placeholderTimer);
+  placeholderTimer = setInterval(() => {
+    if (document.activeElement !== queryInput && (!queryInput.value || queryInput.value.trim() === "")) {
+      currentPlaceholderIdx = (currentPlaceholderIdx + 1) % placeholderExamples.length;
+      queryInput.placeholder = placeholderExamples[currentPlaceholderIdx];
+    }
+  }, 4500);
+}
+
+// Live Research Agent Backend API Call & Event Listeners
 btnRunAgent?.addEventListener('click', executeLiveResearch);
-queryInput?.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') executeLiveResearch();
+
+queryInput?.addEventListener('input', () => {
+  autoResizeTextarea();
+  updateRunButtonState();
 });
+
+queryInput?.addEventListener('focus', () => {
+  autoResizeTextarea();
+});
+
+queryInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    executeLiveResearch();
+  }
+});
+
+// Initialize composer state on load
+if (queryInput) {
+  queryInput.value = ""; // Ensure fresh load starts empty
+  autoResizeTextarea();
+  updateRunButtonState();
+  initPlaceholderRotation();
+}
 
 // Export JSON & Export Markdown Downloads
 document.getElementById('btnExportJson')?.addEventListener('click', () => {
@@ -247,8 +310,11 @@ async function executeLiveResearch() {
   const query = queryInput.value.trim();
   if (!query) return;
 
-  btnRunAgent.disabled = true;
-  btnRunAgent.textContent = "Executing...";
+  if (btnRunAgent) {
+    btnRunAgent.disabled = true;
+    btnRunAgent.classList.add('is-loading');
+    btnRunAgent.setAttribute('aria-label', 'Executing research...');
+  }
   document.getElementById('executiveFindingText').textContent = "Running Multi-Source Agent Pipeline... Querying arXiv API and Web search...";
   isGraphLoading = true;
   renderFullGraphCanvas();
@@ -350,8 +416,11 @@ async function executeLiveResearch() {
     console.error("Research Agent API Execution Error:", err);
     document.getElementById('executiveFindingText').textContent = `API Error: ${err.message}. Make sure 'python server.py' is running on http://localhost:8000.`;
   } finally {
-    btnRunAgent.disabled = false;
-    btnRunAgent.textContent = "Run Research Agent";
+    if (btnRunAgent) {
+      btnRunAgent.classList.remove('is-loading');
+      btnRunAgent.setAttribute('aria-label', 'Run research');
+      updateRunButtonState();
+    }
     isGraphLoading = false;
   }
 }
@@ -521,7 +590,11 @@ function renderPage5Gaps() {
   document.querySelectorAll('.btn-investigate-gap').forEach(btn => {
     btn.addEventListener('click', () => {
       const title = btn.getAttribute('data-title');
-      if (queryInput) queryInput.value = title;
+      if (queryInput) {
+        queryInput.value = title;
+        autoResizeTextarea();
+        updateRunButtonState();
+      }
       executeLiveResearch();
     });
   });
@@ -569,7 +642,11 @@ function renderPage6Recommendations() {
   document.querySelectorAll('.btn-investigate-rec').forEach(btn => {
     btn.addEventListener('click', () => {
       const title = btn.getAttribute('data-title');
-      if (queryInput) queryInput.value = title;
+      if (queryInput) {
+        queryInput.value = title;
+        autoResizeTextarea();
+        updateRunButtonState();
+      }
       executeLiveResearch();
     });
   });
@@ -1252,7 +1329,11 @@ function renderNodeInspector(node) {
 
   document.getElementById('btnInspectorInvestigateGap')?.addEventListener('click', () => {
     const gapTitle = d.title || node.label;
-    if (queryInput) queryInput.value = gapTitle;
+    if (queryInput) {
+      queryInput.value = gapTitle;
+      autoResizeTextarea();
+      updateRunButtonState();
+    }
     executeLiveResearch();
   });
 }

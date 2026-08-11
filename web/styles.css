@@ -211,67 +211,260 @@ body {
   color: var(--accent-hover);
 }
 
-/* Global Query Bar */
+/* Global Research Query Composer */
 .query-bar-container {
-  padding: 0.5rem 1.2rem;
+  padding: 0.75rem 1.2rem;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-dim);
   display: flex;
-  gap: 8px;
+  justify-content: center;
   align-items: center;
-  height: 46px;
   flex-shrink: 0;
+  transition: padding 0.15s ease;
 }
 
-.query-input-wrap {
-  flex: 1;
-  position: relative;
+.research-composer {
+  width: 100%;
+  max-width: 920px;
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 28px;
+  padding: 10px 14px 10px 18px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+[data-theme="light"] .research-composer {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.research-composer:focus-within {
+  border-color: rgba(201, 168, 106, 0.55);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(201, 168, 106, 0.2);
+}
+
+[data-theme="light"] .research-composer:focus-within {
+  border-color: rgba(158, 125, 59, 0.55);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(158, 125, 59, 0.2);
+}
+
+/* Auto-growing Textarea */
+.research-composer textarea#queryInput {
+  width: 100%;
+  min-height: 24px;
+  max-height: 220px;
+  background: transparent;
+  border: none;
+  outline: none !important;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  resize: none;
+  padding: 2px 4px 4px 2px;
+  overflow-y: hidden;
+  box-shadow: none !important;
+  display: block;
+}
+
+.research-composer textarea#queryInput::placeholder {
+  color: var(--text-muted);
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+}
+
+/* Custom Scrollbar for Textarea inside Composer */
+.research-composer textarea#queryInput::-webkit-scrollbar {
+  width: 5px;
+}
+
+.research-composer textarea#queryInput::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.research-composer textarea#queryInput::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
+.research-composer textarea#queryInput::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Composer Controls Row */
+.composer-controls {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.query-icon {
-  position: absolute;
-  left: 10px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  opacity: 0.7;
+[data-theme="light"] .composer-controls {
+  border-top-color: rgba(0, 0, 0, 0.04);
 }
 
-.query-input-wrap input {
-  width: 100%;
-  padding: 6px 12px 6px 32px;
-  background: var(--bg-dark);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 0.84rem;
-  font-family: var(--font-sans);
-  outline: none;
-  transition: border-color 0.12s ease;
+.composer-controls-left,
+.composer-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.query-input-wrap input:focus {
-  border-color: var(--accent);
-}
-
-.btn-run-agent {
-  padding: 6px 14px;
-  background: var(--bg-surface-2);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-sm);
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 0.78rem;
-  font-family: var(--font-mono);
+/* Plus / Attachment Button */
+.composer-plus-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.btn-run-agent:hover {
-  background: var(--accent-tint);
-  border-color: var(--accent-hover);
-  color: var(--accent-hover);
+[data-theme="light"] .composer-plus-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.10);
+  color: var(--text-secondary);
+}
+
+.composer-plus-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--text-primary);
+  transform: scale(1.04);
+}
+
+[data-theme="light"] .composer-plus-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.2);
+  color: var(--text-primary);
+}
+
+/* Keyboard Shortcut Hint */
+.composer-hint {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 4px;
+  user-select: none;
+}
+
+.composer-hint .kbd-icon {
+  font-weight: 600;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+/* Run Research Action Button */
+.composer-run-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  font-family: var(--font-mono);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+/* Disabled / Subdued state when query is empty */
+.composer-run-btn:disabled,
+.composer-run-btn[disabled] {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.25);
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: scale(1);
+  box-shadow: none;
+}
+
+[data-theme="light"] .composer-run-btn:disabled,
+[data-theme="light"] .composer-run-btn[disabled] {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.25);
+  opacity: 0.55;
+}
+
+/* Active state when query has text */
+.composer-run-btn:not(:disabled) {
+  background: var(--accent);
+  color: #0B0D0F;
+  cursor: pointer;
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(201, 168, 106, 0.25);
+}
+
+[data-theme="light"] .composer-run-btn:not(:disabled) {
+  background: var(--accent);
+  color: #FFFFFF;
+}
+
+.composer-run-btn:not(:disabled):hover {
+  background: var(--accent-hover);
+  transform: scale(1.04);
+  box-shadow: 0 4px 12px rgba(201, 168, 106, 0.4);
+}
+
+.composer-run-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+/* Loading State for Run Button */
+.composer-run-btn .run-icon-arrow {
+  display: block;
+}
+
+.composer-run-btn .run-icon-spinner {
+  display: none;
+}
+
+.composer-run-btn.is-loading {
+  background: var(--accent-tint) !important;
+  border: 1px solid var(--accent) !important;
+  color: var(--accent) !important;
+  cursor: wait !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  box-shadow: none !important;
+}
+
+.composer-run-btn.is-loading .run-icon-arrow {
+  display: none;
+}
+
+.composer-run-btn.is-loading .run-icon-spinner {
+  display: block;
+}
+
+/* Responsive Mobile Layout */
+@media (max-width: 640px) {
+  .query-bar-container {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .research-composer {
+    border-radius: 22px;
+    padding: 8px 12px 8px 14px;
+  }
+
+  .composer-hint {
+    display: none;
+  }
 }
 
 /* Main Body Views Switcher */

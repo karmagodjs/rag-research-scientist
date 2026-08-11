@@ -52,11 +52,31 @@
 
     <!-- Global Query Bar -->
     <div class="query-bar-container">
-      <div class="query-input-wrap">
-        <span class="query-icon">🔍</span>
-        <input type="text" id="queryInput" value="OCR on low-resource Indic languages since 2024" placeholder="Search / research question...">
+      <div class="research-composer" id="researchComposer">
+        <textarea id="queryInput" placeholder="What do you want to investigate?" aria-label="Research question" rows="1"></textarea>
+        <div class="composer-controls">
+          <div class="composer-controls-left">
+            <button type="button" class="composer-plus-btn" aria-label="Add research material or context" title="Add research material or context">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 1V13M1 7H13" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="composer-controls-right">
+            <span class="composer-hint" title="Press Ctrl + Enter to submit">Ctrl <span class="kbd-icon">↵</span></span>
+            <button type="button" id="btnRunAgent" class="composer-run-btn" aria-label="Run research" disabled>
+              <svg class="run-icon-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 13V3M8 3L3.5 7.5M8 3L12.5 7.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg class="run-icon-spinner" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8" cy="8" r="6" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10" stroke-linecap="round">
+                  <animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
-      <button id="btnRunAgent" class="btn-run-agent">Run Research Agent</button>
     </div>
 
     <!-- MAIN CONTENT VIEWS -->

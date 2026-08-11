@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class WebRetriever(BaseRetriever):
     """Retriever for general web search results, news, and online documents."""
 
-    def __init__(self, tavily_api_key: Optional[str] = None, timeout: int = 10):
+    def __init__(self, tavily_api_key: Optional[str] = None, timeout: int = 3):
         super().__init__(name="web")
         self.tavily_api_key = tavily_api_key
         self.timeout = timeout

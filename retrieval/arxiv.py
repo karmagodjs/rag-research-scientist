@@ -20,29 +20,20 @@ ARXIV_API_URL = "https://export.arxiv.org/api/query"
 class ArxivRetriever(BaseRetriever):
     """Retriever fetching academic preprints directly from the arXiv API."""
 
-    def __init__(self, api_url: Optional[str] = None, timeout: int = 12):
+    def __init__(self, api_url: Optional[str] = None, timeout: int = 4):
         super().__init__(name="arxiv")
         self.api_url = api_url or ARXIV_API_URL
         self.timeout = timeout
 
     def search(self, query: str, top_k: int = 10) -> List[Document]:
-        """Execute arXiv search using exact title matching and core term fallback."""
+        """Execute arXiv search using core terms."""
         clean_query = query.strip()
-        
-        # Try exact title search first if query looks like a paper title
-        docs = self._fetch_arxiv(f'ti:"{clean_query}"', top_k)
-        if docs:
-            logger.info(f"Exact title match found on arXiv for '{clean_query}': {len(docs)} papers.")
-            return docs
-
-        # Fallback to topic search with clean core terms
-        STOP_WORDS = {"find", "best", "approaches", "for", "since", "with", "from", "using", "paper", "study", "analysis"}
+        STOP_WORDS = {"find", "best", "approaches", "for", "since", "with", "from", "using", "paper", "study", "analysis", "compare", "recent", "analyze", "investigate"}
         words = [w for w in re.findall(r"\w+", clean_query) if len(w) > 2 and w.lower() not in STOP_WORDS]
         
         if not words:
             query_str = f'all:"{clean_query}"'
         else:
-            # Join top terms with AND
             core_terms = words[:3]
             query_str = " AND ".join([f'all:{term}' for term in core_terms])
 
@@ -60,7 +51,6 @@ class ArxivRetriever(BaseRetriever):
 
         documents = []
         try:
-            time.sleep(0.3)  # Rate limiting respect
             resp = requests.get(ARXIV_API_URL, params=params, timeout=self.timeout)
             
             if resp.status_code != 200:

@@ -13,8 +13,8 @@ class AgentConfig:
     """Agent configuration options."""
     max_papers: int = 30
     top_k_rerank: int = 10
-    max_iterations: int = 2
-    timeout_seconds: int = 15
+    max_iterations: int = 1
+    timeout_seconds: int = 4
     arxiv_api_url: str = "https://export.arxiv.org/api/query"
     web_search_api_key: Optional[str] = field(default_factory=lambda: os.getenv("WEB_SEARCH_API_KEY"))
     tavily_api_key: Optional[str] = field(default_factory=lambda: os.getenv("TAVILY_API_KEY"))

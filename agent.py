@@ -92,14 +92,28 @@ class ResearchAgent:
 
             iteration_docs: List[Document] = []
 
-            # Retrieve across subqueries and multi-sources with rate-limiting respect
-            import time
-            for sq in subqueries:
-                arxiv_docs = self.arxiv_retriever.search(sq, top_k=3)
-                time.sleep(0.3)  # Respect arXiv API rate limit
-                web_docs = self.web_retriever.search(sq, top_k=2)
-                iteration_docs.extend(arxiv_docs)
-                iteration_docs.extend(web_docs)
+            # Retrieve across subqueries and multi-sources in parallel
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+
+            def fetch_single_subquery(sq: str) -> List[Document]:
+                docs = []
+                try:
+                    docs.extend(self.arxiv_retriever.search(sq, top_k=3))
+                except Exception as e:
+                    self.logger.warning(f"ArXiv retriever failed for '{sq}': {e}")
+                try:
+                    docs.extend(self.web_retriever.search(sq, top_k=2))
+                except Exception as e:
+                    self.logger.warning(f"Web retriever failed for '{sq}': {e}")
+                return docs
+
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                future_to_sq = {executor.submit(fetch_single_subquery, sq): sq for sq in subqueries}
+                for future in as_completed(future_to_sq, timeout=5.0):
+                    try:
+                        iteration_docs.extend(future.result())
+                    except Exception as e:
+                        self.logger.warning(f"Subquery retrieval worker failed: {e}")
 
             raw_retrieved_count += len(iteration_docs)
 

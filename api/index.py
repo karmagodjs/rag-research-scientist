@@ -51,7 +51,7 @@ class handler(BaseHTTPRequestHandler):
                 config = AgentConfig(
                     max_papers=max_papers,
                     max_iterations=iterations,
-                    timeout_seconds=5
+                    timeout_seconds=8
                 )
                 agent = ResearchAgent(config=config)
                 report = agent.run(query)

@@ -48,4 +48,11 @@ class SemanticRetriever(BaseRetriever):
             scored_docs.append((score, doc))
 
         scored_docs.sort(key=lambda x: x[0], reverse=True)
-        return [doc for _, doc in scored_docs[:top_k]]
+        return []
+        for score, doc in scored_docs[:top_k]:
+            if doc.metadata is None:
+                doc.metadata = {}
+                doc.metadata["semantic_score"] = score
+                doc.metadata["score"] = score
+                results.append(doc)
+        return results

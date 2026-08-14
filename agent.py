@@ -76,14 +76,14 @@ class ResearchAgent:
             self.logger.info(f"--- Self-Improvement Loop Iteration {iteration}/{self.config.max_iterations} ---")
 
 
-            subqueries = []
+            subqueries = [query]
             for q in current_queries:
-                subqueries.extend(self.decomposer.decompose(q))
-            subqueries = list(dict.fromkeys(subqueries))[:4]  
-
+                for sq in self.decomposer.decompose(q):
+                    if sq not in subqueries:
+                        subqueries.append(sq)
+            subqueries = subqueries[:4]
 
             iteration_docs: List[Document] = []
-
 
             from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 
@@ -94,7 +94,7 @@ class ResearchAgent:
                 except Exception as e:
                     self.logger.warning(f"[RETRIEVAL] ArXiv retriever failed for '{sq}': {e}")
                 try:
-                    docs.extend(self.web_retriever.search(sq, top_k=2))
+                    docs.extend(self.web_retriever.search(sq, top_k=3))
                 except Exception as e:
                     self.logger.warning(f"[RETRIEVAL] Web retriever failed for '{sq}': {e}")
                 return docs
@@ -106,7 +106,7 @@ class ResearchAgent:
                 self.logger.info(f"[RETRIEVAL] Starting {total_subqueries} subqueries")
 
                 try:
-                    for future in as_completed(future_to_sq, timeout=8.0):
+                    for future in as_completed(future_to_sq, timeout=max(12.0, float(self.config.timeout_seconds * 2))):
                         sq_name = future_to_sq[future]
                         try:
                             res = future.result()
@@ -121,25 +121,32 @@ class ResearchAgent:
                     self.logger.warning(f"[RETRIEVAL] Subquery timed out: {timed_out_count} subqueries did not finish in time. Continuing with partial results.")
 
             self.logger.info(f"[RETRIEVAL] Continuing with partial results. Total candidates: {len(iteration_docs)}")
-
             raw_retrieved_count += len(iteration_docs)
 
+            # Pipeline step 1: arXiv/Web candidates + existing candidates
+            candidate_pool = all_documents + iteration_docs
 
-            from retrieval.canonical_papers import get_canonical_papers
-            candidate_pool = all_documents + iteration_docs + get_canonical_papers()
-            combined_pool = self.deduplicator.deduplicate(candidate_pool)
-            all_documents = combined_pool
+            # Pipeline step 2: deduplication
+            deduped_pool = self.deduplicator.deduplicate(candidate_pool)
 
+            # Pipeline step 3: TF-IDF/semantic retrieval
+            self.semantic_retriever.set_corpus(deduped_pool)
+            semantic_docs = self.semantic_retriever.search(query, top_k=self.config.max_papers)
 
-            ranked_docs = self.reranker.rerank(query, all_documents, top_k=self.config.max_papers)
+            # Pipeline step 4: candidate merge
+            merged_pool = deduped_pool + semantic_docs
+
+            # Pipeline step 5: deduplication
+            merged_deduped = self.deduplicator.deduplicate(merged_pool)
+
+            # Pipeline step 6: reranking
+            ranked_docs = self.reranker.rerank(query, merged_deduped, top_k=self.config.max_papers)
             all_documents = ranked_docs
-
 
             if len(all_documents) >= 5 or iteration >= self.config.max_iterations:
                 self.logger.info("Sufficient document pool retrieved or max iterations reached.")
                 break
             else:
-
                 self.logger.info("Document pool sparse; reformulating search queries for self-improvement step.")
                 current_queries = [f"{query} survey benchmark", f"{query} systematic evaluation"]
 

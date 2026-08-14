@@ -73,21 +73,29 @@ class Reranker:
 
 
             if exact_match:
-                final_score = 100.0 + title_score
+                final_score = 100.0 + title_score + (min(bm25_score, 10.0) / 10.0)
             elif near_exact:
-                final_score = 50.0 + title_score
+                final_score = 50.0 + title_score + (min(bm25_score, 10.0) / 10.0)
             elif is_exact_query and title_score >= 0.8:
-                final_score = 25.0 + title_score
+                final_score = 25.0 + title_score + (min(bm25_score, 10.0) / 10.0)
             else:
-                semantic_score = doc.metadata.get("score", 0.70) if doc.metadata else 0.70
-                if not isinstance(semantic_score, (int, float)):
-                    semantic_score = 0.70
-                final_score = (0.50 * title_score) + (0.25 * min(bm25_score, 10.0) / 10.0) + (0.25 * semantic_score)
+                sem_raw = doc.metadata.get("semantic_score") if doc.metadata else None
+                if sem_raw is None and doc.metadata:
+                    sem_raw = doc.metadata.get("score", 0.5)
+                semantic_score = float(sem_raw) if isinstance(sem_raw, (int, float)) else 0.5
+                
+                # Normalize BM25 and semantic scores
+                norm_bm25 = min(bm25_score, 10.0) / 10.0
+                norm_sem = min(max(semantic_score, 0.0), 2.0) / 2.0
+
+                source_bonus = 0.05 if doc.source in ("arXiv", "openalex", "crossref") else 0.0
+                final_score = (0.40 * title_score) + (0.30 * norm_bm25) + (0.30 * norm_sem) + source_bonus
 
             if doc.metadata is None:
                 doc.metadata = {}
             doc.metadata["bm25_score"] = round(bm25_score, 4)
             doc.metadata["title_score"] = round(title_score, 4)
+            doc.metadata["semantic_score"] = round(doc.metadata.get("semantic_score", 0.0) if isinstance(doc.metadata.get("semantic_score"), (int, float)) else 0.0, 4)
             doc.metadata["final_score"] = round(final_score, 4)
 
             logger.info(

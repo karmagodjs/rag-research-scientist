@@ -1,15 +1,67 @@
 {
-  "description": "RAG Research Scientist Agent Evaluation Benchmark Dataset",
+  "description": "RAG Research Scientist Agent Evaluation Benchmark Dataset - 10 Core Research Queries",
   "questions": [
     {
       "id": "q1",
-      "query": "OCR on low-resource Indic languages since 2024",
-      "expected_keywords": ["OCR", "Indic", "language", "script", "vision", "dataset", "low-resource"]
+      "query": "Attention Is All You Need",
+      "is_exact_title": true,
+      "expected_title": "Attention Is All You Need",
+      "expected_keywords": ["attention", "transformer", "neural", "sequence", "encoder", "decoder", "self-attention"]
     },
     {
       "id": "q2",
-      "query": "Dense retrieval and graph-based RAG architectures in 2025",
-      "expected_keywords": ["retrieval", "graph", "RAG", "dense", "knowledge", "embedding"]
+      "query": "BERT",
+      "is_exact_title": true,
+      "expected_title": "BERT",
+      "expected_keywords": ["BERT", "transformer", "bidirectional", "pre-training", "language", "representation"]
+    },
+    {
+      "id": "q3",
+      "query": "OCR on low-resource Indic languages",
+      "is_exact_title": false,
+      "expected_keywords": ["OCR", "Indic", "languages", "script", "text", "recognition", "low-resource"]
+    },
+    {
+      "id": "q4",
+      "query": "Recent advances in retrieval augmented generation",
+      "is_exact_title": false,
+      "expected_keywords": ["retrieval", "augmented", "generation", "RAG", "knowledge", "LLM", "advances"]
+    },
+    {
+      "id": "q5",
+      "query": "Compare RAG and long-context LLMs",
+      "is_exact_title": false,
+      "expected_keywords": ["RAG", "retrieval", "long-context", "context", "LLMs", "comparison", "attention"]
+    },
+    {
+      "id": "q6",
+      "query": "Does RAG reduce hallucinations?",
+      "is_exact_title": false,
+      "expected_keywords": ["RAG", "retrieval", "hallucination", "factual", "generation", "faithfulness", "accuracy"]
+    },
+    {
+      "id": "q7",
+      "query": "Evolution of vision-language models from 2023 to 2026",
+      "is_exact_title": false,
+      "expected_keywords": ["vision-language", "multimodal", "VLM", "models", "visual", "vision", "language"]
+    },
+    {
+      "id": "q8",
+      "query": "OCR for low-resource Indic languages using vision-language models",
+      "is_exact_title": false,
+      "expected_keywords": ["OCR", "Indic", "vision-language", "VLM", "low-resource", "script", "recognition"]
+    },
+    {
+      "id": "q9",
+      "query": "Does increasing retrieved context always improve RAG accuracy?",
+      "is_exact_title": false,
+      "expected_keywords": ["context", "retrieved", "RAG", "accuracy", "performance", "length", "noise"]
+    },
+    {
+      "id": "q10",
+      "query": "Compare GraphRAG, vector RAG, and long-context approaches for multi-hop scientific question answering",
+      "is_exact_title": false,
+      "expected_keywords": ["GraphRAG", "vector", "RAG", "graph", "multi-hop", "scientific", "reasoning", "question"]
     }
   ]
 }

@@ -42,8 +42,10 @@ class SemanticRetriever(BaseRetriever):
 
         for doc in self.corpus:
             score = self._tf_idf_score(query_terms, f"{doc.title} {doc.abstract}")
-            if score > 0.0:
-                scored_docs.append((score, doc))
+            if doc.metadata is None:
+                doc.metadata = {}
+            doc.metadata["semantic_score"] = round(score, 4)
+            scored_docs.append((score, doc))
 
         scored_docs.sort(key=lambda x: x[0], reverse=True)
         return [doc for _, doc in scored_docs[:top_k]]

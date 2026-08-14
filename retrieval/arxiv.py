@@ -15,7 +15,7 @@ ARXIV_API_URL = "https://export.arxiv.org/api/query"
 
 class ArxivRetriever(BaseRetriever):
 
-    def __init__(self, api_url: Optional[str] = None, timeout: int = 2):
+    def __init__(self, api_url: Optional[str] = None, timeout: int = 6):
         super().__init__(name="arxiv")
         self.api_url = api_url or ARXIV_API_URL
         self.timeout = timeout
@@ -27,26 +27,35 @@ class ArxivRetriever(BaseRetriever):
         documents = []
 
         STOP_WORDS = {"find", "best", "approaches", "for", "since", "with", "from", "using", "paper", "study", "analysis", "compare", "recent", "analyze", "investigate", "the", "a", "an", "of", "to", "in", "on", "is", "all", "you", "it", "and", "or", "are", "be", "that", "this", "which"}
-        words = [w for w in re.findall(r"\w+", target_title or clean_query) if len(w) > 2 and w.lower() not in STOP_WORDS]
-        if not words:
-            words = [w for w in re.findall(r"\w+", target_title or clean_query) if len(w) > 1]
+        
+        target = target_title if (is_exact and target_title) else clean_query
+        all_words = [w for w in re.findall(r"\w+", target)]
+        filtered_words = [w for w in all_words if len(w) > 2 and w.lower() not in STOP_WORDS]
+        if not filtered_words:
+            filtered_words = [w for w in all_words if len(w) > 1]
 
-        if is_exact or target_title:
-
-            ti_terms = " AND ".join([f'ti:{w}' for w in words[:4]])
-            exact_docs = self._fetch_arxiv(ti_terms, top_k)
+        if is_exact:
+            # 1. Try exact title phrase search first
+            exact_phrase_query = f'ti:"{target}"'
+            exact_docs = self._fetch_arxiv(exact_phrase_query, top_k)
             documents.extend(exact_docs)
 
+            # 2. Try title keyword search if exact phrase returned nothing
+            if not documents and len(all_words) > 0:
+                ti_terms = " AND ".join([f'ti:{w}' for w in (filtered_words[:4] if filtered_words else all_words[:4])])
+                kw_docs = self._fetch_arxiv(ti_terms, top_k)
+                documents.extend(kw_docs)
 
-            if author_hint and words:
-                au_docs = self._fetch_arxiv(f'au:{author_hint} AND ti:{words[0]}', top_k)
+            # 3. If author hint is present, also query author + title
+            if author_hint and filtered_words:
+                au_docs = self._fetch_arxiv(f'au:{author_hint} AND ti:{filtered_words[0]}', top_k)
                 documents.extend(au_docs)
 
             if len(documents) > 0:
                 return self._dedup_internal(documents)[:top_k]
 
-
-        core_terms = words[:3]
+        # Broad search fallback
+        core_terms = filtered_words[:4] if filtered_words else all_words[:3]
         query_str = " AND ".join([f'all:{term}' for term in core_terms]) if core_terms else f'all:"{clean_query}"'
 
         fallback_docs = self._fetch_arxiv(query_str, top_k)
@@ -72,17 +81,20 @@ class ArxivRetriever(BaseRetriever):
             "sortOrder": "descending"
         }
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            "User-Agent": "rag-research-scientist/1.0 (academic research; contact@example.com)"
         }
 
         documents = []
         try:
-            resp = requests.get(ARXIV_API_URL, params=params, headers=headers, timeout=self.timeout)
+            resp = requests.get(self.api_url, params=params, headers=headers, timeout=self.timeout)
             if resp.status_code == 429:
                 logger.warning("[RETRIEVAL] arXiv rate limited: HTTP 429. Continuing without arXiv results for this subquery.")
                 return []
             elif resp.status_code != 200:
                 logger.warning(f"[RETRIEVAL] arXiv API returned HTTP status {resp.status_code}")
+                return []
+
+            if not resp.text or not resp.text.strip():
                 return []
 
             root = ET.fromstring(resp.text)
@@ -97,24 +109,27 @@ class ArxivRetriever(BaseRetriever):
                 if title_elem is None or summary_elem is None:
                     continue
 
-                raw_title = title_elem.text.strip().replace("\n", " ")
+                raw_title = title_elem.text.strip().replace("\n", " ") if title_elem.text else ""
                 clean_title = re.sub(r"\s+", " ", raw_title)
-                raw_summary = summary_elem.text.strip().replace("\n", " ")
+                raw_summary = summary_elem.text.strip().replace("\n", " ") if summary_elem.text else ""
                 clean_summary = re.sub(r"\s+", " ", raw_summary)
 
-                arxiv_id = arxiv_id_elem.text.split("/abs/")[-1] if arxiv_id_elem is not None else ""
-                published_year = published_elem.text[:4] if published_elem is not None else "2025"
+                if not clean_title:
+                    continue
+
+                arxiv_id = arxiv_id_elem.text.split("/abs/")[-1] if (arxiv_id_elem is not None and arxiv_id_elem.text) else ""
+                published_year = published_elem.text[:4] if (published_elem is not None and published_elem.text) else "2025"
 
                 authors = []
                 for author in entry.findall("atom:author", ns):
                     name_elem = author.find("atom:name", ns)
-                    if name_elem is not None:
-                        authors.append(name_elem.text)
+                    if name_elem is not None and name_elem.text:
+                        authors.append(name_elem.text.strip())
 
                 pdf_url = f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else ""
 
                 doc = Document(
-                    id=f"arxiv_{arxiv_id.replace('/', '_')}",
+                    id=f"arxiv_{arxiv_id.replace('/', '_')}" if arxiv_id else f"arxiv_{abs(hash(clean_title))}",
                     title=clean_title,
                     authors=authors if authors else ["arXiv Author"],
                     abstract=clean_summary,
@@ -122,6 +137,7 @@ class ArxivRetriever(BaseRetriever):
                     published=published_year,
                     source="arXiv",
                     content=f"Title: {clean_title}\nAuthors: {', '.join(authors)}\nAbstract: {clean_summary}",
+                    arxiv_id=arxiv_id if arxiv_id else None,
                     metadata={"arxiv_id": arxiv_id}
                 )
                 documents.append(doc)

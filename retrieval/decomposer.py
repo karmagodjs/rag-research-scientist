@@ -56,4 +56,4 @@ class QueryDecomposer:
                 subqueries.append(sq)
 
         logger.info(f"Decomposed query '{user_query}' into {len(subqueries)} subqueries.")
-        return subqueries[:3]
+        return subqueries[:4]

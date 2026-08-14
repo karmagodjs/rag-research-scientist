@@ -10,15 +10,23 @@ logger = logging.getLogger(__name__)
 
 class ContradictionDetector:
 
-    CONTRADICTION_KEYWORDS = {
-        "however", "fails", "failed", "struggles", "inferior", "contrast", 
-        "contradicts", "limitation", "inaccurate", "hallucination", "drop", "degrades"
-    }
+    CHALLENGE_PATTERNS = [
+        r"\b(fails? to (outperform|improve|generalize|scale|reduce))\b",
+        r"\b(inferior to|worse than|underperforms?|degrades? performance)\b",
+        r"\b(contradicts?|refutes?|challenges? (the claim|prior findings|previous results))\b",
+        r"\b(no (significant )?(improvement|gain|reduction|difference))\b",
+        r"\b(ineffective|inaccurate|does not (improve|reduce|solve|hold))\b",
+        r"\b(struggles? with|falls? short of|negative results?)\b",
+        r"\b(increases? (hallucination|error rate|latency|cost))\b"
+    ]
 
-    SUPPORTING_KEYWORDS = {
-        "outperforms", "improves", "surpasses", "effective", "superior", 
-        "state-of-the-art", "reduces", "enhances", "robust", "achieves"
-    }
+    SUPPORTING_PATTERNS = [
+        r"\b(outperforms?|improves?|surpasses?|superior to)\b",
+        r"\b(state-of-the-art|effective(ly)?|significantly enhances?)\b",
+        r"\b(reduces? (hallucination|error|latency|cost))\b",
+        r"\b(robust(ly)?|achieves? (high|superior|better))\b",
+        r"\b(demonstrates? (strong|promising|substantial))\b"
+    ]
 
     def __init__(self, llm_client: Optional[LLMClient] = None):
         self.llm_client = llm_client
@@ -29,7 +37,7 @@ class ContradictionDetector:
             logger.info(f"LLM mode active for contradiction analysis of claim: '{claim.get('claim', '')[:40]}...'")
             return self._analyze_claim_llm(claim, all_evidence)
         else:
-            logger.info("Heuristic keyword mode active for contradiction analysis (no LLM API key configured).")
+            logger.info("Heuristic mode active for contradiction analysis (no LLM API key configured).")
             return self._analyze_claim_heuristic(claim, all_evidence)
 
     def _analyze_claim_llm(self, claim: Dict[str, Any], all_evidence: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -42,9 +50,8 @@ class ContradictionDetector:
                 "claim": claim_text,
                 "supporting_evidence": [],
                 "contradicting_evidence": [],
-                "status": "insufficient"
+                "status": "INSUFFICIENT"
             }
-
 
         claim_words = set(re.findall(r"\w+", claim_text.lower()))
         relevant_evidence = []
@@ -59,7 +66,7 @@ class ContradictionDetector:
         evidence_text = "\n".join([f"[{idx+1}] Paper ID: {ev['paper_id']} | Snippet: {ev['snippet']}" for idx, ev in enumerate(relevant_evidence)])
 
         prompt = (
-            f"Analyze the relationship between this claim and the evidence snippets below:\n"
+            f"Analyze the relationship between this scientific claim and the evidence snippets below:\n"
             f"Claim: \"{claim_text}\"\n\n"
             f"Evidence Snippets:\n{evidence_text}\n\n"
             f"For each snippet [1], [2], etc., judge if it SUPPORTS or CONTRADICTS the claim, or if it is NEUTRAL/INSUFFICIENT.\n"
@@ -72,7 +79,6 @@ class ContradictionDetector:
         parsed = False
         if response:
             try:
-
                 json_str = response
                 if "{" in json_str and "}" in json_str:
                     json_str = json_str[json_str.find("{"):json_str.rfind("}")+1]
@@ -98,15 +104,14 @@ class ContradictionDetector:
         if not parsed:
             return self._analyze_claim_heuristic(claim, all_evidence)
 
-
         if len(supporting) > 0 and len(contradicting) > 0:
-            status = "mixed"
+            status = "MIXED"
         elif len(supporting) > 0:
-            status = "supported"
+            status = "SUPPORTED"
         elif len(contradicting) > 0:
-            status = "contradicted"
+            status = "CONTRADICTED"
         else:
-            status = "insufficient"
+            status = "INSUFFICIENT"
 
         return {
             "claim": claim_text,
@@ -115,23 +120,33 @@ class ContradictionDetector:
             "status": status
         }
 
+    def _stem(self, word: str) -> str:
+        w = word.lower()
+        for sfx in ("ing", "tion", "tions", "ies", "es", "ed", "s"):
+            if w.endswith(sfx) and len(w) > len(sfx) + 2:
+                return w[:-len(sfx)]
+        return w
+
     def _analyze_claim_heuristic(self, claim: Dict[str, Any], all_evidence: List[Dict[str, Any]]) -> Dict[str, Any]:
         supporting = []
         contradicting = []
 
         claim_text = claim.get("claim", "").lower()
-        claim_words = set(re.findall(r"\w+", claim_text))
+        claim_words = [w for w in re.findall(r"\w+", claim_text) if len(w) > 2]
+        claim_stems = set(self._stem(w) for w in claim_words)
+        claim_paper_ids = set(e["paper_id"] for e in claim.get("evidence", []))
 
         for ev in all_evidence:
             snippet = ev["snippet"].lower()
-            snippet_words = set(re.findall(r"\w+", snippet))
+            snippet_words = [w for w in re.findall(r"\w+", snippet) if len(w) > 2]
+            snippet_stems = set(self._stem(w) for w in snippet_words)
+            overlap = len(claim_stems.intersection(snippet_stems))
 
-            if len(claim_words.intersection(snippet_words)) < 2:
+            if overlap < 1 and ev["paper_id"] not in claim_paper_ids:
                 continue
 
-
-            has_contra = any(kw in snippet for kw in self.CONTRADICTION_KEYWORDS)
-            has_supp = any(kw in snippet for kw in self.SUPPORTING_KEYWORDS)
+            has_challenge = any(re.search(pat, snippet, re.IGNORECASE) for pat in self.CHALLENGE_PATTERNS)
+            has_support = any(re.search(pat, snippet, re.IGNORECASE) for pat in self.SUPPORTING_PATTERNS)
 
             ev_entry = {
                 "paper_id": ev["paper_id"],
@@ -139,23 +154,22 @@ class ContradictionDetector:
                 "source_url": ev["source_url"]
             }
 
-            if has_contra and not has_supp:
+            if has_challenge and ev["paper_id"] not in claim_paper_ids:
                 contradicting.append(ev_entry)
-            elif has_supp or ev["paper_id"] in [e["paper_id"] for e in claim.get("evidence", [])]:
+            elif has_support or ev["paper_id"] in claim_paper_ids:
                 supporting.append(ev_entry)
 
-
         if len(supporting) > 0 and len(contradicting) > 0:
-            status = "mixed"
+            status = "MIXED"
         elif len(supporting) > 0:
-            status = "supported"
+            status = "SUPPORTED"
         elif len(contradicting) > 0:
-            status = "contradicted"
+            status = "CONTRADICTED"
         else:
-            status = "insufficient"
+            status = "INSUFFICIENT"
 
         return {
-            "claim": claim["claim"],
+            "claim": claim.get("claim", ""),
             "supporting_evidence": supporting,
             "contradicting_evidence": contradicting,
             "status": status

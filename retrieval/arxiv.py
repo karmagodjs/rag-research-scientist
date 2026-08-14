@@ -77,9 +77,9 @@ class ArxivRetriever(BaseRetriever):
 
         documents = []
         try:
-            resp = requests.get(ARXIV_API_URL, params=params, headers=headers, timeout=self.timeout)
+            resp = requests.get(self.api_url, params=params, headers=headers, timeout=self.timeout)
             if resp.status_code == 429:
-                logger.warning("[RETRIEVAL] arXiv rate limited: HTTP 429. Continuing without arXiv results for this subquery.")
+                logger.warning("[RETRIEVAL] arXiv rate limited: HTTP 429); " "continuing without arXiv results.")
                 return []
             elif resp.status_code != 200:
                 logger.warning(f"[RETRIEVAL] arXiv API returned HTTP status {resp.status_code}")

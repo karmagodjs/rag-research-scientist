@@ -475,25 +475,25 @@ async function executeLiveResearch() {
         claims: (data.claims || []).map((c, idx) => ({
           claim_id: `0${idx + 1}`,
           claim: c.claim,
-          confidence: c.confidence || 0.85,
-          status: "SUPPORTED",
-          sources_count: c.evidence?.length || 1,
+          confidence: typeof c.confidence === 'number' ? c.confidence : 0.0,
+          status: c.status || "SUPPORTED",
+          sources_count: c.evidence?.length || 0,
           evidence_tag: `EVIDENCE E-00${idx + 1}`,
           paper_title: c.evidence[0]?.paper_title || "Retrieved Source",
-          source: "arXiv / Web",
-          published: "2025",
-          relevance: c.evidence[0]?.relevance_score || 0.90,
+          source: c.evidence[0]?.source_type || "arXiv / Web",
+          published: c.evidence[0]?.published_year || "unknown",
+          relevance: typeof c.evidence[0]?.relevance_score === 'number' ? c.evidence[0].relevance_score : (typeof c.confidence === 'number' ? c.confidence : 'N/A'),
           snippet: c.evidence[0]?.snippet || "Evidence passage verified.",
           paper_url: c.evidence[0]?.source_url || "#"
         })),
         papers: (data.citation_list || []).map((p, idx) => ({
-          id: `p${idx + 1}`,
+          id: p.id || `p${idx + 1}`,
           title: p.title,
           authors: (p.authors || []).join(', '),
-          year: p.published || "2025",
+          year: p.published || "unknown",
           source: p.source || "web",
-          relevance: 0.90,
-          evidence_count: 5,
+          relevance: typeof p.relevance === 'number' ? p.relevance : (p.relevance ? parseFloat(p.relevance) : 'N/A'),
+          evidence_count: typeof p.evidence_count === 'number' ? p.evidence_count : 0,
           url: p.url
         })),
         open_research_gaps: (data.open_research_gaps || []).map((g, idx) => ({
@@ -662,8 +662,8 @@ function renderLiteratureTable() {
       <td style="color: var(--text-secondary);">${p.authors}</td>
       <td style="font-family: var(--font-mono); color: var(--text-secondary);">${p.year}</td>
       <td><span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary);">${p.source}</span></td>
-      <td style="font-family: var(--font-mono); color: var(--accent); font-weight: 600;">${typeof p.relevance === 'number' ? p.relevance.toFixed(2) : '0.90'}</td>
-      <td style="font-family: var(--font-mono); color: var(--text-secondary);">${p.evidence_count || 5} evidence</td>
+      <td style="font-family: var(--font-mono); color: var(--accent); font-weight: 600;">${typeof p.relevance === 'number' ? p.relevance.toFixed(2) : (p.relevance || 'N/A')}</td>
+      <td style="font-family: var(--font-mono); color: var(--text-secondary);">${typeof p.evidence_count === 'number' ? p.evidence_count : 0} evidence</td>
     </tr>
   `).join('');
 
@@ -683,10 +683,10 @@ function updateLitDrawer(paper) {
   if (!paper) return;
   document.getElementById('litDrawerTitle').textContent = paper.title;
   document.getElementById('litDrawerAuthors').textContent = paper.authors;
-  document.getElementById('litDrawerYearSource').textContent = `${paper.year} · ${paper.source}`;
-  document.getElementById('litDrawerRelevance').textContent = typeof paper.relevance === 'number' ? paper.relevance.toFixed(2) : '0.90';
-  document.getElementById('litDrawerClaims').textContent = `3 related claims grounded in this source.`;
-  document.getElementById('btnLitDrawerOpen').href = paper.url;
+  document.getElementById('litDrawerYearSource').textContent = `${paper.year || 'unknown'} · ${paper.source || 'web'}`;
+  document.getElementById('litDrawerRelevance').textContent = typeof paper.relevance === 'number' ? paper.relevance.toFixed(2) : (paper.relevance || 'N/A');
+  document.getElementById('litDrawerClaims').textContent = `${paper.evidence_count || 0} evidence snippets extracted from this source.`;
+  document.getElementById('btnLitDrawerOpen').href = paper.url || "#";
 }
 
 document.getElementById('litSearchInput')?.addEventListener('input', renderLiteratureTable);
@@ -1338,7 +1338,7 @@ function renderNodeInspector(node) {
       </div>
       <div class="insp-row">
         <div class="insp-label">Year</div>
-        <div class="insp-val" style="font-family: var(--font-mono);">${d.year || '2025'}</div>
+        <div class="insp-val" style="font-family: var(--font-mono);">${d.year || 'unknown'}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Source</div>
@@ -1346,11 +1346,11 @@ function renderNodeInspector(node) {
       </div>
       <div class="insp-row">
         <div class="insp-label">Relevance</div>
-        <div class="insp-val highlight" style="font-family: var(--font-mono);">${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : d.relevance || '0.91'}</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : (d.relevance || 'N/A')}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Evidence Passages</div>
-        <div class="insp-val" style="font-family: var(--font-mono);">${d.evidence_count || 7}</div>
+        <div class="insp-val" style="font-family: var(--font-mono);">${typeof d.evidence_count === 'number' ? d.evidence_count : 0}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Supporting Claims</div>
@@ -1375,7 +1375,7 @@ function renderNodeInspector(node) {
       </div>
       <div class="insp-row">
         <div class="insp-label">Relevance</div>
-        <div class="insp-val highlight" style="font-family: var(--font-mono);">${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : d.relevance || '0.91'}</div>
+        <div class="insp-val highlight" style="font-family: var(--font-mono);">${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : (d.relevance || 'N/A')}</div>
       </div>
       <div class="insp-row">
         <div class="insp-label">Evidence Passage</div>
@@ -1560,7 +1560,7 @@ function showGraphTooltip(node, mouseEvt) {
     sub = `Status: ${d.status || 'SUPPORTED'} · Confidence: ${d.confidence || '0.87'} · Sources: ${d.sources_count || 4}`;
   } else if (t === 'paper') {
     title = d.title || node.label;
-    sub = `${d.source || 'arXiv'} · ${d.year || '2025'} · Relevance: ${d.relevance || '0.91'}`;
+    sub = `${d.source || 'arXiv'} · ${d.year || 'unknown'} · Relevance: ${typeof d.relevance === 'number' ? d.relevance.toFixed(2) : (d.relevance || 'N/A')}`;
   } else if (t === 'gap') {
     title = `${d.gap_id || 'GAP 01'}: ${d.title || node.label}`;
     sub = `Confidence: ${d.confidence || 'HIGH'} · Identified from literature`;
@@ -2080,9 +2080,42 @@ function initLiterature() {
   document.getElementById('litSortSelect')?.addEventListener('change', renderLiteratureTable);
 }
 
+// About Modal Controller
+function initAboutModal() {
+  const btnAbout = document.getElementById('btnAbout');
+  const modal = document.getElementById('aboutModal');
+  const btnClose = document.getElementById('btnCloseAboutModal');
+  const backdrop = document.getElementById('aboutModalBackdrop');
+
+  if (!btnAbout || !modal) return;
+
+  function openModal() {
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    btnClose?.focus();
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    btnAbout?.focus();
+  }
+
+  btnAbout.addEventListener('click', openModal);
+  btnClose?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      closeModal();
+    }
+  });
+}
+
 // Master Application Initialization & Subsystem Error Isolation
 function initApp() {
   try { initTheme(); } catch (err) { console.error("Theme init failed", err); }
+  try { initAboutModal(); } catch (err) { console.error("About modal init failed", err); }
   try { initNavigation(); } catch (err) { console.error("Navigation init failed", err); }
   try { initComposer(); } catch (err) { console.error("Composer init failed", err); }
   try { initSuggestions(); } catch (err) { console.error("Suggestions init failed", err); }
@@ -2098,3 +2131,4 @@ if (document.readyState === 'loading') {
 } else {
   initApp();
 }
+

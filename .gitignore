@@ -27,3 +27,5 @@ my_rag_report.md
 Thumbs.db
 .vscode/
 .idea/
+
+.vercel

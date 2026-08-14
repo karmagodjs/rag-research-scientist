@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Scientific Research Gap Analysis & Hypothesis Formulation Module
+Identifies grounded literature gaps directly supported by extracted empirical evidence.
+Avoids speculative or generic gap formulations when evidence is absent.
+"""
 
 import re
 import json
@@ -10,14 +16,38 @@ logger = logging.getLogger(__name__)
 
 class ResearchGapAnalyzer:
 
+    # Contextual, substantive challenge and limitation patterns (not isolated single words)
     GAP_INDICATORS = [
-        (r"\b(limitation|limitations|bottleneck|bottlenecks)\b", "Architectural & Scalability Bottlenecks", "Current literature highlights fundamental capacity, throughput, or architectural constraints."),
-        (r"\b(robustness|out-of-distribution|noisy|adversarial|vulnerab)\b", "Robustness & Distribution Shift", "Performance degradation occurs under noisy, adversarial, or out-of-distribution environments."),
-        (r"\b(hallucinat|factuality|ungrounded|misalignment|faithfulness)\b", "Factuality & Alignment Constraints", "Generative outputs remain prone to hallucinations or unsupported inferences."),
-        (r"\b(scarcity|low-resource|annotat|data bottleneck|unlabeled)\b", "Data & Resource Scarcity", "Severe scarcity of annotated domain-specific corpora limits generalization in specialized domains."),
-        (r"\b(generaliz|cross-domain|transfer|adaptation)\b", "Cross-Domain Transfer & Generalization Gap", "Techniques exhibit limited transferability across heterogeneous task distributions."),
-        (r"\b(evaluation|standardiz|benchmark|metric|measurement)\b", "Standardized Evaluation Deficit", "Lack of comprehensive, unified evaluation protocols across diverse real-world conditions."),
-        (r"\b(future work|open challenge|open problem|unresolved|remains unclear)\b", "Unresolved Research Frontiers", "Critical research questions and empirical trade-offs remain open.")
+        (
+            r"\b(fundamental limitation|major bottleneck|capacity constraint|severe latency|high computational overhead|scaling bottleneck)\b",
+            "Architectural & Scalability Bottlenecks",
+            "Current literature highlights explicit capacity, throughput, or architectural constraints."
+        ),
+        (
+            r"\b(struggles with|fails to|vulnerable to|severe degradation|performance degrades|error rate increases|poor performance on)\b",
+            "Robustness & Distribution Shift Failure Modes",
+            "Empirical evidence demonstrates systematic performance degradation under out-of-distribution or degraded inputs."
+        ),
+        (
+            r"\b(hallucinat\w+|ungrounded inferences?|faithfulness breakdown|factuality deficit|unsupported claims?)\b",
+            "Factuality & Grounding Breakdown",
+            "Generative outputs exhibit hallucinations or ungrounded factual inaccuracies."
+        ),
+        (
+            r"\b(severe scarcity of annotated|lack of (domain|annotated|training|parallel) (data|corpora|benchmark)|data annotation bottleneck|resource-constrained scripts?)\b",
+            "Data & Resource Scarcity Bottleneck",
+            "Severe scarcity of annotated domain-specific corpora limits generalization in specialized domains."
+        ),
+        (
+            r"\b(limited cross-domain generalization|fails to generalize|transfer degradation|generalization gap across)\b",
+            "Cross-Domain Transfer & Generalization Deficit",
+            "Techniques exhibit limited transferability across heterogeneous task distributions."
+        ),
+        (
+            r"\b(unresolved challenge|open problem in|remains an open question|unexplored research direction|lack of standardized (metrics|benchmarks))\b",
+            "Unresolved Empirical Frontiers",
+            "Critical empirical trade-offs and research questions remain unresolved in the literature."
+        )
     ]
 
     def __init__(self, llm_client: Optional[LLMClient] = None):
@@ -75,7 +105,7 @@ class ResearchGapAnalyzer:
                     matching_ev = [ev for ev in evidence_list if ev["paper_id"] == p_id]
                     if matching_ev:
                         detected_gaps.append({
-                            "gap": f"{title}: {matching_ev[0]['snippet'][:60]}...",
+                            "gap": f"{title}: {matching_ev[0]['snippet'][:75]}...",
                             "evidence_for_gap": [
                                 {
                                     "paper_id": ev["paper_id"],

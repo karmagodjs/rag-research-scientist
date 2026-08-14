@@ -45,6 +45,7 @@
       </nav>
 
       <div class="header-right">
+        <button id="btnAbout" class="btn-action-sm" aria-label="About this workstation">ABOUT</button>
         <button id="btnThemeToggle" class="btn-action-sm">LIGHT MODE</button>
         <button id="btnExportJson" class="btn-action-sm">Export JSON</button>
         <button id="btnExportMarkdown" class="btn-action-sm">Export Markdown</button>
@@ -424,6 +425,79 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- ABOUT MODAL OVERLAY -->
+  <div id="aboutModal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle">
+    <div class="modal-backdrop" id="aboutModalBackdrop"></div>
+    <div class="modal-window">
+      <div class="modal-header">
+        <div>
+          <div class="meta-label">SYSTEM ARCHITECTURE & CAPABILITIES</div>
+          <h2 id="aboutModalTitle" class="modal-title">RAG RESEARCH SCIENTIST</h2>
+        </div>
+        <button id="btnCloseAboutModal" class="btn-action-sm modal-close-btn" aria-label="Close about dialog">[ ESC / CLOSE ]</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-intro">
+          An autonomous scientific research workstation engineered for literature discovery, evidence-grounded claim extraction, multi-signal paper reranking, 4-state contradiction detection, and research gap formulation.
+        </p>
+
+        <div class="about-grid">
+          <div class="about-card">
+            <div class="about-card-badge">RETRIEVAL & TEMPORAL ENGINE</div>
+            <h3 class="about-card-title">Multi-Source Dual Index</h3>
+            <p class="about-card-text">
+              Combines live <strong>arXiv API</strong> querying with <strong>OpenAlex Academic Web</strong> indices. Features aspect-aware subquery decomposition, temporal window extraction (e.g. <em>since 2024</em>), and date-aware score boosting without discarding foundational background literature.
+            </p>
+          </div>
+
+          <div class="about-card">
+            <div class="about-card-badge">EVIDENCE & GROUNDING</div>
+            <h3 class="about-card-title">Evidence-First Verification</h3>
+            <p class="about-card-text">
+              Extracts sentence-level evidence snippets mapped directly to source URLs. Generates verified research claims and classifies claim status into <code>SUPPORTED</code>, <code>CONTRADICTED</code>, <code>MIXED</code>, or <code>INSUFFICIENT</code> with zero fabricated metrics.
+            </p>
+          </div>
+
+          <div class="about-card">
+            <div class="about-card-badge">DISCOVERY & SYNTHESIS</div>
+            <h3 class="about-card-title">Research Gap Formulation</h3>
+            <p class="about-card-text">
+              Detects empirical bottlenecks, cross-domain generalization degradation, and resource scarcity frontiers strictly supported by evidence snippets, automatically synthesizing actionable next-step hypotheses.
+            </p>
+          </div>
+
+          <div class="about-card">
+            <div class="about-card-badge">INTERACTIVE WORKSTATION</div>
+            <h3 class="about-card-title">6 Investigation Views</h3>
+            <p class="about-card-text">
+              Seamlessly switch between <strong>Synthesis & Claims</strong>, high-performance HTML5 <strong>Evidence Graph</strong>, dense <strong>Literature Browser</strong>, <strong>Analytics</strong>, <strong>Research Gaps</strong>, and <strong>Next Research Proposals</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="about-specs-row">
+          <div class="about-spec-item">
+            <span class="spec-label">VERSION</span>
+            <span class="spec-val">v2.0.0 (Production)</span>
+          </div>
+          <div class="about-spec-item">
+            <span class="spec-label">CORE ENGINE</span>
+            <span class="spec-val">Python 3.12 · RAG Pipeline</span>
+          </div>
+          <div class="about-spec-item">
+            <span class="spec-label">RUNTIME</span>
+            <span class="spec-val">Vercel Serverless / Local</span>
+          </div>
+          <div class="about-spec-item">
+            <span class="spec-label">SHORTCUT</span>
+            <span class="spec-val">Ctrl + ↵ to Investigate</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="./app.js?v=2.0" defer></script>

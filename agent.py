@@ -215,7 +215,8 @@ class ResearchAgent:
             timeline=timeline,
             gaps=gaps,
             next_research=next_research,
-            stats=stats
+            stats=stats,
+            evidence_snippets=evidence_snippets
         )
 
         return full_report

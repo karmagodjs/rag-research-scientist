@@ -1,14 +1,40 @@
+# -*- coding: utf-8 -*-
+"""
+Comprehensive Pipeline Reliability & Feature Test Suite
+Covers:
+- Canonical papers exclusion from production retrieval
+- Semantic retrieval integration
+- ArXiv instance URL usage and HTTP 429 resilience
+- Exact title retrieval and score boosting
+- Contradiction 4-state analysis
+- Evidence-backed research gap validation
+- Temporal query extraction & preservation
+- Date-aware ranking prioritization
+- Unknown web publication year handling (never defaults to 2025)
+- Real relevance and evidence_count metrics in report citations
+- Aspect-aware evidence extraction
+"""
+
 import unittest
 from unittest.mock import MagicMock, patch
 from retrieval.base import Document
 from retrieval.arxiv import ArxivRetriever
+from retrieval.web import WebRetriever
 from retrieval.semantic import SemanticRetriever
 from retrieval.dedup import DocumentDeduplicator
+from retrieval.decomposer import QueryDecomposer
+from retrieval.query_utils import (
+    extract_temporal_constraints,
+    calculate_temporal_score,
+    parse_publication_year,
+    detect_exact_paper_query
+)
 from ranking.reranker import Reranker
 from evidence.extractor import EvidenceExtractor
 from evidence.claims import ClaimGenerator
 from evidence.contradiction import ContradictionDetector
 from synthesis.gaps import ResearchGapAnalyzer
+from synthesis.report import ReportSynthesizer
 from agent import ResearchAgent, AgentConfig
 
 
@@ -17,7 +43,6 @@ class TestPipelineReliability(unittest.TestCase):
     def test_canonical_papers_not_injected_in_unrelated_queries(self):
         agent = ResearchAgent(config=AgentConfig(timeout_seconds=2))
         
-        # Mock retrieval to return only a specific paper
         mock_docs = [
             Document(
                 id="doc_bio_1",
@@ -66,7 +91,6 @@ class TestPipelineReliability(unittest.TestCase):
             docs = retriever.search("Transformer")
             self.assertEqual(docs, [])
             mock_get.assert_called()
-            # Verify custom URL was used in requests.get
             self.assertEqual(mock_get.call_args[0][0], custom_url)
 
     def test_exact_title_retrieval_ranking(self):
@@ -87,6 +111,157 @@ class TestPipelineReliability(unittest.TestCase):
         ]
         ranked_bert = reranker.rerank("BERT", bert_docs)
         self.assertEqual(ranked_bert[0].title, "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding")
+
+    def test_temporal_query_extraction_and_decomposition(self):
+        # Test temporal extraction
+        t1 = extract_temporal_constraints("OCR for low-resource Indic languages since 2024")
+        self.assertTrue(t1["has_temporal_constraint"])
+        self.assertEqual(t1["min_year"], 2024)
+
+        t2 = extract_temporal_constraints("Evolution of vision-language models after 2023")
+        self.assertTrue(t2["has_temporal_constraint"])
+        self.assertEqual(t2["min_year"], 2024)
+
+        t3 = extract_temporal_constraints("multimodal models from 2023 to 2025")
+        self.assertTrue(t3["has_temporal_constraint"])
+        self.assertEqual(t3["min_year"], 2023)
+        self.assertEqual(t3["max_year"], 2025)
+
+        # Test complex multi-aspect query decomposition
+        complex_query = "How has OCR for low-resource Indic languages evolved since 2024, what methods currently perform best, what limitations remain, and what research directions are still unexplored?"
+        decomposer = QueryDecomposer()
+        subqueries = decomposer.decompose(complex_query)
+
+        # Original query must be preserved as subquery 1
+        self.assertEqual(subqueries[0], complex_query)
+        self.assertGreaterEqual(len(subqueries), 3)
+
+        # Subqueries should capture aspect dimensions
+        joined_sqs = " ".join(subqueries).lower()
+        self.assertTrue("since 2024" in joined_sqs or "evolution" in joined_sqs or "2024" in joined_sqs)
+        self.assertTrue("methods" in joined_sqs or "best" in joined_sqs or "state of the art" in joined_sqs)
+        self.assertTrue("limitations" in joined_sqs or "challenges" in joined_sqs)
+
+    def test_date_aware_ranking_prioritizes_recent_papers(self):
+        reranker = Reranker()
+        
+        # Two papers with identical titles/abstracts except publication year
+        doc_old = Document(
+            id="p_old",
+            title="Printed OCR for Low-Resource Indic Languages",
+            authors=["R. Kumar"],
+            abstract="We present an OCR system for low-resource Indic scripts achieving good character accuracy.",
+            url="http://example.com/2019",
+            published="2019",
+            source="arXiv",
+            content="Printed OCR for Low-Resource Indic Languages"
+        )
+        doc_recent = Document(
+            id="p_recent",
+            title="Printed OCR for Low-Resource Indic Languages",
+            authors=["S. Sharma"],
+            abstract="We present an OCR system for low-resource Indic scripts achieving good character accuracy.",
+            url="http://example.com/2025",
+            published="2025",
+            source="arXiv",
+            content="Printed OCR for Low-Resource Indic Languages"
+        )
+
+        # Query WITH temporal constraint: recent paper must rank #1
+        temporal_query = "OCR for low-resource Indic languages since 2024"
+        ranked = reranker.rerank(temporal_query, [doc_old, doc_recent])
+        self.assertEqual(ranked[0].id, "p_recent")
+        self.assertEqual(ranked[1].id, "p_old")
+        self.assertGreater(ranked[0].metadata["final_score"], ranked[1].metadata["final_score"])
+
+        # Query WITHOUT temporal constraint: does not artificially distort ranking
+        unconstrained_query = "OCR for low-resource Indic languages"
+        ranked_unconstrained = reranker.rerank(unconstrained_query, [doc_old, doc_recent])
+        self.assertEqual(len(ranked_unconstrained), 2)
+
+    def test_web_retriever_unknown_year_not_hardcoded_2025(self):
+        web = WebRetriever()
+        
+        # Test OpenAlex result with missing publication_year
+        with patch("requests.get") as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = {
+                "results": [
+                    {
+                        "id": "https://openalex.org/W123",
+                        "title": "Ancient Script Decipherment",
+                        "publication_year": None,
+                        "doi": None,
+                        "authorships": [{"author": {"display_name": "Dr. Historian"}}],
+                        "abstract_inverted_index": {"Study": [0], "of": [1], "scripts": [2]}
+                    }
+                ]
+            }
+            mock_get.return_value = mock_resp
+
+            docs = web._search_academic_web("Ancient Script Decipherment", top_k=1)
+            self.assertEqual(len(docs), 1)
+            self.assertEqual(docs[0].published, "unknown")
+            self.assertNotEqual(docs[0].published, "2025")
+
+    def test_report_citation_has_real_relevance_and_evidence_count(self):
+        synthesizer = ReportSynthesizer()
+        doc = Document(
+            id="doc1",
+            title="Transformer Attention Models",
+            authors=["A. Author"],
+            abstract="Self-attention mechanism.",
+            url="http://example.com/1",
+            published="2024",
+            source="arXiv",
+            metadata={"final_score": 0.88}
+        )
+        evidence = [
+            {"paper_id": "doc1", "snippet": "Self-attention achieves high throughput.", "source_url": "http://example.com/1", "relevance_score": 0.92},
+            {"paper_id": "doc1", "snippet": "Multi-head attention allows joint attending.", "source_url": "http://example.com/1", "relevance_score": 0.85},
+            {"paper_id": "other_doc", "snippet": "Another snippet.", "source_url": "http://example.com/2", "relevance_score": 0.7}
+        ]
+
+        report = synthesizer.build_full_report(
+            query="Transformer Attention Models",
+            documents=[doc],
+            claims=[],
+            contradictions=[],
+            evidence_graph={},
+            timeline={},
+            gaps=[],
+            next_research=[],
+            stats={},
+            evidence_snippets=evidence
+        )
+
+        citation = report["citation_list"][0]
+        self.assertEqual(citation["id"], "doc1")
+        self.assertEqual(citation["relevance"], 0.88)
+        self.assertEqual(citation["evidence_count"], 2)
+        self.assertEqual(citation["published"], "2024")
+
+    def test_aspect_aware_evidence_extraction(self):
+        extractor = EvidenceExtractor()
+        doc = Document(
+            id="doc_vlm",
+            title="Vision Language Models for Low-Resource OCR",
+            authors=["Researcher"],
+            abstract="We propose an end-to-end VLM for Indic OCR. A major bottleneck is the severe degradation on degraded historical documents. The model achieves 94% accuracy on printed text.",
+            url="http://example.com/vlm",
+            published="2024",
+            source="arXiv",
+            metadata={"final_score": 0.9}
+        )
+
+        evidence = extractor.extract_evidence([doc], "How has OCR evolved, what methods perform best, and what limitations remain?")
+        self.assertGreaterEqual(len(evidence), 2)
+        
+        # Check aspect tagging
+        aspects = [ev.get("aspect") for ev in evidence]
+        self.assertTrue("limitations" in aspects or "methods" in aspects or "findings" in aspects)
+        self.assertTrue(all(ev["source_type"] == "abstract" for ev in evidence))
 
     def test_contradiction_states(self):
         detector = ContradictionDetector()
@@ -116,7 +291,7 @@ class TestPipelineReliability(unittest.TestCase):
     def test_no_unsupported_research_gaps(self):
         analyzer = ResearchGapAnalyzer()
         
-        # Snippets with no limitations/challenges
+        # Snippets with standard empirical findings (not limitation / bottleneck)
         clean_evidence = [
             {
                 "paper_id": "p1",
@@ -132,12 +307,12 @@ class TestPipelineReliability(unittest.TestCase):
         proposals = analyzer.propose_next_research(gaps, {})
         self.assertEqual(len(proposals), 0)
 
-        # Snippets with explicit limitations
+        # Snippets with explicit substantive limitations
         limitation_evidence = [
             {
                 "paper_id": "p2",
                 "paper_title": "Vision Language Models",
-                "snippet": "A major bottleneck is the severe scarcity of annotated paired data in low-resource languages.",
+                "snippet": "A major bottleneck is the severe scarcity of annotated parallel data in low-resource Indic languages.",
                 "source_url": "http://example.com/2",
                 "relevance_score": 0.95
             }

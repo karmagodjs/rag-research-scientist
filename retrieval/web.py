@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Web & OpenAlex Academic Search Retriever
+Fetches real scientific publications from academic APIs (OpenAlex) and Web endpoints.
+Never fabricates publication years; preserves authentic dates or marks as 'unknown'.
+"""
 
 import requests
 import json
@@ -6,7 +12,6 @@ import re
 import urllib.parse
 from typing import List, Optional
 from retrieval.base import BaseRetriever, Document
-
 from retrieval.query_utils import detect_exact_paper_query
 
 logger = logging.getLogger(__name__)
@@ -50,8 +55,8 @@ class WebRetriever(BaseRetriever):
                     url_str = res.get("url", "")
                     title = res.get("title", f"Web Result {idx+1}")
                     snippet = res.get("content", "")
-                    year_match = re.search(r"\b(202[0-6])\b", snippet + " " + title)
-                    pub_year = year_match.group(1) if year_match else "2025"
+                    year_match = re.search(r"\b(19\d\d|20\d\d)\b", snippet + " " + title)
+                    pub_year = year_match.group(1) if year_match else "unknown"
 
                     doc = Document(
                         id=f"web_{abs(hash(url_str))}",
@@ -104,7 +109,8 @@ class WebRetriever(BaseRetriever):
                         if not title:
                             continue
                         clean_title = re.sub(r"\s+", " ", title).strip()
-                        year = str(res.get("publication_year") or "2025")
+                        raw_pub_year = res.get("publication_year")
+                        year = str(raw_pub_year) if raw_pub_year else "unknown"
                         doi = res.get("doi")
                         authorships = res.get("authorships", [])
                         authors = [a.get("author", {}).get("display_name") for a in authorships if a.get("author", {}).get("display_name")]
@@ -178,8 +184,8 @@ class WebRetriever(BaseRetriever):
                 if not clean_snippet or len(clean_snippet) < 10:
                     clean_snippet = f"Web result regarding {query}. {clean_title}"
 
-                year_match = re.search(r"\b(202[0-6])\b", clean_snippet + " " + clean_title)
-                pub_year = year_match.group(1) if year_match else "2025"
+                year_match = re.search(r"\b(19\d\d|20\d\d)\b", clean_snippet + " " + clean_title)
+                pub_year = year_match.group(1) if year_match else "unknown"
 
                 url_match = re.search(r"uddg=([^&]+)", raw_url)
                 clean_url = urllib.parse.unquote(url_match.group(1)) if url_match else raw_url

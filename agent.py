@@ -106,7 +106,7 @@ class ResearchAgent:
                 self.logger.info(f"[RETRIEVAL] Starting {total_subqueries} subqueries")
 
                 try:
-                    for future in as_completed(future_to_sq, timeout=8.0):
+                    for future in as_completed(future_to_sq, timeout=20.0):
                         sq_name = future_to_sq[future]
                         try:
                             res = future.result()

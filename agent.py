@@ -127,12 +127,21 @@ class ResearchAgent:
 
             from retrieval.canonical_papers import get_canonical_papers
             candidate_pool = all_documents + iteration_docs
-            combined_pool = self.deduplicator.deduplicate(candidate_pool)
-            all_documents = combined_pool
 
-
-            ranked_docs = self.reranker.rerank(query, all_documents, top_k=self.config.max_papers)
-            all_documents = ranked_docs
+combined_pool = self.deduplicator.deduplicate(candidate_pool)
+self.semantic_retriever.set_corpus(combined_pool)
+semantic_docs = self.semantic_retriever.search(
+    query,
+    top_k=self.config.max_papers
+)
+candidate_pool = combined_pool + semantic_docs
+combined_pool = self.deduplicator.deduplicate(candidate_pool)
+ranked_docs = self.reranker.rerank(
+    query,
+    combined_pool,
+    top_k=self.config.max_papers
+)
+all_documents = ranked_docs
 
 
             if len(all_documents) >= 5 or iteration >= self.config.max_iterations:
@@ -164,14 +173,7 @@ class ResearchAgent:
                 "evidence_graph": {"nodes": [], "edges": []},
                 "citation_list": []
             }
-
-
-        self.semantic_retriever.set_corpus(all_documents)
-
-
         evidence_snippets = self.extractor.extract_evidence(all_documents, query)
-
-
         claims = self.claim_generator.generate_claims(evidence_snippets)
 
 

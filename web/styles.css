@@ -1532,16 +1532,10 @@ body {
 
 .about-specs-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
   padding-top: 0.5rem;
   border-top: 1px solid var(--border-dim);
-}
-
-@media (max-width: 640px) {
-  .about-specs-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 .about-spec-item {

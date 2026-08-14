@@ -126,7 +126,7 @@ class ResearchAgent:
 
 
             from retrieval.canonical_papers import get_canonical_papers
-            candidate_pool = all_documents + iteration_docs + get_canonical_papers()
+            candidate_pool = all_documents + iteration_docs
             combined_pool = self.deduplicator.deduplicate(candidate_pool)
             all_documents = combined_pool
 

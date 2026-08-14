@@ -33,11 +33,18 @@ class ArxivRetriever(BaseRetriever):
 
         if is_exact or target_title:
 
-            ti_terms = " AND ".join([f'ti:{w}' for w in words[:4]])
-            exact_docs = self._fetch_arxiv(ti_terms, top_k)
+            normalized_title = target_title.strip()
+            exact_query = f'ti:"{normalized_title}"'
+            exact_docs = self._fetch_arxiv(exact_query, top_k)
             documents.extend(exact_docs)
-
-
+            fallback_query = " AND ".join(
+                f"ti:{w}" for w in words[:5]
+            )
+            fallback_docs = self._fetch_arxiv(
+                fallback_query,
+                top_k
+            )
+            
             if author_hint and words:
                 au_docs = self._fetch_arxiv(f'au:{author_hint} AND ti:{words[0]}', top_k)
                 documents.extend(au_docs)

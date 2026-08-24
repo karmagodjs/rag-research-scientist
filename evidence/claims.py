@@ -1,10 +1,8 @@
-
 import logging
 from typing import List, Dict, Any, Optional
 from evidence.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
-
 
 class ClaimGenerator:
 
@@ -41,14 +39,12 @@ class ClaimGenerator:
         else:
             logger.info("Heuristic mode active for claim synthesis (no LLM API key configured).")
 
-
         doc_map: Dict[str, List[Dict[str, Any]]] = {}
         for item in evidence_items:
             p_id = item["paper_id"]
             if p_id not in doc_map:
                 doc_map[p_id] = []
             doc_map[p_id].append(item)
-
 
         sorted_docs = sorted(
             doc_map.items(),
@@ -105,7 +101,6 @@ class ClaimGenerator:
                             f"{qualitative_reasoning} "
                             f"(Quantitative score: {confidence} derived from {num_sources} source(s), avg relevance {avg_rel:.2f}, recency {recency})."
                         )
-
 
             if not claim_text:
                 raw_text = lead_snippet['snippet'].strip()

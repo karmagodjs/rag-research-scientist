@@ -1,4 +1,3 @@
-
 import math
 import re
 import logging
@@ -6,7 +5,6 @@ from typing import List, Dict
 from retrieval.base import BaseRetriever, Document
 
 logger = logging.getLogger(__name__)
-
 
 class SemanticRetriever(BaseRetriever):
 

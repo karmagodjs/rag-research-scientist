@@ -1,4 +1,3 @@
-
 import re
 import json
 import logging
@@ -6,7 +5,6 @@ from typing import List, Dict, Any, Optional
 from evidence.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
-
 
 class ContradictionDetector:
 

@@ -1,8 +1,6 @@
-
 import unittest
 from evidence.graph import EvidenceGraph
 from retrieval.base import Document
-
 
 class TestGraph(unittest.TestCase):
 
@@ -24,7 +22,6 @@ class TestGraph(unittest.TestCase):
         self.assertIn("edges", g_data)
         self.assertGreater(len(g_data["nodes"]), 0)
         self.assertGreater(len(g_data["edges"]), 0)
-
 
 if __name__ == "__main__":
     unittest.main()

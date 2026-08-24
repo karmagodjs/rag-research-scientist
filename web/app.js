@@ -1,5 +1,3 @@
-/* RAG Research Scientist Agent - Single Connected Investigation State Workstation */
-
 let reportData = null;
 let cachedGraphNodes = null;
 let cachedGraphEdges = null;
@@ -24,7 +22,6 @@ let currentInvestigationState = {
   hasDraggedFar: false
 };
 
-// Initial State Data Template
 const initialReport = {
   research_question: "OCR on low-resource Indic languages since 2024",
   executive_summary: "Scientific evidence synthesis compiled across verified documents. Transitioning to end-to-end Vision-Language Models (VLMs) and HarfBuzz synthetic font rendering pipelines provides the highest accuracy gains for low-resource Indic scripts.",
@@ -115,7 +112,6 @@ const initialReport = {
 
 reportData = null;
 
-// Theme Switcher Logic
 function initTheme() {
   const btnThemeToggle = document.getElementById('btnThemeToggle');
   const savedTheme = localStorage.getItem('rag_workstation_theme');
@@ -147,7 +143,6 @@ function initTheme() {
   });
 }
 
-// Navigation Tab Switcher Handler
 function initNavigation() {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -176,7 +171,6 @@ function initNavigation() {
   });
 }
 
-// Research Query Composer Logic
 function autoResizeTextarea(el) {
   const queryInput = el || document.getElementById('queryInput');
   if (!queryInput) return;
@@ -199,7 +193,6 @@ function updateRunButtonState() {
   btnRunAgent.disabled = !hasText;
 }
 
-// Rotating Placeholder Examples
 const placeholderExamples = [
   "What do you want to investigate?",
   "Compare recent vision-language models for OCR...",
@@ -293,7 +286,7 @@ function renderInitialEmptyState() {
   const litCountLabel = document.getElementById('litCountLabel');
   const page5GapsContainer = document.getElementById('page5GapsContainer');
   const page6RecsContainer = document.getElementById('page6RecsContainer');
-  
+
   if (centerTitle) centerTitle.textContent = "RESEARCH WORKSPACE";
   if (execFinding) {
     execFinding.innerHTML = `<strong>No investigation running</strong><br><span class="finding-subtext">Ask a research question above to begin an evidence-grounded investigation across arXiv and scientific literature.</span>`;
@@ -413,7 +406,6 @@ async function executeLiveResearch() {
     btnRunAgent.setAttribute('aria-label', 'Executing research...');
   }
 
-  // Update trace stage 01 to RUNNING
   const stage01 = document.querySelector('.trace-item[data-stage="01"]');
   if (stage01) {
     stage01.classList.add('active');
@@ -453,7 +445,7 @@ async function executeLiveResearch() {
 
     const data = await response.json();
     console.log("[RESEARCH] Result received:", data);
-    
+
     if (data.status === "RETRIEVAL_FAILURE") {
       if (execFinding) {
         execFinding.textContent = `RETRIEVAL_FAILURE: No real documents found for '${query}'. Zero fake evidence generated per system rules.`;
@@ -516,11 +508,9 @@ async function executeLiveResearch() {
         evidence_graph: data.evidence_graph || null
       };
 
-      // Clear cached graph state for recalculation
       cachedGraphNodes = null;
       cachedGraphEdges = null;
 
-      // Update trace items to DONE
       document.querySelectorAll('.trace-item').forEach(item => {
         item.classList.remove('active');
         const statusEl = item.querySelector('.trace-status');
@@ -535,7 +525,7 @@ async function executeLiveResearch() {
       const centerTitle = document.getElementById('centerQueryTitle');
       if (centerTitle) centerTitle.textContent = reportData.research_question;
       if (execFinding) execFinding.textContent = reportData.executive_summary;
-      
+
       renderPage1Claims();
       renderLiteratureTable();
       renderPage5Gaps();
@@ -570,7 +560,6 @@ async function executeLiveResearch() {
   }
 }
 
-// View 01 Claims Render
 function renderPage1Claims() {
   const centerClaimsList = document.getElementById('centerClaimsList');
   if (!centerClaimsList || !reportData || !reportData.claims) return;
@@ -631,7 +620,6 @@ function updateInspector(claim) {
   }
 }
 
-// View 03 Literature Browser & Drawer
 function renderLiteratureTable() {
   const tbody = document.getElementById('litTableBody');
   if (!tbody || !reportData || !reportData.papers) return;
@@ -694,7 +682,6 @@ document.getElementById('litSourceFilter')?.addEventListener('change', renderLit
 document.getElementById('litYearFilter')?.addEventListener('change', renderLiteratureTable);
 document.getElementById('litSortSelect')?.addEventListener('change', renderLiteratureTable);
 
-// View 05 Research Gaps Notebook
 function renderPage5Gaps() {
   const container = document.getElementById('page5GapsContainer');
   if (!container || !reportData || !reportData.open_research_gaps) return;
@@ -705,22 +692,22 @@ function renderPage5Gaps() {
     <div class="gap-card-spec">
       <div class="gap-num-spec">${g.gap_id}</div>
       <div class="gap-name-spec">${g.title}</div>
-      
+
       <div class="gap-field">
         <div class="gap-field-label">EVIDENCE</div>
         <div class="gap-field-val">${g.evidence}</div>
       </div>
-      
+
       <div class="gap-field">
         <div class="gap-field-label">OBSERVATION</div>
         <div class="gap-field-val">${g.observation}</div>
       </div>
-      
+
       <div class="gap-field">
         <div class="gap-field-label">IMPLICATION</div>
         <div class="gap-field-val">${g.implication}</div>
       </div>
-      
+
       <div class="gap-field">
         <div class="gap-field-label">CONFIDENCE</div>
         <div class="gap-field-val" style="color: var(--success); font-weight: 600; font-family: var(--font-mono);">${g.confidence}</div>
@@ -753,7 +740,6 @@ function renderPage5Gaps() {
   });
 }
 
-// View 06 Recommendations
 function renderPage6Recommendations() {
   const container = document.getElementById('page6RecsContainer');
   if (!container || !reportData || !reportData.what_to_research_next) return;
@@ -806,7 +792,6 @@ function renderPage6Recommendations() {
   });
 }
 
-// View 04 Visualizations
 function renderAnalyticsCharts() {
   const funnel = document.getElementById('funnelChart');
   const claimsVizList = document.getElementById('claimsVizList');
@@ -890,7 +875,7 @@ function renderAnalyticsCharts() {
 
     srcCanvas.width = srcCanvas.parentElement.clientWidth - 40;
     ctx.clearRect(0, 0, srcCanvas.width, 180);
-    
+
     ctx.fillStyle = accentColor;
     ctx.fillRect(30, 30, 120, 90);
     ctx.fillStyle = textColor;
@@ -904,20 +889,15 @@ function renderAnalyticsCharts() {
   }
 }
 
-
-/* ==========================================================================
-   REDESIGNED HIGH-END SCIENTIFIC EVIDENCE GRAPH SYSTEM
-   ========================================================================== */
-
 function getNodeShape(type) {
   const t = (type || '').toLowerCase();
   if (t === 'paper') return 'circle';
-  if (t === 'claim') return 'rect';       // Gold rounded square
-  if (t === 'method') return 'diamond';   // Diamond / Hexagon
-  if (t === 'gap') return 'square';       // Muted red square
+  if (t === 'claim') return 'rect';       
+  if (t === 'method') return 'diamond';   
+  if (t === 'gap') return 'square';       
   if (t === 'query' || t === 'question') return 'circle';
   if (t === 'dataset') return 'rect';
-  if (t === 'evidence') return 'diamond'; // Small diamond
+  if (t === 'evidence') return 'diamond'; 
   return 'circle';
 }
 
@@ -962,20 +942,17 @@ function getGraphData() {
     }
   }
 
-  // 1. Root Query Node
   const qId = 'query_root';
   addNode(qId, `Query: ${truncateText(reportData.research_question, 30)}`, 'query', {
     question: reportData.research_question,
     executive_summary: reportData.executive_summary
   }, 'circle', 22);
 
-  // 2. Claims
   (reportData.claims || []).forEach(c => {
     const claimId = `claim_${c.claim_id}`;
     addNode(claimId, `Claim ${c.claim_id}`, 'claim', c, 'rect', 18);
     addEdge(qId, claimId, 'evaluates');
 
-    // Add Evidence Node for Claim
     if (c.snippet) {
       const evId = c.evidence_tag || `ev_${c.claim_id}`;
       addNode(evId, evId, 'evidence', {
@@ -991,13 +968,11 @@ function getGraphData() {
     }
   });
 
-  // 3. Papers
   (reportData.papers || []).forEach((p, idx) => {
     const paperId = p.id || `paper_${idx + 1}`;
     addNode(paperId, `Paper: ${truncateText(p.title, 26)}`, 'paper', p, 'circle', 15);
     addEdge(qId, paperId, 'retrieved');
 
-    // Connect papers to claims
     (reportData.claims || []).forEach(c => {
       const claimId = `claim_${c.claim_id}`;
       if (
@@ -1015,7 +990,6 @@ function getGraphData() {
     });
   });
 
-  // 4. Methods
   const defaultMethods = [
     { id: 'method_vlm', name: 'Method: VLM Fine-Tuning', desc: 'End-to-End VLM fine-tuning on Indic script image tokens.', usedBy: ['01'], papers: ['p1'] },
     { id: 'method_harfbuzz', name: 'Method: HarfBuzz Renderer', desc: 'Synthetic font rendering pipeline.', usedBy: ['01'], papers: ['p1'] },
@@ -1028,7 +1002,6 @@ function getGraphData() {
     (m.papers || []).forEach(pId => addEdge(pId, m.id, 'evaluated_in'));
   });
 
-  // 5. Datasets
   const defaultDatasets = [
     { id: 'dataset_mozhi', name: 'Dataset: Mozhi-LR(S)', source: 'arXiv / WMT 2024', usedFor: 'Low-resource Indic benchmark', mentionedIn: ['p1'] }
   ];
@@ -1037,7 +1010,6 @@ function getGraphData() {
     (d.mentionedIn || []).forEach(pId => addEdge(pId, d.id, 'evaluates_on'));
   });
 
-  // 6. Research Gaps
   (reportData.open_research_gaps || []).forEach(g => {
     const gapId = g.gap_id ? `gap_${g.gap_id.replace(/\s+/g, '_')}` : `gap_01`;
     addNode(gapId, `Gap: ${g.gap_id || 'GAP 01'} ${truncateText(g.title, 20)}`, 'gap', g, 'square', 17);
@@ -1049,7 +1021,6 @@ function getGraphData() {
     });
   });
 
-  // If backend provided evidence_graph structure, merge backend entities
   if (reportData.evidence_graph && Array.isArray(reportData.evidence_graph.nodes)) {
     reportData.evidence_graph.nodes.forEach(bn => {
       if (!nodeMap.has(String(bn.id))) {
@@ -1069,18 +1040,11 @@ function getGraphData() {
   return { nodes: cachedGraphNodes, edges: cachedGraphEdges };
 }
 
-// Layered Hierarchical Node Positioning
 function normalizeGraphPositions(nodes, width, height) {
   if (!nodes || nodes.length === 0) return;
   const w = width || 900;
   const h = height || 650;
 
-  // Hierarchical Layers:
-  // Layer 0: Query
-  // Layer 1: Claims
-  // Layer 2: Papers & Evidence
-  // Layer 3: Methods & Datasets
-  // Layer 4: Gaps
   const typeYMap = {
     'query': 80,
     'claim': 200,
@@ -1113,7 +1077,6 @@ function normalizeGraphPositions(nodes, width, height) {
   });
 }
 
-// Automatically Fit Graph to Canvas Viewport
 function fitGraphToViewport() {
   const canvas = document.getElementById('fullGraphCanvas');
   if (!canvas) return;
@@ -1161,7 +1124,6 @@ function selectGraphNode(node) {
   currentInvestigationState.selectedNodeId = node.id;
   currentInvestigationState.selectedEdge = null;
 
-  // Center selected node smoothly without zooming too far
   const canvas = document.getElementById('fullGraphCanvas');
   if (canvas) {
     const width = canvas.width;
@@ -1204,7 +1166,7 @@ function renderGraphOverviewInspector() {
       <div class="insp-label">Investigation Structure</div>
       <div class="insp-val" style="font-weight:700; font-size: 0.95rem;">System Overview</div>
     </div>
-    
+
     <div class="insp-divider"></div>
 
     <div class="insp-metric-grid">
@@ -1283,8 +1245,7 @@ function renderNodeInspector(node) {
     const claimNum = d.claim_id || node.id.replace('claim_', '');
     const statusLower = (d.status || 'SUPPORTED').toLowerCase();
     const statusClass = statusLower === 'supported' ? 'supported' : statusLower === 'contradicted' ? 'contradicted' : 'mixed';
-    
-    // Connected Papers
+
     const paperIds = connEdges.filter(e => e.relation === 'supports' || e.relation === 'contradicts').map(e => e.target);
     const connectedPapersHTML = (reportData?.papers || []).filter(p => paperIds.includes(p.id)).map(p => `• ${p.title}`).join('<br>') || (d.paper_title ? `• ${d.paper_title}` : 'NOT AVAILABLE IN CURRENT EVIDENCE SET');
 
@@ -1324,7 +1285,7 @@ function renderNodeInspector(node) {
     `;
   } else if (t === 'paper') {
     const relatedClaimsList = connEdges.filter(e => e.relation === 'supports' || e.relation === 'contradicts').map(e => `Claim ${e.source.replace('claim_', '')}`).join(', ') || 'Claim 01';
-    
+
     html = `
       <div class="section-title-sm">NODE INSPECTOR</div>
       <div class="insp-row">
@@ -1473,7 +1434,6 @@ function renderNodeInspector(node) {
 
   graphInspectorContent.innerHTML = html;
 
-  // Bind inspector buttons
   document.getElementById('btnInspectorViewSynthesis')?.addEventListener('click', () => {
     document.querySelector('.tab-btn[data-tab="tab-synthesis"]')?.click();
   });
@@ -1606,7 +1566,6 @@ function getHitTarget(worldX, worldY) {
   const filter = currentInvestigationState.graphFilterType;
   const visibleNodes = filter === 'all' ? nodes : nodes.filter(n => n.type === 'query' || n.type === filter);
 
-  // 1. Test Nodes
   for (let i = visibleNodes.length - 1; i >= 0; i--) {
     const n = visibleNodes[i];
     const dist = Math.hypot(n.x - worldX, n.y - worldY);
@@ -1616,7 +1575,6 @@ function getHitTarget(worldX, worldY) {
     }
   }
 
-  // 2. Test Edges
   const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
   const visibleEdges = edges.filter(e => visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target));
 
@@ -1635,7 +1593,6 @@ function getHitTarget(worldX, worldY) {
   return null;
 }
 
-// Canvas Mouse Interactions
 function setupCanvasInteractions() {
   const canvas = document.getElementById('fullGraphCanvas');
   if (!canvas) return;
@@ -1706,7 +1663,6 @@ function setupCanvasInteractions() {
       return;
     }
 
-    // Hover detection
     if (evt.target === canvas) {
       const screenX = evt.clientX - rect.left;
       const screenY = evt.clientY - rect.top;
@@ -1776,7 +1732,6 @@ function setupCanvasInteractions() {
   });
 }
 
-// Window Resize Auto-Fit & Graph Toolbar Handlers
 function initGraphToolbar() {
   document.querySelectorAll('.node-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1821,7 +1776,6 @@ function initGraphToolbar() {
   });
 }
 
-// Render Full Canvas Evidence Graph
 function renderFullGraphCanvas() {
   const canvas = document.getElementById('fullGraphCanvas');
   if (!canvas) return;
@@ -1845,7 +1799,6 @@ function renderFullGraphCanvas() {
   const colorTextMuted = style.getPropertyValue('--text-muted').trim() || '#687078';
   const colorBorderDim = style.getPropertyValue('--border-dim').trim() || '#252B30';
 
-  // Handle Loading & Empty States
   if (isGraphLoading) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = colorTextPrimary;
@@ -1889,7 +1842,6 @@ function renderFullGraphCanvas() {
   const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
   const visibleEdges = edges.filter(e => visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target));
 
-  // Determine active highlight sets
   const activeNodeId = currentInvestigationState.selectedNodeId || currentInvestigationState.hoveredNodeId;
   const activeEdge = currentInvestigationState.selectedEdge || currentInvestigationState.hoveredEdge;
 
@@ -1922,7 +1874,6 @@ function renderFullGraphCanvas() {
   ctx.translate(currentInvestigationState.panX, currentInvestigationState.panY);
   ctx.scale(currentInvestigationState.zoomLevel, currentInvestigationState.zoomLevel);
 
-  // 1. Draw Edges
   visibleEdges.forEach(e => {
     const n1 = nodes.find(n => n.id === e.source);
     const n2 = nodes.find(n => n.id === e.target);
@@ -1948,7 +1899,6 @@ function renderFullGraphCanvas() {
       }
       ctx.stroke();
 
-      // Conditional Edge Label rendering: ONLY when highlighted/selected/hovered
       if (isHighlighted) {
         ctx.fillStyle = colorAccent;
         ctx.font = '600 10px "JetBrains Mono", monospace';
@@ -1959,7 +1909,6 @@ function renderFullGraphCanvas() {
     }
   });
 
-  // 2. Draw Nodes
   visibleNodes.forEach(n => {
     const isSelected = (n.id === currentInvestigationState.selectedNodeId);
     const isHovered = (n.id === currentInvestigationState.hoveredNodeId);
@@ -1984,7 +1933,6 @@ function renderFullGraphCanvas() {
     const baseSize = n.size || 15;
     const renderSize = isHovered ? baseSize * 1.08 : baseSize;
 
-    // Draw Shape
     if (n.shape === 'circle') {
       ctx.beginPath();
       ctx.arc(n.x, n.y, renderSize, 0, Math.PI * 2);
@@ -2036,7 +1984,6 @@ function renderFullGraphCanvas() {
       }
     }
 
-    // Node Label: Readable 12-14px sans-serif
     ctx.fillStyle = colorTextPrimary;
     ctx.font = isSelected ? '600 14px Inter, sans-serif' : isHovered ? '600 13px Inter, sans-serif' : '12px Inter, sans-serif';
     ctx.textAlign = 'center';
@@ -2080,7 +2027,6 @@ function initLiterature() {
   document.getElementById('litSortSelect')?.addEventListener('change', renderLiteratureTable);
 }
 
-// About Modal Controller
 function initAboutModal() {
   const btnAbout = document.getElementById('btnAbout');
   const modal = document.getElementById('aboutModal');
@@ -2112,7 +2058,6 @@ function initAboutModal() {
   });
 }
 
-// Master Application Initialization & Subsystem Error Isolation
 function initApp() {
   try { initTheme(); } catch (err) { console.error("Theme init failed", err); }
   try { initAboutModal(); } catch (err) { console.error("About modal init failed", err); }
@@ -2131,4 +2076,3 @@ if (document.readyState === 'loading') {
 } else {
   initApp();
 }
-

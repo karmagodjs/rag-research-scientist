@@ -1,17 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Scientific Research Report Synthesizer
-Assembles structured JSON reports and human-readable Markdown summaries.
-Provides real relevance scores, verified evidence counts, and authentic metadata.
-"""
-
 import json
 import logging
 from typing import List, Dict, Any, Optional
 from retrieval.base import Document
 
 logger = logging.getLogger(__name__)
-
 
 class ReportSynthesizer:
 
@@ -28,7 +20,7 @@ class ReportSynthesizer:
         stats: Dict[str, Any],
         evidence_snippets: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
-        # Count actual extracted evidence snippets per document
+
         evidence_counts = {}
         for ev in (evidence_snippets or []):
             p_id = ev.get("paper_id")

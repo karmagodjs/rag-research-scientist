@@ -1,9 +1,7 @@
-
 import logging
 from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
-
 
 class EvidenceGraph:
 
@@ -41,14 +39,12 @@ class EvidenceGraph:
         q_id = "query_root"
         self.add_node(q_id, query, "question")
 
-
         for doc in documents:
             doc_id = doc.id if hasattr(doc, "id") else doc["id"]
             title = doc.title if hasattr(doc, "title") else doc["title"]
             url = doc.url if hasattr(doc, "url") else doc.get("url", "")
             self.add_node(doc_id, title, "paper", {"url": url})
             self.add_edge(q_id, doc_id, "retrieved_paper")
-
 
         for idx, claim in enumerate(claims):
             claim_id = f"claim_{idx+1}"
@@ -60,7 +56,6 @@ class EvidenceGraph:
                 self.add_node(ev_id, ev["snippet"][:50] + "...", "evidence", {"source_url": ev["source_url"]})
                 self.add_edge(claim_id, ev_id, "has_evidence")
                 self.add_edge(ev["paper_id"], ev_id, "provides_evidence")
-
 
         for contra in contradictions:
             c_text = contra["claim"]

@@ -1,10 +1,8 @@
-
 import logging
 from typing import List, Dict, Any
 from retrieval.base import Document
 
 logger = logging.getLogger(__name__)
-
 
 class TimelineGenerator:
 
@@ -26,7 +24,6 @@ class TimelineGenerator:
                 "url": doc.url,
                 "source": doc.source
             })
-
 
         sorted_timeline = {k: timeline[k] for k in sorted(timeline.keys())}
         logger.info(f"Generated research timeline across {len(sorted_timeline)} publication years.")

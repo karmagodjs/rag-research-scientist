@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
 import os
 import sys
 import json
 import uuid
 import logging
 from urllib.parse import urlparse
-
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -14,7 +12,6 @@ from agent import ResearchAgent, AgentConfig
 from storage import storage
 
 logger = logging.getLogger("VercelAPI")
-
 
 class handler(BaseHTTPRequestHandler):
 

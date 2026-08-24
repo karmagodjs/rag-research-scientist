@@ -1,8 +1,6 @@
-
 import os
 from dataclasses import dataclass, field
 from typing import Optional
-
 
 @dataclass
 class AgentConfig:
@@ -21,6 +19,4 @@ class AgentConfig:
     verbose: bool = False
     log_level: str = field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))
 
-
 default_config = AgentConfig()
-

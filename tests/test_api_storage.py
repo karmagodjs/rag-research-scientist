@@ -1,8 +1,6 @@
-
 import unittest
 import json
 from storage import storage, PersistentStorage
-
 
 class TestStorageAndAPI(unittest.TestCase):
 
@@ -18,7 +16,6 @@ class TestStorageAndAPI(unittest.TestCase):
         self.assertIsNotNone(retrieved)
         self.assertEqual(retrieved["id"], test_id)
         self.assertEqual(retrieved["research_question"], "Test query")
-
 
 if __name__ == "__main__":
     unittest.main()

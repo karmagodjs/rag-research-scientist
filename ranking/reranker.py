@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Multi-Signal Document Reranking Module
-Combines exact title matching, BM25 lexical relevance, TF-IDF semantic similarity,
-source reputation, and date-aware temporal relevance scoring.
-"""
-
 import math
 import re
 import logging
@@ -20,17 +13,7 @@ from retrieval.query_utils import (
 
 logger = logging.getLogger(__name__)
 
-
 class Reranker:
-    """
-    Reranker implements multi-signal scoring:
-    1. Exact Match Dominance: If the query is an exact paper title, exact/near matches receive +100 / +50 score boost.
-    2. Date-Aware Temporal Relevance: When the query contains an explicit date constraint (e.g. 'since 2024'),
-       recent papers satisfying the constraint receive a significant boost, while foundational older papers
-       are preserved with unboosted relevance. For queries without date constraints, standard scoring applies.
-    3. Lexical & Semantic Relevance: BM25 text relevance and TF-IDF semantic vector similarity.
-    4. Source Reputation: Boost for verified academic repositories (arXiv, OpenAlex, Crossref).
-    """
 
     def __init__(self, k1: float = 1.5, b: float = 0.75):
         self.k1 = k1
@@ -54,11 +37,9 @@ class Reranker:
 
         query_terms = [w.lower() for w in re.findall(r"\w+", query) if len(w) > 1]
 
-        # Calculate average document length for BM25
         doc_lengths = [len(re.findall(r"\w+", doc.content or "")) for doc in documents]
         avg_dl = sum(doc_lengths) / len(doc_lengths) if doc_lengths else 1.0
 
-        # Calculate document frequencies
         df = {}
         for term in set(query_terms):
             df[term] = sum(1 for doc in documents if term in (doc.content or "").lower())
@@ -71,7 +52,6 @@ class Reranker:
             dl = len(doc_terms)
             bm25_score = 0.0
 
-            # 1. BM25 calculation
             for term in query_terms:
                 if term not in df or df[term] == 0:
                     continue
@@ -81,7 +61,6 @@ class Reranker:
                 denominator = tf + self.k1 * (1.0 - self.b + self.b * (dl / avg_dl))
                 bm25_score += idf * (numerator / denominator)
 
-            # 2. Title matching
             try:
                 title_info = calculate_title_score(
                     query_title=clean_title_query if clean_title_query else query,
@@ -96,7 +75,6 @@ class Reranker:
                 logger.warning(f"Title matching failed for '{doc.title}': {e}")
                 title_score, exact_match, near_exact = 0.0, False, False
 
-            # 3. Composite final scoring
             if exact_match:
                 final_score = 100.0 + title_score + (min(bm25_score, 10.0) / 10.0)
             elif near_exact:
@@ -113,7 +91,6 @@ class Reranker:
                 norm_sem = min(max(semantic_score, 0.0), 2.0) / 2.0
                 source_bonus = 0.05 if doc.source in ("arXiv", "openalex", "crossref") else 0.0
 
-                # 4. Date-Aware Temporal Relevance Scoring
                 if temporal_info.get("has_temporal_constraint"):
                     temporal_raw = calculate_temporal_score(doc.published, temporal_info)
                     temporal_bonus = 0.30 * temporal_raw

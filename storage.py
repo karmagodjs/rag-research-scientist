@@ -1,4 +1,3 @@
-
 import os
 import json
 import logging
@@ -8,10 +7,8 @@ from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
-
 _IN_MEMORY_STORE: Dict[str, Dict[str, Any]] = {}
 _LOCAL_FILE_DIR = os.getenv("STORAGE_DIR", os.path.join(os.path.dirname(__file__), ".storage"))
-
 
 class PersistentStorage:
 
@@ -51,7 +48,6 @@ class PersistentStorage:
             except Exception as e:
                 logger.warning(f"Failed to save to Vercel KV: {e}. Saved to fallback store.")
 
-
         try:
             file_path = os.path.join(_LOCAL_FILE_DIR, f"{research_id}.json")
             with open(file_path, "w", encoding="utf-8") as f:
@@ -87,7 +83,6 @@ class PersistentStorage:
             except Exception as e:
                 logger.warning(f"Failed to fetch from Vercel KV: {e}")
 
-
         try:
             file_path = os.path.join(_LOCAL_FILE_DIR, f"{research_id}.json")
             if os.path.exists(file_path):
@@ -99,6 +94,5 @@ class PersistentStorage:
             logger.warning(f"Failed to fetch from disk fallback: {e}")
 
         return None
-
 
 storage = PersistentStorage()

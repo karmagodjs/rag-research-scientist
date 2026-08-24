@@ -1,8 +1,7 @@
-/* RAG Research Scientist Agent - Scientific Research Terminal Design System */
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Dark Palette Tokens (Exact Specification) */
+
   --bg-dark: #080A0D;
   --bg-surface: #0D1116;
   --bg-surface-2: #111720;
@@ -19,26 +18,21 @@
   --border-subtle: rgba(255, 255, 255, 0.14);
   --border-active: #C9A86A;
 
-  /* Primary Brand Accent */
   --accent: #C9A86A;
   --accent-hover: #D8B979;
   --accent-tint: rgba(201, 168, 106, 0.08);
 
-  /* Evidence Cyan Accent */
   --cyan: #55D6FF;
 
-  /* Semantic System */
   --success: #63D7A0;
   --warning: #C9A86A;
   --danger: #E57979;
 
-  /* Graph Node Tokens */
   --graph-paper: #A5ADB8;
   --graph-claim: #C9A86A;
   --graph-method: #55D6FF;
   --graph-gap: #E57979;
 
-  /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --font-title: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -47,7 +41,7 @@
 }
 
 [data-theme="light"] {
-  /* Light Palette Tokens */
+
   --bg-dark: #F4F5F7;
   --bg-surface: #FFFFFF;
   --bg-surface-2: #E9ECEF;
@@ -94,13 +88,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Accessibility Focus Outline */
 :focus-visible {
   outline: 2px solid var(--accent) !important;
   outline-offset: 1px !important;
 }
 
-/* Global Application Shell */
 .app-shell {
   display: flex;
   flex-direction: column;
@@ -110,7 +102,6 @@ body {
   background-color: var(--bg-dark);
 }
 
-/* App Header */
 .app-header {
   display: flex;
   align-items: center;
@@ -142,7 +133,6 @@ body {
   font-family: var(--font-mono);
 }
 
-/* Nav Tabs - Modern Technical Workstation Header */
 .nav-tabs {
   display: flex;
   gap: 4px;
@@ -197,7 +187,6 @@ body {
   gap: 6px;
 }
 
-/* Buttons - Restrained & Compact */
 .btn-action-sm,
 .btn-graph-action,
 .btn-gap-action {
@@ -221,7 +210,6 @@ body {
   color: var(--accent-hover);
 }
 
-/* Global Research Query Composer & Suggestions */
 .query-bar-container {
   padding: 0.75rem 1.2rem;
   background: var(--bg-surface);
@@ -313,7 +301,6 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(158, 125, 59, 0.2);
 }
 
-/* Auto-growing Textarea */
 .research-composer textarea#queryInput {
   width: 100%;
   min-height: 24px;
@@ -338,7 +325,6 @@ body {
   transition: opacity 0.2s ease;
 }
 
-/* Custom Scrollbar for Textarea inside Composer */
 .research-composer textarea#queryInput::-webkit-scrollbar {
   width: 5px;
 }
@@ -356,7 +342,6 @@ body {
   background: var(--text-muted);
 }
 
-/* Composer Controls Row */
 .composer-controls {
   display: flex;
   align-items: center;
@@ -377,7 +362,6 @@ body {
   gap: 8px;
 }
 
-/* Plus / Attachment Button */
 .composer-plus-btn {
   width: 32px;
   height: 32px;
@@ -411,7 +395,6 @@ body {
   color: var(--text-primary);
 }
 
-/* Keyboard Shortcut Hint */
 .composer-hint {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -429,7 +412,6 @@ body {
   line-height: 1;
 }
 
-/* Run Research Action Button */
 .composer-run-btn {
   width: 34px;
   height: 34px;
@@ -443,7 +425,6 @@ body {
   outline: none;
 }
 
-/* Disabled / Subdued state when query is empty */
 .composer-run-btn:disabled,
 .composer-run-btn[disabled] {
   background: rgba(255, 255, 255, 0.08);
@@ -461,7 +442,6 @@ body {
   opacity: 0.55;
 }
 
-/* Active state when query has text */
 .composer-run-btn:not(:disabled) {
   background: var(--accent);
   color: #0B0D0F;
@@ -485,7 +465,6 @@ body {
   transform: scale(0.96);
 }
 
-/* Loading State for Run Button */
 .composer-run-btn .run-icon-arrow {
   display: block;
 }
@@ -512,7 +491,6 @@ body {
   display: block;
 }
 
-/* Responsive Mobile Layout */
 @media (max-width: 640px) {
   .query-bar-container {
     padding: 0.5rem 0.75rem;
@@ -528,7 +506,6 @@ body {
   }
 }
 
-/* Main Body Views Switcher */
 .app-body {
   flex: 1;
   overflow: hidden;
@@ -547,7 +524,6 @@ body {
   display: flex;
 }
 
-/* Section Title Helper */
 .section-title-sm {
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -560,7 +536,6 @@ body {
   padding-bottom: 4px;
 }
 
-/* VIEW 01: THREE-COLUMN WORKSTATION */
 .three-column-workstation {
   display: grid;
   grid-template-columns: 18% 1fr 18%;
@@ -884,7 +859,6 @@ body {
   color: var(--text-muted) !important;
 }
 
-/* VIEW 02: EVIDENCE GRAPH WORKSTATION */
 .graph-workstation {
   display: flex;
   flex-direction: column;
@@ -1056,7 +1030,6 @@ body {
   border: 1px solid var(--border-dim);
 }
 
-/* VIEW 03: LITERATURE DATABASE WORKSTATION */
 .literature-workstation {
   display: flex;
   flex-direction: column;
@@ -1156,7 +1129,6 @@ body {
   overflow-y: auto;
 }
 
-/* VIEW 04: VISUALIZATIONS */
 .analytics-workstation {
   padding: 1rem 1.2rem;
   overflow-y: auto;
@@ -1205,7 +1177,6 @@ body {
   justify-content: space-between;
 }
 
-/* VIEW 05: RESEARCH GAPS NOTEBOOK */
 .gaps-workstation {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -1305,7 +1276,6 @@ body {
   border: 1px solid var(--border-dim);
 }
 
-/* VIEW 06: NEXT RESEARCH PLANNING */
 .recs-workstation {
   padding: 1.2rem 1.6rem;
   overflow-y: auto;
@@ -1345,7 +1315,6 @@ body {
   margin-bottom: 0.8rem;
 }
 
-/* Responsive Panel Stacking */
 @media (max-width: 960px) {
   .three-column-workstation,
   .lit-table-split,
@@ -1363,7 +1332,6 @@ body {
   }
 }
 
-/* Accessibility: Reduced-Motion Support */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -1373,9 +1341,6 @@ body {
   }
 }
 
-/* ==========================================================================
-   ABOUT MODAL DIALOG
-   ========================================================================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1557,4 +1522,3 @@ body {
   font-weight: 600;
   color: var(--text-primary);
 }
-

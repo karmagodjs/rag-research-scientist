@@ -1,4 +1,3 @@
-
 import re
 from typing import Tuple, Optional, List, Dict, Any
 
@@ -17,17 +16,7 @@ EXPLORATORY_TERMS = {
     "since", "after", "latest", "unexplored", "limitations", "what methods"
 }
 
-
 def extract_temporal_constraints(query: str) -> Dict[str, Any]:
-    """
-    Extract temporal constraints such as:
-    - 'since 2024' -> min_year = 2024
-    - 'after 2023' -> min_year = 2024
-    - 'from 2024 to 2026' -> min_year = 2024, max_year = 2026
-    - 'between 2023 and 2025' -> min_year = 2023, max_year = 2025
-    - 'in 2024' -> min_year = 2024, max_year = 2024
-    - 'recent' / 'latest' -> is_recent = True, min_year = 2023
-    """
     if not query:
         return {
             "has_temporal_constraint": False,
@@ -43,7 +32,6 @@ def extract_temporal_constraints(query: str) -> Dict[str, Any]:
     max_year = None
     is_recent = False
 
-    # 1. Range patterns: "from 2023 to 2026", "between 2023 and 2025", "2023-2026"
     range_match = re.search(r"\bfrom\s+(19\d\d|20\d\d)\s+to\s+(19\d\d|20\d\d)\b", q_lower)
     if range_match:
         min_year = int(range_match.group(1))
@@ -57,7 +45,6 @@ def extract_temporal_constraints(query: str) -> Dict[str, Any]:
             max_year = int(between_match.group(2))
             matched_phrases.append(between_match.group(0))
 
-    # 2. Lower bound patterns: "since 2024", "after 2023"
     if min_year is None:
         since_match = re.search(r"\bsince\s+(19\d\d|20\d\d)\b", q_lower)
         if since_match:
@@ -70,7 +57,6 @@ def extract_temporal_constraints(query: str) -> Dict[str, Any]:
             min_year = int(after_match.group(1)) + 1
             matched_phrases.append(after_match.group(0))
 
-    # 3. Specific year pattern: "in 2024"
     if min_year is None:
         in_match = re.search(r"\bin\s+(19\d\d|20\d\d)\b", q_lower)
         if in_match:
@@ -78,7 +64,6 @@ def extract_temporal_constraints(query: str) -> Dict[str, Any]:
             max_year = int(in_match.group(1))
             matched_phrases.append(in_match.group(0))
 
-    # 4. Keyword patterns: "recent", "latest"
     if re.search(r"\b(recent|latest|newest)\b", q_lower):
         is_recent = True
         matched_phrases.append("recent")
@@ -95,11 +80,7 @@ def extract_temporal_constraints(query: str) -> Dict[str, Any]:
         "matched_phrases": matched_phrases
     }
 
-
 def parse_publication_year(published_str: Optional[str]) -> Optional[int]:
-    """
-    Safely extract a 4-digit publication year from a date string, or return None.
-    """
     if not published_str:
         return None
     match = re.search(r"\b(19\d\d|20\d\d)\b", str(published_str))
@@ -110,14 +91,7 @@ def parse_publication_year(published_str: Optional[str]) -> Optional[int]:
             return None
     return None
 
-
 def calculate_temporal_score(published_str: Optional[str], temporal_info: Dict[str, Any]) -> float:
-    """
-    Calculate a temporal relevance score [0.0, 1.0] for a paper.
-    If the query has NO temporal constraint, returns 0.0 (no effect on ranking).
-    If the paper satisfies the temporal constraint (e.g. >= 2024), returns a strong bonus (1.0).
-    If older, returns a smaller background relevance score (e.g. 0.1 - 0.2) based on proximity.
-    """
     if not temporal_info.get("has_temporal_constraint"):
         return 0.0
 
@@ -126,9 +100,8 @@ def calculate_temporal_score(published_str: Optional[str], temporal_info: Dict[s
     paper_yr = parse_publication_year(published_str)
 
     if paper_yr is None:
-        return 0.1  # Unknown year gets neutral minimal background score
+        return 0.1
 
-    # Check range satisfaction
     if min_yr is not None and max_yr is not None:
         if min_yr <= paper_yr <= max_yr:
             return 1.0
@@ -139,17 +112,15 @@ def calculate_temporal_score(published_str: Optional[str], temporal_info: Dict[s
             diff = paper_yr - max_yr
             return max(0.0, 0.8 - (diff * 0.1))
 
-    # Check lower bound satisfaction (e.g. "since 2024")
     if min_yr is not None:
         if paper_yr >= min_yr:
             return 1.0
         else:
             diff = min_yr - paper_yr
-            # 2023 when min is 2024 -> 0.35, 2022 -> 0.25, 2021 -> 0.15, 2016 -> 0.0
+
             return max(0.0, round(0.45 - (diff * 0.10), 2))
 
     return 0.5
-
 
 def normalize_title(text: str) -> str:
     if not text:
@@ -164,7 +135,6 @@ def normalize_title(text: str) -> str:
 
     text = re.sub(r"[^\w\s]", " ", text)
     return " ".join(text.split())
-
 
 def detect_exact_paper_query(query: str) -> Tuple[bool, str, Optional[str]]:
     try:
@@ -198,7 +168,7 @@ def detect_exact_paper_query(query: str) -> Tuple[bool, str, Optional[str]]:
         if is_quoted or has_explicit_prefix or author_hint is not None:
             is_title_like = True
         elif not is_exploratory and len(words) >= 1:
-            # Acronyms (BERT, GPT, LoRA) or Title-Cased names (Attention Is All You Need)
+
             if len(words) == 1 and raw_query.isupper():
                 is_title_like = True
             elif len(words) >= 2 and any(c.isupper() for c in raw_query):
@@ -207,7 +177,6 @@ def detect_exact_paper_query(query: str) -> Tuple[bool, str, Optional[str]]:
         return is_title_like, norm_query, author_hint
     except Exception:
         return False, str(query or "").strip().lower(), None
-
 
 def calculate_title_score(query_title: str, candidate_title: str, candidate_authors: Optional[List[str]] = None, author_hint: Optional[str] = None) -> Dict[str, Any]:
     try:
@@ -220,8 +189,7 @@ def calculate_title_score(query_title: str, candidate_title: str, candidate_auth
         exact_match = (q_norm == t_norm)
 
         len_ratio = min(len(q_norm), len(t_norm)) / max(len(q_norm), len(t_norm))
-        
-        # Near exact: contained with high len ratio, or candidate starts with query as distinct prefix (e.g. "BERT: ...")
+
         q_words = q_norm.split()
         t_words_list = t_norm.split()
         is_prefix = False

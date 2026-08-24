@@ -1,4 +1,3 @@
-
 import requests
 import xml.etree.ElementTree as ET
 import urllib.parse
@@ -11,7 +10,6 @@ from retrieval.query_utils import detect_exact_paper_query
 logger = logging.getLogger(__name__)
 
 ARXIV_API_URL = "https://export.arxiv.org/api/query"
-
 
 class ArxivRetriever(BaseRetriever):
 
@@ -27,7 +25,7 @@ class ArxivRetriever(BaseRetriever):
         documents = []
 
         STOP_WORDS = {"find", "best", "approaches", "for", "since", "with", "from", "using", "paper", "study", "analysis", "compare", "recent", "analyze", "investigate", "the", "a", "an", "of", "to", "in", "on", "is", "all", "you", "it", "and", "or", "are", "be", "that", "this", "which"}
-        
+
         target = target_title if (is_exact and target_title) else clean_query
         all_words = [w for w in re.findall(r"\w+", target)]
         filtered_words = [w for w in all_words if len(w) > 2 and w.lower() not in STOP_WORDS]
@@ -35,18 +33,16 @@ class ArxivRetriever(BaseRetriever):
             filtered_words = [w for w in all_words if len(w) > 1]
 
         if is_exact:
-            # 1. Try exact title phrase search first
+
             exact_phrase_query = f'ti:"{target}"'
             exact_docs = self._fetch_arxiv(exact_phrase_query, top_k)
             documents.extend(exact_docs)
 
-            # 2. Try title keyword search if exact phrase returned nothing
             if not documents and len(all_words) > 0:
                 ti_terms = " AND ".join([f'ti:{w}' for w in (filtered_words[:4] if filtered_words else all_words[:4])])
                 kw_docs = self._fetch_arxiv(ti_terms, top_k)
                 documents.extend(kw_docs)
 
-            # 3. If author hint is present, also query author + title
             if author_hint and filtered_words:
                 au_docs = self._fetch_arxiv(f'au:{author_hint} AND ti:{filtered_words[0]}', top_k)
                 documents.extend(au_docs)
@@ -54,7 +50,6 @@ class ArxivRetriever(BaseRetriever):
             if len(documents) > 0:
                 return self._dedup_internal(documents)[:top_k]
 
-        # Broad search fallback
         core_terms = filtered_words[:4] if filtered_words else all_words[:3]
         query_str = " AND ".join([f'all:{term}' for term in core_terms]) if core_terms else f'all:"{clean_query}"'
 

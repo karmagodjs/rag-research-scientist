@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
 import sys
 import os
 import json
 import argparse
 import logging
 from typing import List, Dict, Any
-
 
 from config import AgentConfig
 from retrieval.base import Document
@@ -25,7 +23,6 @@ from synthesis.gaps import ResearchGapAnalyzer
 from synthesis.report import ReportSynthesizer
 from evaluation.evaluator import Evaluator
 
-
 class ResearchAgent:
 
     def __init__(self, config: AgentConfig = None):
@@ -38,14 +35,12 @@ class ResearchAgent:
         )
         self.logger = logging.getLogger("ResearchAgent")
 
-
         self.llm_client = LLMClient(
             anthropic_api_key=self.config.anthropic_api_key,
             openai_api_key=self.config.openai_api_key,
             gemini_api_key=self.config.gemini_api_key,
             timeout=self.config.timeout_seconds
         )
-
 
         self.decomposer = QueryDecomposer()
         self.arxiv_retriever = ArxivRetriever(api_url=self.config.arxiv_api_url, timeout=self.config.timeout_seconds)
@@ -62,7 +57,6 @@ class ResearchAgent:
         self.synthesizer = ReportSynthesizer()
         self.evaluator = Evaluator()
 
-
     def run(self, query: str) -> Dict[str, Any]:
         self.logger.info(f"Starting Research Pipeline for query: '{query}'")
         all_documents: List[Document] = []
@@ -70,11 +64,9 @@ class ResearchAgent:
         iteration = 0
         current_queries = [query]
 
-
         while iteration < self.config.max_iterations:
             iteration += 1
             self.logger.info(f"--- Self-Improvement Loop Iteration {iteration}/{self.config.max_iterations} ---")
-
 
             subqueries = [query]
             for q in current_queries:
@@ -123,23 +115,17 @@ class ResearchAgent:
             self.logger.info(f"[RETRIEVAL] Continuing with partial results. Total candidates: {len(iteration_docs)}")
             raw_retrieved_count += len(iteration_docs)
 
-            # Pipeline step 1: arXiv/Web candidates + existing candidates
             candidate_pool = all_documents + iteration_docs
 
-            # Pipeline step 2: deduplication
             deduped_pool = self.deduplicator.deduplicate(candidate_pool)
 
-            # Pipeline step 3: TF-IDF/semantic retrieval
             self.semantic_retriever.set_corpus(deduped_pool)
             semantic_docs = self.semantic_retriever.search(query, top_k=self.config.max_papers)
 
-            # Pipeline step 4: candidate merge
             merged_pool = deduped_pool + semantic_docs
 
-            # Pipeline step 5: deduplication
             merged_deduped = self.deduplicator.deduplicate(merged_pool)
 
-            # Pipeline step 6: reranking
             ranked_docs = self.reranker.rerank(query, merged_deduped, top_k=self.config.max_papers)
             all_documents = ranked_docs
 
@@ -149,7 +135,6 @@ class ResearchAgent:
             else:
                 self.logger.info("Document pool sparse; reformulating search queries for self-improvement step.")
                 current_queries = [f"{query} survey benchmark", f"{query} systematic evaluation"]
-
 
         if not all_documents:
             self.logger.warning("RETRIEVAL_FAILURE: Zero documents were retrieved from any source.")
@@ -172,31 +157,23 @@ class ResearchAgent:
                 "citation_list": []
             }
 
-
         self.semantic_retriever.set_corpus(all_documents)
-
 
         evidence_snippets = self.extractor.extract_evidence(all_documents, query)
 
-
         claims = self.claim_generator.generate_claims(evidence_snippets)
-
 
         contradictions = [
             self.contradiction_detector.analyze_claim(c, evidence_snippets)
             for c in claims
         ]
 
-
         evidence_graph = self.graph_builder.build_graph(query, claims, contradictions, all_documents)
-
 
         timeline = self.timeline_generator.generate_timeline(all_documents)
 
-
         gaps = self.gap_analyzer.detect_gaps(evidence_snippets)
         next_research = self.gap_analyzer.propose_next_research(gaps, evidence_graph)
-
 
         stats = {
             "total_documents": len(all_documents),
@@ -204,7 +181,6 @@ class ResearchAgent:
             "num_subqueries": len(subqueries),
             "iterations": iteration,
         }
-
 
         full_report = self.synthesizer.build_full_report(
             query=query,
@@ -220,7 +196,6 @@ class ResearchAgent:
         )
 
         return full_report
-
 
 def main():
     parser = argparse.ArgumentParser(description="RAG Research Scientist Agent CLI")
@@ -254,16 +229,13 @@ def main():
             print(f"[!] Benchmark file not found at {bench_path}")
         return
 
-
     print(f"[*] Executing Research Scientist Agent for: '{args.query}'...")
     report = agent.run(args.query)
-
 
     if args.output:
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2)
         print(f"[OK] Saved JSON report to {args.output}")
-
 
     if args.markdown:
         md_text = agent.synthesizer.render_markdown(report)
@@ -271,10 +243,8 @@ def main():
             f.write(md_text)
         print(f"[OK] Saved Markdown report to {args.markdown}")
 
-
     print(f"\nCompleted analysis. Retrieved {report.get('retrieval_statistics', {}).get('total_documents', 0)} documents.")
     print(f"Generated {len(report.get('claims', []))} claims and {len(report.get('what_to_research_next', []))} future research proposals.\n")
-
 
 if __name__ == "__main__":
     main()

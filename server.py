@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import http.server
 import socketserver
 import os
@@ -13,7 +12,6 @@ PORT = 8000
 WEB_DIR = os.path.join(os.path.dirname(__file__), "web")
 
 logger = logging.getLogger("ResearchServer")
-
 
 class ResearchHandler(http.server.SimpleHTTPRequestHandler):
 
@@ -56,7 +54,6 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         path = self.path
 
-
         if path.startswith("/api/research"):
             parts = path.strip("/").split("/")  
 
@@ -97,13 +94,10 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
                     self._send_json({"error": f"Invalid sub-resource {sub}"}, status=404)
                 return
 
-
         super().do_GET()
-
 
 class ReusableTCPServer(socketserver.TCPServer):
     allow_reuse_address = True
-
 
 def main():
     print(f"[*] Starting RAG Research Scientist Server on http://localhost:{PORT}")
@@ -122,7 +116,6 @@ def main():
             httpd.serve_forever()
         except KeyboardInterrupt:
             print("\n[*] Shutting down server.")
-
 
 if __name__ == "__main__":
     main()

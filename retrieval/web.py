@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Web & OpenAlex Academic Search Retriever
-Fetches real scientific publications from academic APIs (OpenAlex) and Web endpoints.
-Never fabricates publication years; preserves authentic dates or marks as 'unknown'.
-"""
-
 import requests
 import json
 import logging
@@ -15,7 +8,6 @@ from retrieval.base import BaseRetriever, Document
 from retrieval.query_utils import detect_exact_paper_query
 
 logger = logging.getLogger(__name__)
-
 
 class WebRetriever(BaseRetriever):
 

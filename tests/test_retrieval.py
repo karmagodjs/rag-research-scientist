@@ -1,9 +1,7 @@
-
 import unittest
 from retrieval.base import Document
 from retrieval.dedup import DocumentDeduplicator
 from retrieval.decomposer import QueryDecomposer
-
 
 class TestRetrieval(unittest.TestCase):
 
@@ -40,34 +38,27 @@ class TestRetrieval(unittest.TestCase):
         interp_subqueries = decomposer.decompose("transformer interpretability")
         self.assertTrue(any("evaluation" in sq or "empirical" in sq for sq in interp_subqueries))
 
-
     def test_exact_paper_query_detection_and_ranking(self):
         from retrieval.query_utils import detect_exact_paper_query
         from ranking.reranker import Reranker
-
 
         is_exact, title, author = detect_exact_paper_query("Attention Is All You Need")
         self.assertTrue(is_exact)
         self.assertEqual(title, "attention is all you need")
 
-
         is_exact, title, author = detect_exact_paper_query("Attention Is All You Need paper")
         self.assertTrue(is_exact)
         self.assertEqual(title, "attention is all you need")
-
 
         is_exact, title, author = detect_exact_paper_query("Vaswani Attention Is All You Need")
         self.assertTrue(is_exact)
         self.assertEqual(author, "vaswani")
 
-
         is_exact, title, author = detect_exact_paper_query("recent transformer attention research")
         self.assertFalse(is_exact)
 
-
         is_exact, title, author = detect_exact_paper_query("papers about attention mechanisms")
         self.assertFalse(is_exact)
-
 
         reranker = Reranker()
         docs = [
@@ -82,7 +73,6 @@ class TestRetrieval(unittest.TestCase):
         from ranking.reranker import Reranker
         from agent import ResearchAgent
 
-
         reranker = Reranker()
         malformed_docs = [
             Document(id="m1", title="", authors=None, abstract=None, url="u1", published="2025", source="s1"),
@@ -91,7 +81,6 @@ class TestRetrieval(unittest.TestCase):
         ranked = reranker.rerank("Attention Is All You Need", malformed_docs)
         self.assertTrue(len(ranked) > 0)
         self.assertEqual(ranked[0].title, "Attention Is All You Need")
-
 
         agent = ResearchAgent()
         report_exact = agent.run("Attention Is All You Need")
@@ -129,7 +118,5 @@ class TestRetrieval(unittest.TestCase):
         self.assertIn("citation_list", report)
         self.assertNotEqual(report.get("status"), "HTTP 500")
 
-
 if __name__ == "__main__":
     unittest.main()
-

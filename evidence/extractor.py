@@ -1,18 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Aspect-Aware Grounded Evidence Extraction Module
-Extracts factual evidence snippets from retrieved academic abstracts and verified sources.
-Scores sentence-level relevance using query alignment, aspect classification,
-assertion strength, and document ranking signals.
-"""
-
 import re
 import logging
 from typing import List, Dict, Any
 from retrieval.base import Document
 
 logger = logging.getLogger(__name__)
-
 
 class EvidenceExtractor:
 
@@ -31,7 +22,6 @@ class EvidenceExtractor:
         evidence_list = []
         topic_words = set(w.lower() for w in re.findall(r"\w+", topic) if len(w) > 2)
 
-        # Detect which aspects the user's research topic is asking about
         t_lower = topic.lower()
         query_aspects = set()
         if re.search(r"\b(evolv|since\s+\d{4}|recent|history|trend)\b", t_lower):
@@ -47,7 +37,6 @@ class EvidenceExtractor:
             doc_title_words = set(w.lower() for w in re.findall(r"\w+", doc.title) if len(w) > 2)
             title_overlap_ratio = len(topic_words.intersection(doc_title_words)) / len(topic_words) if topic_words else 0.0
 
-            # Document ranking score factor
             raw_final_score = doc.metadata.get("final_score", 0.5) if doc.metadata else 0.5
             doc_score_factor = 1.0 if raw_final_score >= 1.0 else min(1.0, max(0.2, float(raw_final_score)))
 
@@ -64,20 +53,17 @@ class EvidenceExtractor:
                 overlap = len(topic_words.intersection(s_words))
                 base_rel = overlap / len(topic_words) if topic_words else 0.4
 
-                # Determine primary aspect of sentence
                 primary_aspect = "findings"
                 for aspect_name, pattern in self.ASPECT_PATTERNS.items():
                     if re.search(pattern, sentence_clean, re.IGNORECASE):
                         primary_aspect = aspect_name
                         break
 
-                # If sentence or title has query relevance
                 if overlap > 0 or title_overlap_ratio > 0.25:
                     finding_kws = {"propose", "show", "achieve", "demonstrate", "outperform", "find", "results", "model", "accuracy", "evaluate", "reduce", "increase", "improve", "benchmark"}
                     has_finding = bool(s_words.intersection(finding_kws))
                     finding_boost = 0.15 if has_finding else 0.0
 
-                    # Boost if the snippet directly answers an aspect explicitly asked in user query
                     aspect_boost = 0.15 if (primary_aspect in query_aspects) else 0.0
                     title_boost = 0.15 if title_overlap_ratio > 0.3 else 0.0
 
@@ -98,7 +84,6 @@ class EvidenceExtractor:
                         "authors": doc.authors,
                     })
 
-        # Sort by relevance score descending
         evidence_list.sort(key=lambda x: x["relevance_score"], reverse=True)
         logger.info(f"Extracted {len(evidence_list)} evidence snippets across {len(documents)} documents.")
         return evidence_list[:16]

@@ -1,4 +1,3 @@
-
 import os
 import json
 import logging
@@ -7,7 +6,6 @@ import urllib.error
 from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
-
 
 class LLMClient:
 
@@ -106,7 +104,7 @@ class LLMClient:
         model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={self.gemini_api_key}"
         headers = {"Content-Type": "application/json"}
-        
+
         contents = []
         if system_prompt:
             contents.append({"role": "user", "parts": [{"text": f"System Instruction: {system_prompt}\n\nTask: {prompt}"}]})

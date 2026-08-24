@@ -1,7 +1,5 @@
-
 import unittest
 from evidence.claims import ClaimGenerator
-
 
 class TestClaims(unittest.TestCase):
 
@@ -17,7 +15,6 @@ class TestClaims(unittest.TestCase):
             has_contradiction=False
         )
         self.assertGreaterEqual(score_high, 0.8)
-
 
         score_low = self.generator._calculate_confidence(
             num_sources=1,
@@ -42,7 +39,6 @@ class TestClaims(unittest.TestCase):
         self.assertEqual(len(claims), 1)
         self.assertIn("confidence", claims[0])
         self.assertGreater(claims[0]["confidence"], 0.0)
-
 
 if __name__ == "__main__":
     unittest.main()

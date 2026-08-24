@@ -1,20 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Comprehensive Pipeline Reliability & Feature Test Suite
-Covers:
-- Canonical papers exclusion from production retrieval
-- Semantic retrieval integration
-- ArXiv instance URL usage and HTTP 429 resilience
-- Exact title retrieval and score boosting
-- Contradiction 4-state analysis
-- Evidence-backed research gap validation
-- Temporal query extraction & preservation
-- Date-aware ranking prioritization
-- Unknown web publication year handling (never defaults to 2025)
-- Real relevance and evidence_count metrics in report citations
-- Aspect-aware evidence extraction
-"""
-
 import unittest
 from unittest.mock import MagicMock, patch
 from retrieval.base import Document
@@ -37,12 +20,11 @@ from synthesis.gaps import ResearchGapAnalyzer
 from synthesis.report import ReportSynthesizer
 from agent import ResearchAgent, AgentConfig
 
-
 class TestPipelineReliability(unittest.TestCase):
 
     def test_canonical_papers_not_injected_in_unrelated_queries(self):
         agent = ResearchAgent(config=AgentConfig(timeout_seconds=2))
-        
+
         mock_docs = [
             Document(
                 id="doc_bio_1",
@@ -84,7 +66,6 @@ class TestPipelineReliability(unittest.TestCase):
         retriever = ArxivRetriever(api_url=custom_url, timeout=3)
         self.assertEqual(retriever.api_url, custom_url)
 
-        # Mock 429 response
         mock_429 = MagicMock()
         mock_429.status_code = 429
         with patch("requests.get", return_value=mock_429) as mock_get:
@@ -104,7 +85,6 @@ class TestPipelineReliability(unittest.TestCase):
         self.assertEqual(ranked[0].title, "Attention Is All You Need")
         self.assertGreater(ranked[0].metadata["final_score"], 100.0)
 
-        # Also test BERT title matching
         bert_docs = [
             Document(id="b1", title="Evaluating Language Models", authors=["A"], abstract="Language model benchmarks.", url="http://1", published="2021", source="arXiv"),
             Document(id="b2", title="BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", authors=["Jacob Devlin"], abstract="BERT paper.", url="http://2", published="2018", source="arXiv"),
@@ -113,7 +93,7 @@ class TestPipelineReliability(unittest.TestCase):
         self.assertEqual(ranked_bert[0].title, "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding")
 
     def test_temporal_query_extraction_and_decomposition(self):
-        # Test temporal extraction
+
         t1 = extract_temporal_constraints("OCR for low-resource Indic languages since 2024")
         self.assertTrue(t1["has_temporal_constraint"])
         self.assertEqual(t1["min_year"], 2024)
@@ -127,16 +107,13 @@ class TestPipelineReliability(unittest.TestCase):
         self.assertEqual(t3["min_year"], 2023)
         self.assertEqual(t3["max_year"], 2025)
 
-        # Test complex multi-aspect query decomposition
         complex_query = "How has OCR for low-resource Indic languages evolved since 2024, what methods currently perform best, what limitations remain, and what research directions are still unexplored?"
         decomposer = QueryDecomposer()
         subqueries = decomposer.decompose(complex_query)
 
-        # Original query must be preserved as subquery 1
         self.assertEqual(subqueries[0], complex_query)
         self.assertGreaterEqual(len(subqueries), 3)
 
-        # Subqueries should capture aspect dimensions
         joined_sqs = " ".join(subqueries).lower()
         self.assertTrue("since 2024" in joined_sqs or "evolution" in joined_sqs or "2024" in joined_sqs)
         self.assertTrue("methods" in joined_sqs or "best" in joined_sqs or "state of the art" in joined_sqs)
@@ -144,8 +121,7 @@ class TestPipelineReliability(unittest.TestCase):
 
     def test_date_aware_ranking_prioritizes_recent_papers(self):
         reranker = Reranker()
-        
-        # Two papers with identical titles/abstracts except publication year
+
         doc_old = Document(
             id="p_old",
             title="Printed OCR for Low-Resource Indic Languages",
@@ -167,22 +143,19 @@ class TestPipelineReliability(unittest.TestCase):
             content="Printed OCR for Low-Resource Indic Languages"
         )
 
-        # Query WITH temporal constraint: recent paper must rank #1
         temporal_query = "OCR for low-resource Indic languages since 2024"
         ranked = reranker.rerank(temporal_query, [doc_old, doc_recent])
         self.assertEqual(ranked[0].id, "p_recent")
         self.assertEqual(ranked[1].id, "p_old")
         self.assertGreater(ranked[0].metadata["final_score"], ranked[1].metadata["final_score"])
 
-        # Query WITHOUT temporal constraint: does not artificially distort ranking
         unconstrained_query = "OCR for low-resource Indic languages"
         ranked_unconstrained = reranker.rerank(unconstrained_query, [doc_old, doc_recent])
         self.assertEqual(len(ranked_unconstrained), 2)
 
     def test_web_retriever_unknown_year_not_hardcoded_2025(self):
         web = WebRetriever()
-        
-        # Test OpenAlex result with missing publication_year
+
         with patch("requests.get") as mock_get:
             mock_resp = MagicMock()
             mock_resp.status_code = 200
@@ -257,15 +230,14 @@ class TestPipelineReliability(unittest.TestCase):
 
         evidence = extractor.extract_evidence([doc], "How has OCR evolved, what methods perform best, and what limitations remain?")
         self.assertGreaterEqual(len(evidence), 2)
-        
-        # Check aspect tagging
+
         aspects = [ev.get("aspect") for ev in evidence]
         self.assertTrue("limitations" in aspects or "methods" in aspects or "findings" in aspects)
         self.assertTrue(all(ev["source_type"] == "abstract" for ev in evidence))
 
     def test_contradiction_states(self):
         detector = ContradictionDetector()
-        
+
         claim_support = {
             "claim": "RAG reduces factual hallucinations in large language models",
             "evidence": [{"paper_id": "p1", "snippet": "RAG significantly reduces hallucinations and improves accuracy.", "source_url": "http://1"}]
@@ -276,7 +248,6 @@ class TestPipelineReliability(unittest.TestCase):
         res_support = detector.analyze_claim(claim_support, all_ev_support)
         self.assertEqual(res_support["status"], "SUPPORTED")
 
-        # Mixed / Challenge evidence
         all_ev_mixed = [
             {"paper_id": "p1", "snippet": "RAG significantly reduces hallucinations and improves accuracy.", "source_url": "http://1", "relevance_score": 0.9},
             {"paper_id": "p2", "snippet": "Our empirical study shows that RAG fails to reduce error rates under noisy retrieved contexts.", "source_url": "http://2", "relevance_score": 0.85}
@@ -284,14 +255,12 @@ class TestPipelineReliability(unittest.TestCase):
         res_mixed = detector.analyze_claim(claim_support, all_ev_mixed)
         self.assertEqual(res_mixed["status"], "MIXED")
 
-        # Insufficient evidence
         res_insufficient = detector.analyze_claim({"claim": "Quantum annealing optimizes RAG routing"}, [])
         self.assertEqual(res_insufficient["status"], "INSUFFICIENT")
 
     def test_no_unsupported_research_gaps(self):
         analyzer = ResearchGapAnalyzer()
-        
-        # Snippets with standard empirical findings (not limitation / bottleneck)
+
         clean_evidence = [
             {
                 "paper_id": "p1",
@@ -307,7 +276,6 @@ class TestPipelineReliability(unittest.TestCase):
         proposals = analyzer.propose_next_research(gaps, {})
         self.assertEqual(len(proposals), 0)
 
-        # Snippets with explicit substantive limitations
         limitation_evidence = [
             {
                 "paper_id": "p2",
@@ -320,7 +288,6 @@ class TestPipelineReliability(unittest.TestCase):
         gaps_with_lim = analyzer.detect_gaps(limitation_evidence)
         self.assertGreater(len(gaps_with_lim), 0)
         self.assertTrue(any("Scarcity" in g["gap"] or "Bottleneck" in g["gap"] for g in gaps_with_lim))
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,8 +1,6 @@
-
 import unittest
 from unittest.mock import patch, MagicMock
 from retrieval.web import WebRetriever
-
 
 class TestWebRetriever(unittest.TestCase):
 
@@ -51,7 +49,6 @@ class TestWebRetriever(unittest.TestCase):
 
         docs = self.retriever.search("test query", top_k=5)
         self.assertEqual(len(docs), 0)
-
 
 if __name__ == "__main__":
     unittest.main()

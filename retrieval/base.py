@@ -1,9 +1,7 @@
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 import datetime
-
 
 @dataclass
 class Document:
@@ -35,7 +33,6 @@ class Document:
             "arxiv_id": self.arxiv_id,
             "metadata": self.metadata,
         }
-
 
 class BaseRetriever(ABC):
 

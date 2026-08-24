@@ -1,10 +1,8 @@
-
 import json
 import logging
 from typing import Dict, Any, List
 
 logger = logging.getLogger(__name__)
-
 
 class Evaluator:
 
@@ -42,17 +40,14 @@ class Evaluator:
                 return any(kw.lower() in t for kw in expected_keywords)
             return True
 
-        # Relevant document retrieval precision
         precision = 0.0
         if total_unique > 0:
             relevant_count = sum(1 for doc in retrieved_docs if is_doc_relevant(doc))
             precision = round(relevant_count / total_unique, 2)
 
-        # Top-1 and Top-3 retrieval metrics
         top_1_retrieval = 1.0 if (total_unique > 0 and is_doc_relevant(retrieved_docs[0])) else 0.0
         top_3_retrieval = 1.0 if (total_unique > 0 and any(is_doc_relevant(d) for d in retrieved_docs[:3])) else 0.0
 
-        # Evidence availability and grounding
         all_ev = [ev for c in claims for ev in c.get("evidence", [])]
         evidence_availability = 1.0 if len(all_ev) > 0 else 0.0
 

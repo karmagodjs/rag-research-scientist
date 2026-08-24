@@ -1,4 +1,3 @@
-
 from typing import List
 from retrieval.base import Document
 
@@ -40,7 +39,6 @@ CANONICAL_PAPERS: List[Document] = [
         content="Title: Deep Residual Learning for Image Recognition\nAuthors: Kaiming He et al.\nAbstract: Deep Residual Networks (ResNet)."
     )
 ]
-
 
 def get_canonical_papers() -> List[Document]:
     return list(CANONICAL_PAPERS)

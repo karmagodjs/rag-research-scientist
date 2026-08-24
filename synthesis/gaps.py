@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Scientific Research Gap Analysis & Hypothesis Formulation Module
-Identifies grounded literature gaps directly supported by extracted empirical evidence.
-Avoids speculative or generic gap formulations when evidence is absent.
-"""
-
 import re
 import json
 import logging
@@ -13,10 +6,8 @@ from evidence.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
-
 class ResearchGapAnalyzer:
 
-    # Contextual, substantive challenge and limitation patterns (not isolated single words)
     GAP_INDICATORS = [
         (
             r"\b(fundamental limitation|major bottleneck|capacity constraint|severe latency|high computational overhead|scaling bottleneck)\b",

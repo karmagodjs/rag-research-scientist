@@ -428,7 +428,7 @@ button {
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
-  gap: 8px;
+  gap: 0;
 }
 
 /* ==========================================================================

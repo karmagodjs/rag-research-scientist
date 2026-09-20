@@ -68,29 +68,14 @@ function initNavigation() {
     switchView('viewSources');
   });
 
-  // Mobile Sidebar Drawer Toggle
-  const btnToggle = document.getElementById('btnSidebarToggle');
-  const sidebar = document.getElementById('appSidebar');
-  btnToggle?.addEventListener('click', () => {
-    sidebar?.classList.toggle('open');
-  });
-
   // Close mobile sidebar on nav click
+  const sidebar = document.getElementById('appSidebar');
   navBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       if (window.innerWidth <= 860) {
         sidebar?.classList.remove('open');
       }
     });
-  });
-
-  // Toggle Right Sidebar (Mobile / Tablet)
-  const btnToggleRight = document.getElementById('btnToggleRightSidebar');
-  const rightSidebar = document.getElementById('rightSidebar');
-  btnToggleRight?.addEventListener('click', () => {
-    if (rightSidebar) {
-      rightSidebar.style.display = (rightSidebar.style.display === 'none' || getComputedStyle(rightSidebar).display === 'none') ? 'flex' : 'none';
-    }
   });
 }
 
@@ -1143,24 +1128,8 @@ function initExportsAndModals() {
     if (el) el.value = e.target.value;
   });
 
-  // Global search input filter
-  const globalSearch = document.getElementById('globalSearchInput');
-  globalSearch?.addEventListener('input', () => {
-    const q = globalSearch.value.toLowerCase().trim();
-    document.querySelectorAll('.finding-card, .academic-source-card').forEach(card => {
-      const match = !q || card.textContent.toLowerCase().includes(q);
-      card.style.display = match ? '' : 'none';
-    });
-  });
-
   // Global Keyboard Shortcuts
   document.addEventListener('keydown', (e) => {
-    // Ctrl + K -> Focus global search
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      globalSearch?.focus();
-      globalSearch?.select();
-    }
     // Ctrl + N -> New research
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
       e.preventDefault();
@@ -1173,11 +1142,10 @@ function initExportsAndModals() {
         qInput.focus();
       }
     }
-    // Escape -> Close modals / blur
+    // Escape -> Close modals
     if (e.key === 'Escape') {
       modal?.classList.remove('active');
       document.getElementById('appSidebar')?.classList.remove('open');
-      globalSearch?.blur();
     }
   });
 

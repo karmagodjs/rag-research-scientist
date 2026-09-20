@@ -54,6 +54,22 @@ class ResearchHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         path = self.path
 
+        if path in ["/api/sample", "/api/research/sample"]:
+            sample_file = os.path.join(os.path.dirname(__file__), "report.json")
+            if os.path.exists(sample_file):
+                try:
+                    with open(sample_file, "r", encoding="utf-8") as f:
+                        self._send_json(json.load(f))
+                        return
+                except Exception:
+                    pass
+            self._send_json({"error": "Sample report not found"}, status=404)
+            return
+
+        if path.rstrip('/') in ["/api/research", "/api/history"]:
+            self._send_json({"items": storage.list_all()})
+            return
+
         if path.startswith("/api/research"):
             parts = path.strip("/").split("/")  
 

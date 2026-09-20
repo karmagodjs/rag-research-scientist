@@ -1,473 +1,475 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>RAG Research Scientist Workstation</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evidence-Oriented Research Agent</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=2.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=9.0">
 </head>
 <body>
 
-  <div class="app-shell">
+  <div class="app-layout" id="appLayout">
 
-    <header class="app-header">
-      <div class="header-left">
-        <div class="brand-title">RAG RESEARCH SCIENTIST</div>
-        <div class="brand-sub">Evidence before conclusions.</div>
+    <!-- ================================================== -->
+    <!-- 1. SIMPLIFIED LEFT SIDEBAR                         -->
+    <!-- ================================================== -->
+    <aside class="sidebar" id="appSidebar" aria-label="Main Navigation">
+      <!-- App Brand -->
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <circle cx="19" cy="5" r="2"></circle>
+            <circle cx="5" cy="19" r="2"></circle>
+            <path d="M10.4 10.4 6.4 17.6"></path>
+            <path d="M17.6 6.4 13.6 13.6"></path>
+            <circle cx="5" cy="5" r="2"></circle>
+            <path d="M6.5 6.5 10.5 10.5"></path>
+          </svg>
+        </div>
+        <div class="brand-text-block">
+          <span class="brand-title">Research Agent</span>
+          <span class="brand-subtitle">Evidence-Backed Discovery</span>
+        </div>
       </div>
 
-      <nav class="nav-tabs" role="tablist" aria-label="Investigation Views">
-        <button class="tab-btn active" data-tab="tab-synthesis" role="tab" aria-selected="true">
-          <span class="tab-num">01</span> Synthesis & Claims
+      <!-- Action: + New Research -->
+      <div class="sidebar-action-wrap">
+        <button type="button" class="btn-new-research" id="btnNewResearch" title="Start a new research investigation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Research</span>
         </button>
-        <button class="tab-btn" data-tab="tab-graph" role="tab" aria-selected="false">
-          <span class="tab-num">02</span> Evidence Graph
+      </div>
+
+      <!-- Clean User Navigation Items: Home, My Research, Sources -->
+      <nav class="sidebar-nav">
+        <button type="button" class="nav-btn active" data-view="viewHome" id="navHome">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Home</span>
         </button>
-        <button class="tab-btn" data-tab="tab-literature" role="tab" aria-selected="false">
-          <span class="tab-num">03</span> Literature
+
+        <button type="button" class="nav-btn" data-view="viewMyResearch" id="navMyResearch">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span>My Research</span>
+          <span class="nav-badge" id="myResearchCountBadge">0</span>
         </button>
-        <button class="tab-btn" data-tab="tab-analytics" role="tab" aria-selected="false">
-          <span class="tab-num">04</span> Visualizations
-        </button>
-        <button class="tab-btn" data-tab="tab-gaps" role="tab" aria-selected="false">
-          <span class="tab-num">05</span> Research Gaps
-        </button>
-        <button class="tab-btn" data-tab="tab-recommendations" role="tab" aria-selected="false">
-          <span class="tab-num">06</span> Next Research
+
+        <button type="button" class="nav-btn" data-view="viewSources" id="navSources">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span>Sources</span>
+          <span class="nav-badge" id="sourcesCountBadge">0</span>
         </button>
       </nav>
 
-      <div class="header-right">
-        <button id="btnAbout" class="btn-action-sm" aria-label="About this workstation">ABOUT</button>
-        <button id="btnThemeToggle" class="btn-action-sm">LIGHT MODE</button>
-        <button id="btnExportJson" class="btn-action-sm">Export JSON</button>
-        <button id="btnExportMarkdown" class="btn-action-sm">Export Markdown</button>
-      </div>
-    </header>
+      <!-- Section Divider -->
+      <div class="sidebar-divider"></div>
 
-    <div class="query-bar-container">
-      <div class="composer-wrapper">
-        <div class="research-composer" id="researchComposer">
-          <textarea id="queryInput" placeholder="What do you want to investigate?" aria-label="Research question" rows="1"></textarea>
-          <div class="composer-controls">
-            <div class="composer-controls-right">
-              <span class="composer-hint" title="Press Ctrl + Enter to submit">Ctrl <span class="kbd-icon">↵</span></span>
-              <button type="button" id="btnRunAgent" class="composer-run-btn" aria-label="Run research" disabled>
-                <svg class="run-icon-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 13V3M8 3L3.5 7.5M8 3L12.5 7.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <svg class="run-icon-spinner" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="8" cy="8" r="6" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10" stroke-linecap="round">
-                    <animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/>
-                  </circle>
-                </svg>
-              </button>
+      <!-- Recent Research History (Capped at 5 items + View all) -->
+      <div class="sidebar-recent-container">
+        <div class="recent-header">
+          <span class="recent-label">RECENT RESEARCH</span>
+          <button type="button" class="btn-clear-history" id="btnClearRecent" title="Clear history">Clear</button>
+        </div>
+        <div class="recent-items-list" id="recentResearchList">
+          <!-- Populated dynamically (max 5-6 items) -->
+        </div>
+        <button type="button" class="btn-sidebar-view-all" id="btnSidebarViewAll" title="View all investigations in My Research">
+          <span>View all</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Section Divider -->
+      <div class="sidebar-divider"></div>
+
+      <!-- Sidebar Footer (Settings only) -->
+      <div class="sidebar-footer">
+        <button type="button" class="btn-footer-link" id="btnOpenSettings" title="Research Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ================================================== -->
+    <!-- MAIN WORKSPACE & TOP BAR                           -->
+    <!-- ================================================== -->
+    <div class="workspace-area">
+
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="btn-sidebar-toggle" id="btnSidebarToggle" aria-label="Toggle navigation drawer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="topbar-search-box">
+            <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="globalSearchInput" placeholder="Search research, papers, or claims..." aria-label="Quick search">
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button type="button" class="btn-topbar-icon" id="btnToggleRightSidebar" title="Toggle Overview Panel" aria-label="Toggle overview panel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="15" y1="3" x2="15" y2="21"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Body (Center Content + Right Overview) -->
+      <div class="main-body-split">
+
+        <!-- ================================================== -->
+        <!-- CENTER MAIN WORKSPACE                              -->
+        <!-- ================================================== -->
+        <main class="center-content-scroll" id="mainContentScroll">
+
+          <!-- VIEW 1: HOME (PRIMARY NORMAL USER WORKFLOW) -->
+          <div class="view-pane active" id="viewHome">
+            
+            <!-- 3. RESEARCH QUESTION COMPOSER HERO -->
+            <section class="research-hero-card">
+              <div class="hero-header">
+                <h1 class="hero-title">Evidence-Backed Scientific Research</h1>
+                <p class="hero-subtitle">Ask any scientific hypothesis or domain question to synthesize answers grounded in verified papers.</p>
+              </div>
+
+              <div class="hero-input-box">
+                <textarea id="queryInput" placeholder="What scientific question or hypothesis do you want to investigate?" rows="2" aria-label="Research question"></textarea>
+                <div class="hero-input-footer">
+                  <div class="hero-footer-right">
+                    <button type="button" class="btn-run-research" id="btnRunAgent" disabled>
+                      <span class="btn-text">Run Research</span>
+                      <svg class="icon-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                      <svg class="icon-spinner" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                        <circle cx="8" cy="8" r="6" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10" stroke-linecap="round">
+                          <animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/>
+                        </circle>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Hidden inputs for underlying configuration defaults -->
+                <input type="hidden" id="maxPapersInput" value="15">
+                <input type="hidden" id="iterationsInput" value="1">
+              </div>
+            </section>
+
+            <!-- 4. SIMPLIFIED 5-STAGE RESEARCH PIPELINE -->
+            <section class="research-pipeline-card">
+              <div class="pipeline-header">
+                <span class="pipeline-title">RESEARCH PIPELINE</span>
+              </div>
+              <div class="pipeline-steps-container">
+                <div class="pipeline-step-box" data-step="retrieve" id="pstep-retrieve">
+                  <div class="step-circle">1</div>
+                  <div class="step-info">
+                    <span class="step-name">Retrieve</span>
+                    <span class="step-desc" id="pdesc-retrieve">Find relevant literature</span>
+                  </div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="pipeline-step-box" data-step="rank" id="pstep-rank">
+                  <div class="step-circle">2</div>
+                  <div class="step-info">
+                    <span class="step-name">Rank</span>
+                    <span class="step-desc" id="pdesc-rank">Prioritize relevant sources</span>
+                  </div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="pipeline-step-box" data-step="extract" id="pstep-extract">
+                  <div class="step-circle">3</div>
+                  <div class="step-info">
+                    <span class="step-name">Extract Evidence</span>
+                    <span class="step-desc" id="pdesc-extract">Find supporting passages</span>
+                  </div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="pipeline-step-box" data-step="analyze" id="pstep-analyze">
+                  <div class="step-circle">4</div>
+                  <div class="step-info">
+                    <span class="step-name">Analyze Claims</span>
+                    <span class="step-desc" id="pdesc-analyze">Verify findings</span>
+                  </div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="pipeline-step-box" data-step="synthesize" id="pstep-synthesize">
+                  <div class="step-circle">5</div>
+                  <div class="step-info">
+                    <span class="step-name">Synthesize</span>
+                    <span class="step-desc" id="pdesc-synthesize">Generate evidence-backed answer</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 5. RESULTS: RESEARCH SYNTHESIS & FINDINGS -->
+            <section class="results-area" id="resultsArea">
+              
+              <!-- Research Synthesis (Main Synthesized Answer) -->
+              <div class="synthesis-card">
+                <div class="synthesis-header">
+                  <div class="synthesis-header-left">
+                    <div class="badge-icon-wrap">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                      </svg>
+                    </div>
+                    <h2 class="synthesis-title">Research Synthesis</h2>
+                  </div>
+                </div>
+                <div class="synthesis-body" id="executiveSummaryText">
+                  <strong>No investigation running</strong><br>
+                  <span class="finding-subtext">Ask a scientific research question above to synthesize answers grounded in peer-reviewed literature.</span>
+                </div>
+              </div>
+
+              <!-- Key Findings & Claims -->
+              <div class="findings-container">
+                <div class="section-title-row">
+                  <h3 class="section-heading">Key Findings & Verified Claims</h3>
+                </div>
+                <div class="claims-list" id="claimsList"></div>
+              </div>
+
+            </section>
+
+          </div>
+
+          <!-- VIEW 2: MY RESEARCH (SAVED & PAST INVESTIGATIONS) -->
+          <div class="view-pane" id="viewMyResearch">
+            <div class="pane-header">
+              <div>
+                <h2 class="pane-title">My Research</h2>
+                <p class="pane-subtitle">Access your past investigations, synthesized reports, and verified evidence ledgers.</p>
+              </div>
+              <div class="pane-search-box">
+                <input type="text" id="myResearchSearchInput" placeholder="Filter investigations..." class="input-search-sm">
+              </div>
+            </div>
+            <div class="my-research-grid" id="myResearchGrid">
+              <!-- Dynamically populated past investigations -->
             </div>
           </div>
-        </div>
 
-        <div class="composer-suggestions">
-          <span class="suggestions-label">TRY AN INVESTIGATION</span>
-          <div class="suggestions-list">
-            <button type="button" class="suggestion-chip" data-query="Compare recent vision-language models for OCR on low-resource Indic scripts and identify unexplored research gaps.">Compare recent VLMs for OCR</button>
-            <button type="button" class="suggestion-chip" data-query="Find research gaps and benchmark limitations in low-resource NLP.">Find gaps in low-resource NLP</button>
-            <button type="button" class="suggestion-chip" data-query="Analyze conflicting evidence across recent scientific papers.">Analyze conflicting evidence</button>
-            <button type="button" class="suggestion-chip" data-query="Investigate retrieval-augmented scientific discovery agents and evidence synthesis pipelines.">Investigate scientific discovery agents</button>
+          <!-- VIEW 3: SOURCES (ACADEMIC LITERATURE LIBRARY) -->
+          <div class="view-pane" id="viewSources">
+            <div class="pane-header">
+              <div>
+                <h2 class="pane-title">Literature & Sources</h2>
+                <p class="pane-subtitle">Peer-reviewed papers and academic sources retrieved for the active research.</p>
+              </div>
+              <div class="sources-toolbar">
+                <input type="text" id="sourcesFilterInput" placeholder="Search papers by title, author..." class="input-search-sm">
+                <select id="sourcesTypeSelect" class="form-select-sm">
+                  <option value="all">All Sources</option>
+                  <option value="arxiv">arXiv Only</option>
+                  <option value="web">Web Only</option>
+                </select>
+                <select id="sourcesSortSelect" class="form-select-sm">
+                  <option value="relevance">Sort: Relevance</option>
+                  <option value="year">Sort: Year</option>
+                </select>
+              </div>
+            </div>
+            <div class="sources-full-grid" id="sourcesFullGrid">
+              <!-- Dynamically populated academic source cards -->
+            </div>
           </div>
-        </div>
+
+        </main>
+
+        <!-- ================================================== -->
+        <!-- RIGHT SIDEBAR: OVERVIEW & TOP SOURCES              -->
+        <!-- ================================================== -->
+        <aside class="right-overview-sidebar" id="rightSidebar" aria-label="Research Overview and Top Sources">
+          
+          <!-- 7. CLEAN USER-FACING METRICS -->
+          <div class="overview-card">
+            <div class="overview-card-header">
+              <span class="card-kicker">RESEARCH OVERVIEW</span>
+            </div>
+            <div class="metrics-grid">
+              <div class="metric-item">
+                <span class="metric-num" id="mSourcesFound">0</span>
+                <span class="metric-label">Sources Found</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-num" id="mRelevantSources">0</span>
+                <span class="metric-label">Relevant Sources</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-num" id="mEvidenceFound">0</span>
+                <span class="metric-label">Evidence Found</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-num" id="mClaimsFound">0</span>
+                <span class="metric-label">Claims Found</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. TOP SOURCES LIST -->
+          <div class="overview-card top-sources-card">
+            <div class="overview-card-header">
+              <span class="card-kicker">TOP SOURCES</span>
+              <button type="button" class="btn-text-action" id="btnViewAllSources">View All</button>
+            </div>
+            <div class="top-sources-list" id="topSourcesList">
+              <div class="empty-sources-note">Run an investigation to view top academic sources.</div>
+            </div>
+          </div>
+
+          <!-- SOURCE PREVIEW DRAWER -->
+          <div class="overview-card preview-card" id="sourcePreviewCard">
+            <div class="overview-card-header">
+              <span class="card-kicker">SOURCE PREVIEW</span>
+              <span class="preview-badge" id="previewYearSource">-</span>
+            </div>
+            <div class="preview-body">
+              <h4 class="preview-title" id="previewTitle">No source selected</h4>
+              <p class="preview-authors" id="previewAuthors">-</p>
+              
+              <div class="preview-snippet-box">
+                <span class="snippet-label">EXTRACTED EVIDENCE:</span>
+                <p class="preview-snippet" id="previewSnippet">Click on any claim citation or paper card to preview verified evidence.</p>
+              </div>
+
+              <div class="preview-footer">
+                <span class="preview-relevance" id="previewRelevance">Relevance: -</span>
+                <div class="preview-actions-group">
+                  <button type="button" class="btn-preview-evidence" id="btnPreviewEvidence" title="View matching evidence in results">
+                    <span>View Evidence</span>
+                  </button>
+                  <a href="#" target="_blank" rel="noopener noreferrer" class="btn-open-paper disabled" id="btnPreviewOpen">
+                    <span>Open Paper</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </aside>
+
       </div>
     </div>
-
-    <main class="app-body">
-
-      <section id="tab-synthesis" class="view-page active" role="tabpanel">
-        <div class="three-column-workstation">
-
-          <aside class="col-trace">
-            <div class="section-title-sm">RESEARCH TRACE</div>
-            <div class="trace-list" id="traceStageList">
-              <div class="trace-item" data-stage="01">
-                <span class="trace-num">01</span>
-                <div class="trace-info">
-                  <span class="trace-label">Query Planner</span>
-                  <span class="trace-sub">Decompose question</span>
-                </div>
-                <span class="trace-status status-ready">READY</span>
-              </div>
-              <div class="trace-item" data-stage="02">
-                <span class="trace-num">02</span>
-                <div class="trace-info">
-                  <span class="trace-label">Multi-Retrieval</span>
-                  <span class="trace-sub">arXiv + Web search</span>
-                </div>
-                <span class="trace-status status-ready">READY</span>
-              </div>
-              <div class="trace-item" data-stage="03">
-                <span class="trace-num">03</span>
-                <div class="trace-info">
-                  <span class="trace-label">Deduplication</span>
-                  <span class="trace-sub">Remove duplicates</span>
-                </div>
-                <span class="trace-status status-ready">READY</span>
-              </div>
-              <div class="trace-item" data-stage="04">
-                <span class="trace-num">04</span>
-                <div class="trace-info">
-                  <span class="trace-label">Reranker</span>
-                  <span class="trace-sub">Rank passages</span>
-                </div>
-                <span class="trace-status status-ready">READY</span>
-              </div>
-              <div class="trace-item" data-stage="05">
-                <span class="trace-num">05</span>
-                <div class="trace-info">
-                  <span class="trace-label">Evidence Extraction</span>
-                  <span class="trace-sub">Extract passages</span>
-                </div>
-                <span class="trace-status status-ready">READY</span>
-              </div>
-              <div class="trace-item" data-stage="06">
-                <span class="trace-num">06</span>
-                <div class="trace-info">
-                  <span class="trace-label">Claim Analysis</span>
-                  <span class="trace-sub">Build claims</span>
-                </div>
-                <span class="trace-status status-ready">READY</span>
-              </div>
-              <div class="trace-item" data-stage="07">
-                <span class="trace-num">07</span>
-                <div class="trace-info">
-                  <span class="trace-label">Contradiction Analysis</span>
-                  <span class="trace-sub">Detect disagreement</span>
-                </div>
-                <span class="trace-status status-ready">READY</span>
-              </div>
-              <div class="trace-item" data-stage="08">
-                <span class="trace-num">08</span>
-                <div class="trace-info">
-                  <span class="trace-label">Synthesis</span>
-                  <span class="trace-sub">Produce conclusion</span>
-                </div>
-                <span class="trace-status status-ready">READY</span>
-              </div>
-            </div>
-
-            <div class="trace-output-box">
-              <div class="section-title-sm">STAGE EXECUTION LOG</div>
-              <div class="trace-log-text" id="traceLogText">
-                System ready. Ask a research question above to execute the multi-agent pipeline.
-              </div>
-            </div>
-          </aside>
-
-          <article class="col-synthesis">
-            <div class="synthesis-header">
-              <div class="meta-label">RESEARCH QUESTION</div>
-              <h1 class="research-question-text" id="centerQueryTitle">RESEARCH WORKSPACE</h1>
-            </div>
-
-            <div class="section-block">
-              <div class="section-title-sm">EXECUTIVE FINDING</div>
-              <div class="executive-finding-box" id="executiveFindingText">
-                <strong>No investigation running</strong><br>
-                <span class="finding-subtext">Ask a research question above to begin an evidence-grounded investigation across arXiv and scientific literature.</span>
-              </div>
-            </div>
-
-            <div class="section-block">
-              <div class="section-title-sm">KEY CLAIMS</div>
-              <div id="centerClaimsList" class="claims-list"></div>
-            </div>
-          </article>
-
-          <aside class="col-inspector" id="synthesisInspector">
-            <div class="section-title-sm" id="inspHeaderTitle">EVIDENCE INSPECTOR</div>
-
-            <div class="inspector-card">
-              <div class="insp-row">
-                <div class="insp-label">Paper</div>
-                <div class="insp-val" id="inspPaperTitle">No evidence selected</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Source</div>
-                <div class="insp-val" id="inspSource">-</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Published</div>
-                <div class="insp-val" id="inspPublished">-</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Relevance</div>
-                <div class="insp-val highlight" id="inspRelevance">-</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Evidence Passage</div>
-                <div class="insp-val passage-quote" id="inspSnippet">
-                  Run an investigation to populate verified evidence.
-                </div>
-              </div>
-              <a id="btnOpenPaperLink" href="#" target="_blank" class="btn-open-paper disabled">[ OPEN PAPER ]</a>
-            </div>
-          </aside>
-
-        </div>
-      </section>
-
-      <section id="tab-graph" class="view-page" role="tabpanel">
-        <div class="graph-workstation">
-
-          <div class="graph-toolbar">
-            <div class="graph-filters">
-              <span class="filter-title">FILTER NODES</span>
-              <div class="segmented-control">
-                <button class="node-filter-btn active" data-type="all">ALL</button>
-                <button class="node-filter-btn" data-type="paper">PAPER</button>
-                <button class="node-filter-btn" data-type="claim">CLAIM</button>
-                <button class="node-filter-btn" data-type="method">METHOD</button>
-                <button class="node-filter-btn" data-type="dataset">DATASET</button>
-                <button class="node-filter-btn" data-type="gap">GAP</button>
-              </div>
-            </div>
-            <div class="graph-controls">
-              <button id="btnZoomIn" class="btn-graph-action" title="Zoom In">[ + ]</button>
-              <button id="btnZoomOut" class="btn-graph-action" title="Zoom Out">[ − ]</button>
-              <button id="btnFitGraph" class="btn-graph-action" title="Fit View">[ FIT ]</button>
-              <button id="btnResetGraph" class="btn-graph-action" title="Reset View">[ RESET ]</button>
-            </div>
-          </div>
-
-          <div class="graph-canvas-container">
-            <canvas id="fullGraphCanvas"></canvas>
-            <div id="graphTooltip" class="graph-tooltip"></div>
-
-            <aside class="graph-side-inspector" id="graphSideInspector">
-              <div class="section-title-sm">GRAPH NODE INSPECTOR</div>
-              <div id="graphInspectorContent">
-                <div class="insp-row">
-                  <div class="insp-label">Node Label</div>
-                  <div class="insp-val" id="graphNodeLabel">Select a node to inspect its evidence relationships.</div>
-                </div>
-                <div class="insp-row">
-                  <div class="insp-label">Type</div>
-                  <div class="insp-val highlight" id="graphNodeType">-</div>
-                </div>
-                <div class="insp-row">
-                  <div class="insp-label">Connected Edges</div>
-                  <div class="insp-val" id="graphNodeConnections">-</div>
-                </div>
-              </div>
-            </aside>
-          </div>
-
-        </div>
-      </section>
-
-      <section id="tab-literature" class="view-page" role="tabpanel">
-        <div class="literature-workstation">
-          <div class="lit-toolbar">
-            <div class="lit-count" id="litCountLabel">LITERATURE — 31 PAPERS</div>
-            <div class="lit-controls">
-              <input type="text" id="litSearchInput" class="input-sm" placeholder="Search literature...">
-              <select id="litSourceFilter" class="select-sm">
-                <option value="all">Source: All</option>
-                <option value="arxiv">Source: arXiv</option>
-                <option value="web">Source: Web</option>
-              </select>
-              <select id="litYearFilter" class="select-sm">
-                <option value="all">Year: All</option>
-                <option value="2026">Year: 2026</option>
-                <option value="2025">Year: 2025</option>
-                <option value="2024">Year: 2024</option>
-              </select>
-              <select id="litSortSelect" class="select-sm">
-                <option value="relevance">Sort: Relevance</option>
-                <option value="year">Sort: Year</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="lit-table-split">
-            <div class="table-container">
-              <table class="dense-lit-table">
-                <thead>
-                  <tr>
-                    <th>TITLE</th>
-                    <th>AUTHORS</th>
-                    <th>YEAR</th>
-                    <th>SOURCE</th>
-                    <th>RELEVANCE</th>
-                    <th>EVIDENCE</th>
-                  </tr>
-                </thead>
-                <tbody id="litTableBody"></tbody>
-              </table>
-            </div>
-
-            <aside class="lit-drawer" id="litDrawer">
-              <div class="section-title-sm">PAPER INSPECTOR</div>
-              <div class="insp-row">
-                <div class="insp-label">Paper Title</div>
-                <div class="insp-val" id="litDrawerTitle">Select a paper to inspect</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Authors</div>
-                <div class="insp-val" id="litDrawerAuthors">-</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Year / Source</div>
-                <div class="insp-val" id="litDrawerYearSource">-</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Relevance Score</div>
-                <div class="insp-val highlight" id="litDrawerRelevance">-</div>
-              </div>
-              <div class="insp-row">
-                <div class="insp-label">Related Claims</div>
-                <div class="insp-val" id="litDrawerClaims">-</div>
-              </div>
-              <div class="insp-actions">
-                <a id="btnLitDrawerOpen" href="#" target="_blank" class="btn-open-paper btn-action-block">[ OPEN PAPER ]</a>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </section>
-
-      <section id="tab-analytics" class="view-page" role="tabpanel">
-        <div class="analytics-workstation">
-          <div class="analytics-grid">
-
-            <div class="viz-card">
-              <div class="viz-title">01 RETRIEVAL FUNNEL</div>
-              <div class="funnel-container" id="funnelChart"></div>
-            </div>
-
-            <div class="viz-card">
-              <div class="viz-title">02 CLAIM SUPPORT VS CONTRADICTION</div>
-              <div class="claims-viz-list" id="claimsVizList"></div>
-            </div>
-
-            <div class="viz-card">
-              <div class="viz-title">03 SOURCE DISTRIBUTION</div>
-              <canvas id="sourceDistCanvas" height="180"></canvas>
-            </div>
-
-            <div class="viz-card span-2">
-              <div class="viz-title">04 METHODOLOGY COMPARISON MATRIX</div>
-              <div id="methodologyMatrixTable" class="matrix-wrap"></div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <section id="tab-gaps" class="view-page" role="tabpanel">
-        <div class="gaps-workstation">
-
-          <main class="gaps-notebook">
-            <div class="gaps-header-summary">
-              <h2 class="gaps-title">RESEARCH GAPS</h2>
-              <div class="gaps-count-badge" id="gapsCountBadge">01 IDENTIFIED FROM 31 PAPERS</div>
-            </div>
-            <div id="page5GapsContainer"></div>
-          </main>
-
-          <aside class="gaps-sidebar">
-            <div class="section-title-sm">SUPPORTING EVIDENCE</div>
-            <div id="gapsSupportingEvList" class="sidebar-list-sm">
-              <div class="sidebar-item-sm">E-014: "Historical Indic font degradation CER >25%"</div>
-              <div class="sidebar-item-sm">E-021: "Lack of 19th century palm-leaf dataset"</div>
-            </div>
-
-            <div class="section-title-sm" style="margin-top: 1.5rem;">RELATED PAPERS</div>
-            <div id="gapsRelatedPapersList" class="sidebar-list-sm">
-              <div class="sidebar-item-sm">Paper 01: Yes-MT WMT 2024</div>
-              <div class="sidebar-item-sm">Paper 02: SPRING IITM 2024</div>
-            </div>
-          </aside>
-
-        </div>
-      </section>
-
-      <section id="tab-recommendations" class="view-page" role="tabpanel">
-        <div class="recs-workstation">
-          <div class="recs-header">
-            <h2 class="recs-title">WHAT SHOULD BE RESEARCHED NEXT?</h2>
-            <div class="meta-label">Graph-Grounded Research Directions</div>
-          </div>
-          <div id="page6RecsContainer"></div>
-        </div>
-      </section>
-
-    </main>
   </div>
 
-  <div id="aboutModal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle">
-    <div class="modal-backdrop" id="aboutModalBackdrop"></div>
-    <div class="modal-window">
+  <!-- Settings Modal (Clean, non-intrusive) -->
+  <div id="settingsModal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="settingsBackdrop"></div>
+    <div class="modal-card">
       <div class="modal-header">
-        <div>
-          <div class="meta-label">SYSTEM ARCHITECTURE & CAPABILITIES</div>
-          <h2 id="aboutModalTitle" class="modal-title">RAG RESEARCH SCIENTIST</h2>
-        </div>
-        <button id="btnCloseAboutModal" class="btn-action-sm modal-close-btn" aria-label="Close about dialog">[ ESC / CLOSE ]</button>
+        <h3 class="modal-title">Settings & Preferences</h3>
+        <button type="button" class="btn-modal-close" id="btnCloseSettings">×</button>
       </div>
-
       <div class="modal-body">
-        <p class="modal-intro">
-          An autonomous scientific research workstation engineered for literature discovery, evidence-grounded claim extraction, multi-signal paper reranking, 4-state contradiction detection, and research gap formulation.
-        </p>
-
-        <div class="about-grid">
-          <div class="about-card">
-            <div class="about-card-badge">RETRIEVAL & TEMPORAL ENGINE</div>
-            <h3 class="about-card-title">Multi-Source Dual Index</h3>
-            <p class="about-card-text">
-              Combines live <strong>arXiv API</strong> querying with <strong>OpenAlex Academic Web</strong> indices. Features aspect-aware subquery decomposition, temporal window extraction (e.g. <em>since 2024</em>), and date-aware score boosting without discarding foundational background literature.
-            </p>
-          </div>
-
-          <div class="about-card">
-            <div class="about-card-badge">EVIDENCE & GROUNDING</div>
-            <h3 class="about-card-title">Evidence-First Verification</h3>
-            <p class="about-card-text">
-              Extracts sentence-level evidence snippets mapped directly to source URLs. Generates verified research claims and classifies claim status into <code>SUPPORTED</code>, <code>CONTRADICTED</code>, <code>MIXED</code>, or <code>INSUFFICIENT</code> with zero fabricated metrics.
-            </p>
-          </div>
-
-          <div class="about-card">
-            <div class="about-card-badge">DISCOVERY & SYNTHESIS</div>
-            <h3 class="about-card-title">Research Gap Formulation</h3>
-            <p class="about-card-text">
-              Detects empirical bottlenecks, cross-domain generalization degradation, and resource scarcity frontiers strictly supported by evidence snippets, automatically synthesizing actionable next-step hypotheses.
-            </p>
-          </div>
-
-          <div class="about-card">
-            <div class="about-card-badge">INTERACTIVE WORKSTATION</div>
-            <h3 class="about-card-title">6 Investigation Views</h3>
-            <p class="about-card-text">
-              Seamlessly switch between <strong>Synthesis & Claims</strong>, high-performance HTML5 <strong>Evidence Graph</strong>, dense <strong>Literature Browser</strong>, <strong>Analytics</strong>, <strong>Research Gaps</strong>, and <strong>Next Research Proposals</strong>.
-            </p>
+        <div class="form-group">
+          <label class="form-label" for="settingDefaultPapers">Default Papers to Retrieve</label>
+          <select id="settingDefaultPapers" class="form-select">
+            <option value="10">10 Papers (Fast)</option>
+            <option value="15" selected>15 Papers (Recommended)</option>
+            <option value="20">20 Papers</option>
+            <option value="30">30 Papers (Deep)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="settingDefaultIterations">Self-Improvement Loops</label>
+          <select id="settingDefaultIterations" class="form-select">
+            <option value="1" selected>1 Iteration</option>
+            <option value="2">2 Iterations</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Connected Indices</label>
+          <div class="info-tag-box">
+            <span>arXiv API: Online</span>
+            <span>Academic Web: Online</span>
           </div>
         </div>
 
-        <div class="about-specs-row">
-          <div class="about-spec-item">
-            <span class="spec-label">VERSION</span>
-            <span class="spec-val">v2.0.0 (Production)</span>
-          </div>
-          <div class="about-spec-item">
-            <span class="spec-label">CORE ENGINE</span>
-            <span class="spec-val">Python 3.12 · RAG Pipeline</span>
+        <div class="form-group">
+          <label class="form-label">Export Investigation</label>
+          <div class="settings-export-row" style="display: flex; gap: 8px;">
+            <button type="button" class="btn-sidebar-view-all" id="btnExportMarkdown" style="margin-top: 0; padding: 6px 12px; font-size: 0.78rem;">Export Markdown (.md)</button>
+            <button type="button" class="btn-sidebar-view-all" id="btnExportJson" style="margin-top: 0; padding: 6px 12px; font-size: 0.78rem;">Export JSON (.json)</button>
           </div>
         </div>
+
+        <!-- Optional Advanced Diagnostics for Researchers/Developers -->
+        <details class="settings-advanced-details">
+          <summary class="settings-advanced-summary">Advanced Diagnostics</summary>
+          <div class="settings-diagnostics-grid">
+            <div class="diagnostic-field">
+              <span class="diag-label">Execution Latency</span>
+              <span class="diag-val" id="techExecutionTime">-</span>
+            </div>
+            <div class="diagnostic-field">
+              <span class="diag-label">Documents Processed</span>
+              <span class="diag-val" id="techDocsProcessed">-</span>
+            </div>
+            <div class="diagnostic-field">
+              <span class="diag-label">Search Loops</span>
+              <span class="diag-val" id="techIterations">1 Loop</span>
+            </div>
+            <div class="diagnostic-field">
+              <span class="diag-label">Contradiction Check</span>
+              <span class="diag-val" id="techContradictionStatus">Consistency Verified</span>
+            </div>
+            <div class="diagnostic-field">
+              <span class="diag-label">Evidence Graph</span>
+              <span class="diag-val" id="techGraphStatus">Grounding Verified</span>
+            </div>
+          </div>
+        </details>
       </div>
     </div>
   </div>
 
-  <script src="./app.js?v=2.0" defer></script>
+  <script src="./app.js?v=9.0" defer></script>
 </body>
 </html>

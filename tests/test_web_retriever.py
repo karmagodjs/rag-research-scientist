@@ -30,22 +30,26 @@ class TestWebRetriever(unittest.TestCase):
         self.assertEqual(docs[0].title, "Sample Paper Title 2025")
         self.assertEqual(docs[0].url, "https://example.com/paper1")
 
+    @patch("requests.get")
     @patch("requests.post")
-    def test_ddg_lite_markup_changed_graceful_fallback(self, mock_post):
+    def test_ddg_lite_markup_changed_graceful_fallback(self, mock_post, mock_get):
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.text = "<html><body>Structure changed completely</body></html>"
         mock_post.return_value = mock_resp
+        mock_get.return_value = MagicMock(status_code=500, text="error")
 
         docs = self.retriever.search("test query", top_k=5)
         self.assertEqual(len(docs), 0)
 
+    @patch("requests.get")
     @patch("requests.post")
-    def test_ddg_lite_http_error_graceful_fallback(self, mock_post):
+    def test_ddg_lite_http_error_graceful_fallback(self, mock_post, mock_get):
         mock_resp = MagicMock()
         mock_resp.status_code = 503
         mock_resp.text = "Service Unavailable"
         mock_post.return_value = mock_resp
+        mock_get.return_value = MagicMock(status_code=500, text="error")
 
         docs = self.retriever.search("test query", top_k=5)
         self.assertEqual(len(docs), 0)

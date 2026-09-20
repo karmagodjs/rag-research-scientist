@@ -95,4 +95,31 @@ class PersistentStorage:
 
         return None
 
+    def list_all(self):
+        items = []
+        for r_id, rep in _IN_MEMORY_STORE.items():
+            items.append({
+                "id": r_id,
+                "research_question": rep.get("research_question", "Untitled Research"),
+                "total_documents": rep.get("retrieval_statistics", {}).get("total_documents", len(rep.get("citation_list", []))),
+                "claims_count": len(rep.get("claims", []))
+            })
+        if os.path.exists(_LOCAL_FILE_DIR):
+            for fname in os.listdir(_LOCAL_FILE_DIR):
+                if fname.endswith(".json"):
+                    r_id = fname[:-5]
+                    if not any(i["id"] == r_id for i in items):
+                        try:
+                            with open(os.path.join(_LOCAL_FILE_DIR, fname), "r", encoding="utf-8") as f:
+                                rep = json.load(f)
+                                items.append({
+                                    "id": r_id,
+                                    "research_question": rep.get("research_question", "Untitled Research"),
+                                    "total_documents": rep.get("retrieval_statistics", {}).get("total_documents", len(rep.get("citation_list", []))),
+                                    "claims_count": len(rep.get("claims", []))
+                                })
+                        except Exception:
+                            pass
+        return items
+
 storage = PersistentStorage()

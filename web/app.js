@@ -682,22 +682,12 @@ function updateSourcePreviewFromPaper(paper) {
   const pAuthors = document.getElementById('previewAuthors');
   const pBadge = document.getElementById('previewYearSource');
   const pSnippet = document.getElementById('previewSnippet');
-  const pRelevance = document.getElementById('previewRelevance');
   const btnOpen = document.getElementById('btnPreviewOpen');
   const btnViewEv = document.getElementById('btnPreviewEvidence');
 
   if (pTitle) pTitle.textContent = paper.title;
   if (pAuthors) pAuthors.textContent = formatCompactAuthors(paper.authors);
   if (pBadge) pBadge.textContent = `${paper.source.toUpperCase()} · ${paper.year}`;
-  if (pRelevance) {
-    if (typeof paper.relevance === 'number' && paper.relevance > 0) {
-      pRelevance.textContent = `Relevance: ${(paper.relevance * 100).toFixed(0)}%`;
-      pRelevance.style.display = 'inline-block';
-    } else {
-      pRelevance.textContent = '';
-      pRelevance.style.display = 'none';
-    }
-  }
   
   // Find matching evidence snippet
   let matchSnippet = "Peer-reviewed publication analyzing this scientific domain.";
@@ -734,23 +724,12 @@ function updateSourcePreviewFromEvidence(ev) {
   const pAuthors = document.getElementById('previewAuthors');
   const pBadge = document.getElementById('previewYearSource');
   const pSnippet = document.getElementById('previewSnippet');
-  const pRelevance = document.getElementById('previewRelevance');
   const btnOpen = document.getElementById('btnPreviewOpen');
   const btnViewEv = document.getElementById('btnPreviewEvidence');
 
   if (pTitle) pTitle.textContent = ev.paper_title || "Academic Literature Paper";
   if (pAuthors) pAuthors.textContent = formatCompactAuthors(ev.authors || "Peer-Reviewed Literature");
   if (pBadge) pBadge.textContent = `${(ev.source || 'arXiv').toUpperCase()} · ${ev.published || '2024'}`;
-  if (pRelevance) {
-    const relScore = typeof ev.relevance_score === 'number' ? ev.relevance_score : ev.relevance;
-    if (typeof relScore === 'number' && relScore > 0) {
-      pRelevance.textContent = `Relevance: ${(relScore * 100).toFixed(0)}%`;
-      pRelevance.style.display = 'inline-block';
-    } else {
-      pRelevance.textContent = '';
-      pRelevance.style.display = 'none';
-    }
-  }
   if (pSnippet) pSnippet.textContent = `"${ev.snippet || 'Verbatim sentence passage verified.'}"`;
 
   const url = ev.source_url || ev.url;

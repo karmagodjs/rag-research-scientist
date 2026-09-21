@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=19.0">
+  <link rel="stylesheet" href="styles.css?v=20.0">
 </head>
 <body>
 
@@ -388,19 +388,45 @@
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label" for="settingDefaultPapers">Default Papers to Retrieve</label>
-          <select id="settingDefaultPapers" class="form-select">
-            <option value="10">10 Papers (Fast)</option>
-            <option value="15" selected>15 Papers (Recommended)</option>
-            <option value="20">20 Papers</option>
-            <option value="30">30 Papers (Deep)</option>
-          </select>
+          <div class="custom-select-wrapper" id="wrapperDefaultPapers">
+            <button type="button" class="custom-select-trigger" id="triggerDefaultPapers" aria-haspopup="listbox" aria-expanded="false" title="Default Papers to Retrieve">
+              <span class="custom-select-label" id="labelDefaultPapers">15 Papers (Recommended)</span>
+              <svg class="custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="custom-select-menu dropdown-menu" id="menuDefaultPapers" role="listbox">
+              <div class="custom-select-option" role="option" data-value="10">10 Papers (Fast)</div>
+              <div class="custom-select-option selected" role="option" data-value="15" aria-selected="true">15 Papers (Recommended)</div>
+              <div class="custom-select-option" role="option" data-value="20">20 Papers</div>
+              <div class="custom-select-option" role="option" data-value="30">30 Papers (Deep)</div>
+            </div>
+            <select id="settingDefaultPapers" class="form-select visually-hidden" tabindex="-1">
+              <option value="10">10 Papers (Fast)</option>
+              <option value="15" selected>15 Papers (Recommended)</option>
+              <option value="20">20 Papers</option>
+              <option value="30">30 Papers (Deep)</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label" for="settingDefaultIterations">Self-Improvement Loops</label>
-          <select id="settingDefaultIterations" class="form-select">
-            <option value="1" selected>1 Iteration</option>
-            <option value="2">2 Iterations</option>
-          </select>
+          <div class="custom-select-wrapper" id="wrapperDefaultIterations">
+            <button type="button" class="custom-select-trigger" id="triggerDefaultIterations" aria-haspopup="listbox" aria-expanded="false" title="Self-Improvement Loops">
+              <span class="custom-select-label" id="labelDefaultIterations">1 Iteration</span>
+              <svg class="custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="custom-select-menu dropdown-menu" id="menuDefaultIterations" role="listbox">
+              <div class="custom-select-option selected" role="option" data-value="1" aria-selected="true">1 Iteration</div>
+              <div class="custom-select-option" role="option" data-value="2">2 Iterations</div>
+            </div>
+            <select id="settingDefaultIterations" class="form-select visually-hidden" tabindex="-1">
+              <option value="1" selected>1 Iteration</option>
+              <option value="2">2 Iterations</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Connected Indices</label>
@@ -448,6 +474,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=19.0" defer></script>
+  <script src="./app.js?v=20.0" defer></script>
 </body>
 </html>

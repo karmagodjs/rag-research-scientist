@@ -15,10 +15,45 @@ const STORAGE_HISTORY_KEY = "rag_research_history";
    THEME TOGGLE
    ========================================================================== */
 
+const THEME_STORAGE_KEY = "rag_research_theme";
+
+function applyTheme(theme) {
+  const isLight = theme === 'light';
+  if (isLight) {
+    document.documentElement.setAttribute('data-theme', 'light');
+    try { localStorage.setItem(THEME_STORAGE_KEY, 'light'); } catch (e) {}
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    try { localStorage.setItem(THEME_STORAGE_KEY, 'dark'); } catch (e) {}
+  }
+
+  const textEl = document.getElementById('themeToggleText');
+  const iconDark = document.querySelector('.icon-theme-dark');
+  const iconLight = document.querySelector('.icon-theme-light');
+  if (textEl) {
+    textEl.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+  }
+  if (iconDark) iconDark.style.display = isLight ? 'none' : 'block';
+  if (iconLight) iconLight.style.display = isLight ? 'block' : 'none';
+}
+
 function initTheme() {
-  // Application is designed in permanent True Dark Mode
-  document.documentElement.removeAttribute('data-theme');
-  localStorage.setItem('rag_research_theme', 'dark');
+  let savedTheme = 'dark';
+  try {
+    savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'dark';
+  } catch (e) {
+    savedTheme = 'dark';
+  }
+  applyTheme(savedTheme);
+
+  const btn = document.getElementById('btnToggleTheme');
+  if (btn && !btn._themeListenerAttached) {
+    btn._themeListenerAttached = true;
+    btn.addEventListener('click', () => {
+      const isCurrentlyLight = document.documentElement.getAttribute('data-theme') === 'light';
+      applyTheme(isCurrentlyLight ? 'dark' : 'light');
+    });
+  }
 }
 
 /* ==========================================================================

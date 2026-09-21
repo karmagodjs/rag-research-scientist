@@ -7,42 +7,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Surface & Canvas Palette (True Dark Mode: Near-Black & Dark Charcoal, NOT Blue) */
-  --bg-base: #09090b;             /* Pure near-black background */
-  --bg-sidebar: #0f0f12;          /* Very dark charcoal sidebar */
-  --bg-surface: #141418;          /* Very dark charcoal panels */
-  --bg-surface-elevated: #1a1a20; /* Slightly lighter elevated card surface */
-  --bg-surface-active: #22222a;   /* Active selection */
-  --bg-surface-hover: #262630;    /* Hover surface */
-  --bg-input: #0c0c0e;            /* Recessed input background */
+  /* DARK MODE (Default) */
+  --bg-base: #0B0B0D;             /* Main page background */
+  --bg-sidebar: #0E0E11;          /* Dark charcoal sidebar */
+  --bg-surface: #111114;          /* Main workspace panel */
+  --bg-surface-elevated: #141416; /* Card background: #141416 */
+  --bg-surface-active: #1D1D22;   /* Active selection */
+  --bg-surface-hover: #1E1E23;    /* Hover surface */
+  --bg-input: #09090B;            /* Inner/input background: #09090B */
+  --bg-canvas: #09090B;
 
-  /* Neutral Typography Colors (Crisp White / Light Neutral Gray) */
-  --text-high: #ffffff;
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --text-dim: #52525b;
+  /* Neutral Typography Colors */
+  --text-high: #FFFFFF;
+  --text-primary: #F4F4F5;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-dim: #52525B;
 
-  /* Subtle Dark Gray Borders (No blue) */
+  /* Subtle Neutral Dark Gray Borders */
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-dim: rgba(255, 255, 255, 0.14);
-  --border-medium: rgba(255, 255, 255, 0.22);
-  --border-active: #3b82f6;
-  --border-highlight: #60a5fa;
+  --border-dim: #222226;
+  --border-medium: #2E2E34;
+  --border-active: #2563EB;
+  --border-highlight: #3B82F6;
 
-  /* Accent Color System (Blue used only for important actions/status) */
-  --accent: #2563eb;
-  --accent-hover: #3b82f6;
+  /* Accent Color System (Blue) */
+  --accent: #2563EB;
+  --accent-hover: #3B82F6;
   --accent-tint: rgba(37, 99, 235, 0.14);
   --accent-tint-subtle: rgba(37, 99, 235, 0.07);
-  --accent-cyan: #0ea5e9;
+  --accent-cyan: #0EA5E9;
 
-  /* Status / Feedback Colors (Green for success/status) */
-  --success: #10b981;
+  /* Status / Feedback Colors */
+  --success: #10B981;
   --success-tint: rgba(16, 185, 129, 0.14);
-  --warning: #f59e0b;
+  --warning: #F59E0B;
   --warning-tint: rgba(245, 158, 11, 0.14);
-  --danger: #ef4444;
+  --danger: #EF4444;
   --danger-tint: rgba(239, 68, 68, 0.14);
 
   /* Typography Stack */
@@ -60,6 +61,52 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.50);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.65);
   --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="light"] {
+  /* LIGHT MODE */
+  --bg-base: #F7F7F8;             /* Page background: #F7F7F8 */
+  --bg-sidebar: #FFFFFF;          /* Clean white sidebar */
+  --bg-surface: #FFFFFF;          /* Clean white surface */
+  --bg-surface-elevated: #FFFFFF; /* Card background: #FFFFFF */
+  --bg-surface-active: #E5E7EB;   /* Active selection */
+  --bg-surface-hover: #F3F4F6;    /* Hover item */
+  --bg-input: #F3F4F6;            /* Inner/input background: #F3F4F6 */
+  --bg-canvas: #F9FAFB;
+
+  /* Primary text: #111827, Secondary text: #6B7280 */
+  --text-high: #111827;
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #6B7280;
+  --text-dim: #9CA3AF;
+
+  /* Borders: #E5E7EB */
+  --border-subtle: #F3F4F6;
+  --border-dim: #E5E7EB;
+  --border-medium: #D1D5DB;
+  --border-active: #2563EB;
+  --border-highlight: #3B82F6;
+
+  /* Accent Color (Blue) */
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-tint: rgba(37, 99, 235, 0.08);
+  --accent-tint-subtle: rgba(37, 99, 235, 0.04);
+  --accent-cyan: #0284C7;
+
+  /* Status Colors */
+  --success: #059669;
+  --success-tint: rgba(5, 150, 105, 0.10);
+  --warning: #D97706;
+  --warning-tint: rgba(217, 119, 6, 0.10);
+  --danger: #DC2626;
+  --danger-tint: rgba(220, 38, 38, 0.10);
+
+  /* Shadows (Soft neutral shadows) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 /* ==========================================================================
@@ -432,8 +479,8 @@ code, pre, kbd, samp {
 .sidebar-footer {
   padding: 6px 10px 10px 10px;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .btn-footer-link {
@@ -447,11 +494,16 @@ code, pre, kbd, samp {
   padding: 7px 10px;
   border-radius: var(--radius-control);
   transition: all 0.12s ease;
+  cursor: pointer;
 }
 
 .btn-footer-link:hover {
   background: var(--bg-surface-hover);
   color: var(--text-high);
+}
+
+.btn-footer-link svg {
+  flex-shrink: 0;
 }
 
 /* ==========================================================================
@@ -1773,44 +1825,50 @@ code, pre, kbd, samp {
 }
 
 .right-empty-card {
-  padding: 48px 20px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-panel);
+  padding: 56px 24px;
   text-align: center;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 240px;
+  min-height: 260px;
+  overflow: hidden;
 }
 
 .right-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .right-empty-icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
   background: var(--bg-input);
   border: 1px solid var(--border-dim);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-dim);
+  color: var(--text-muted);
   margin-bottom: 2px;
 }
 
 .right-empty-title {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  color: var(--text-secondary);
-  line-height: 1.3;
+  color: var(--text-high);
+  line-height: 1.35;
 }
 
 .right-empty-desc {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
+  font-weight: 400;
   color: var(--text-muted);
-  line-height: 1.45;
+  line-height: 1.5;
   max-width: 220px;
 }
 

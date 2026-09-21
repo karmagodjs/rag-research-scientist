@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=18.0">
+  <link rel="stylesheet" href="styles.css?v=19.0">
 </head>
 <body>
 
@@ -234,15 +234,44 @@
               </div>
               <div class="sources-toolbar">
                 <input type="text" id="sourcesFilterInput" placeholder="Search papers by title, author..." class="input-search-sm">
-                <select id="sourcesTypeSelect" class="form-select-sm">
-                  <option value="all">All Sources</option>
-                  <option value="arxiv">arXiv Only</option>
-                  <option value="web">Web Only</option>
-                </select>
-                <select id="sourcesSortSelect" class="form-select-sm">
-                  <option value="relevance">Sort: Relevance</option>
-                  <option value="year">Sort: Year</option>
-                </select>
+
+                <!-- Custom Rounded Select: All Sources -->
+                <div class="custom-select-wrapper" id="wrapperSourcesType">
+                  <button type="button" class="custom-select-trigger" id="triggerSourcesType" aria-haspopup="listbox" aria-expanded="false" title="Filter by source">
+                    <span class="custom-select-label" id="labelSourcesType">All Sources</span>
+                    <svg class="custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="custom-select-menu dropdown-menu" id="menuSourcesType" role="listbox">
+                    <div class="custom-select-option selected" role="option" data-value="all">All Sources</div>
+                    <div class="custom-select-option" role="option" data-value="arxiv">arXiv Only</div>
+                    <div class="custom-select-option" role="option" data-value="web">Web Only</div>
+                  </div>
+                  <select id="sourcesTypeSelect" class="form-select-sm visually-hidden" tabindex="-1">
+                    <option value="all" selected>All Sources</option>
+                    <option value="arxiv">arXiv Only</option>
+                    <option value="web">Web Only</option>
+                  </select>
+                </div>
+
+                <!-- Custom Rounded Select: Sort: Relevance -->
+                <div class="custom-select-wrapper" id="wrapperSourcesSort">
+                  <button type="button" class="custom-select-trigger" id="triggerSourcesSort" aria-haspopup="listbox" aria-expanded="false" title="Sort sources">
+                    <span class="custom-select-label" id="labelSourcesSort">Sort: Relevance</span>
+                    <svg class="custom-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="custom-select-menu dropdown-menu" id="menuSourcesSort" role="listbox">
+                    <div class="custom-select-option selected" role="option" data-value="relevance">Sort: Relevance</div>
+                    <div class="custom-select-option" role="option" data-value="year">Sort: Year</div>
+                  </div>
+                  <select id="sourcesSortSelect" class="form-select-sm visually-hidden" tabindex="-1">
+                    <option value="relevance" selected>Sort: Relevance</option>
+                    <option value="year">Sort: Year</option>
+                  </select>
+                </div>
               </div>
             </div>
             <div class="sources-full-grid" id="sourcesFullGrid">
@@ -419,6 +448,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=18.0" defer></script>
+  <script src="./app.js?v=19.0" defer></script>
 </body>
 </html>

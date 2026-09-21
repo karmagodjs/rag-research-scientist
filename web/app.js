@@ -1141,6 +1141,85 @@ function initExportsAndModals() {
   });
 }
 
+function initCustomSelects() {
+  document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+    if (wrapper._customSelectInitialized) return;
+    wrapper._customSelectInitialized = true;
+
+    const trigger = wrapper.querySelector('.custom-select-trigger');
+    const menu = wrapper.querySelector('.custom-select-menu');
+    const label = wrapper.querySelector('.custom-select-label');
+    const select = wrapper.querySelector('select');
+    if (!trigger || !menu || !select) return;
+
+    // Toggle menu
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = wrapper.classList.contains('open');
+      // Close all other dropdowns
+      document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
+        if (w !== wrapper) {
+          w.classList.remove('open');
+          w.querySelector('.custom-select-trigger')?.setAttribute('aria-expanded', 'false');
+        }
+      });
+      wrapper.classList.toggle('open', !isOpen);
+      trigger.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+    });
+
+    // Option selection
+    menu.querySelectorAll('.custom-select-option').forEach(opt => {
+      opt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const val = opt.getAttribute('data-value');
+        if (select.value !== val) {
+          select.value = val;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (label) label.textContent = opt.textContent;
+        menu.querySelectorAll('.custom-select-option').forEach(o => {
+          const isSelected = o === opt;
+          o.classList.toggle('selected', isSelected);
+          o.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+        wrapper.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Sync if select is changed programmatically
+    select.addEventListener('change', () => {
+      const currentOpt = menu.querySelector(`.custom-select-option[data-value="${select.value}"]`);
+      if (currentOpt) {
+        if (label) label.textContent = currentOpt.textContent;
+        menu.querySelectorAll('.custom-select-option').forEach(o => {
+          const isSelected = o === currentOpt;
+          o.classList.toggle('selected', isSelected);
+          o.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+      }
+    });
+  });
+
+  // Global click outside to close dropdowns
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
+      w.classList.remove('open');
+      w.querySelector('.custom-select-trigger')?.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // Global Escape key to close dropdowns
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
+        w.classList.remove('open');
+        w.querySelector('.custom-select-trigger')?.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+}
+
 /* ==========================================================================
    INITIALIZE APP
    ========================================================================== */
@@ -1150,6 +1229,7 @@ async function initApp() {
   try { initNavigation(); } catch (e) { console.error("Nav init error:", e); }
   try { initComposer(); } catch (e) { console.error("Composer init error:", e); }
   try { initSourcesControls(); } catch (e) { console.error("Sources controls error:", e); }
+  try { initCustomSelects(); } catch (e) { console.error("Custom selects error:", e); }
   try { initExportsAndModals(); } catch (e) { console.error("Exports init error:", e); }
   try { renderSidebarRecentHistory(); } catch (e) { console.error("History init error:", e); }
 

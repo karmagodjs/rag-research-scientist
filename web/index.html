@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=11.0">
+  <link rel="stylesheet" href="styles.css?v=12.0">
 </head>
 <body>
 
@@ -90,7 +90,7 @@
           <button type="button" class="btn-clear-history" id="btnClearRecent" title="Clear history">Clear</button>
         </div>
         <div class="recent-items-list" id="recentResearchList">
-          <!-- Populated dynamically (max 5-6 items) -->
+          <div class="empty-recent-note">No recent research yet.</div>
         </div>
         <button type="button" class="btn-sidebar-view-all" id="btnSidebarViewAll" title="View all investigations in My Research">
           <span>View all</span>
@@ -212,7 +212,7 @@
             </section>
 
             <!-- 5. RESULTS: RESEARCH SYNTHESIS & FINDINGS -->
-            <section class="results-area" id="resultsArea">
+            <section class="results-area" id="resultsArea" style="display: none;">
               
               <!-- Research Synthesis (Main Synthesized Answer) -->
               <div class="synthesis-card">
@@ -295,8 +295,25 @@
         <!-- ================================================== -->
         <aside class="right-overview-sidebar" id="rightSidebar" aria-label="Research Overview and Top Sources">
           
+          <!-- EMPTY STATE WHEN NO ACTIVE RESEARCH -->
+          <div class="overview-card right-empty-card" id="rightSidebarEmpty">
+            <div class="right-empty-state">
+              <div class="right-empty-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+              <h4 class="right-empty-title">Research results will appear here</h4>
+              <p class="right-empty-desc">Run a research query to see sources, evidence, and findings.</p>
+            </div>
+          </div>
+
           <!-- 7. CLEAN USER-FACING METRICS -->
-          <div class="overview-card">
+          <div class="overview-card" id="cardResearchOverview" style="display: none;">
             <div class="overview-card-header">
               <span class="card-kicker">RESEARCH OVERVIEW</span>
             </div>
@@ -321,7 +338,7 @@
           </div>
 
           <!-- 8. TOP SOURCES LIST -->
-          <div class="overview-card top-sources-card">
+          <div class="overview-card top-sources-card" id="cardTopSources" style="display: none;">
             <div class="overview-card-header">
               <span class="card-kicker">TOP SOURCES</span>
               <button type="button" class="btn-text-action" id="btnViewAllSources">View All</button>
@@ -332,7 +349,7 @@
           </div>
 
           <!-- SOURCE PREVIEW DRAWER -->
-          <div class="overview-card preview-card" id="sourcePreviewCard">
+          <div class="overview-card preview-card" id="sourcePreviewCard" style="display: none;">
             <div class="overview-card-header">
               <span class="card-kicker">SOURCE PREVIEW</span>
               <span class="preview-badge" id="previewYearSource">-</span>
@@ -440,6 +457,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=11.0" defer></script>
+  <script src="./app.js?v=12.0" defer></script>
 </body>
 </html>

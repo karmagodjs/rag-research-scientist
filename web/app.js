@@ -9,22 +9,6 @@ let currentInvestigationState = {
   selectedClaimIdx: null
 };
 
-// Verified sample investigations for instant exploration
-const builtInSamples = [
-  {
-    id: "sample_bert",
-    title: "BERT: Pre-training of Deep Bidirectional Transformers",
-    subtitle: "Verified literature synthesis · 4 papers · 3 claims",
-    file: "./sample_report.json"
-  },
-  {
-    id: "sample_dense",
-    title: "Dense retrieval & graph-based RAG architectures in 2025",
-    subtitle: "Verified literature synthesis · 4 papers · 3 claims",
-    file: "./sample_report_2.json"
-  }
-];
-
 const STORAGE_HISTORY_KEY = "rag_research_history";
 
 /* ==========================================================================
@@ -54,13 +38,7 @@ function initNavigation() {
   // New Research Button
   document.getElementById('btnNewResearch')?.addEventListener('click', () => {
     switchView('viewHome');
-    const queryInput = document.getElementById('queryInput');
-    if (queryInput) {
-      queryInput.value = "";
-      autoResizeTextarea(queryInput);
-      updateRunButtonState();
-      queryInput.focus();
-    }
+    clearActiveResearch();
   });
 
   // View All Sources in Right Panel
@@ -205,6 +183,44 @@ function resetPipelineToReady() {
   updatePipelineStep('synthesize', 'ready');
 }
 
+function clearActiveResearch() {
+  reportData = null;
+  currentInvestigationState = {
+    selectedPaperId: null,
+    selectedClaimIdx: null
+  };
+
+  const queryInput = document.getElementById('queryInput');
+  if (queryInput) {
+    queryInput.value = "";
+    autoResizeTextarea(queryInput);
+    updateRunButtonState();
+    if (typeof queryInput.focus === 'function') {
+      queryInput.focus();
+    }
+  }
+
+  resetPipelineToReady();
+
+  const resultsArea = document.getElementById('resultsArea');
+  if (resultsArea) {
+    resultsArea.style.display = 'none';
+  }
+
+  const execSummary = document.getElementById('executiveSummaryText');
+  if (execSummary) {
+    execSummary.innerHTML = "";
+  }
+
+  const claimsList = document.getElementById('claimsList');
+  if (claimsList) {
+    claimsList.innerHTML = "";
+  }
+
+  updateRightOverview();
+  renderSourcesFullView();
+}
+
 /* ==========================================================================
    4. LIVE RESEARCH EXECUTION (BACKEND API INTEGRATION)
    ========================================================================== */
@@ -220,6 +236,11 @@ async function executeLiveResearch() {
   const iterations = parseInt(document.getElementById('iterationsInput')?.value || "1");
 
   setRunButtonLoading(true);
+
+  const resultsArea = document.getElementById('resultsArea');
+  if (resultsArea) {
+    resultsArea.style.display = 'flex';
+  }
 
   updatePipelineStep('retrieve', 'active');
   updatePipelineStep('rank', 'ready');
@@ -284,7 +305,18 @@ async function executeLiveResearch() {
 function loadReportIntoWorkstation(data) {
   if (!data) return;
 
-  const query = data.research_question || "Scientific Investigation";
+  const resultsArea = document.getElementById('resultsArea');
+  if (resultsArea) {
+    resultsArea.style.display = 'flex';
+  }
+
+  const query = data.research_question || "";
+  const queryInput = document.getElementById('queryInput');
+  if (queryInput && query && query !== "Scientific Investigation") {
+    queryInput.value = query;
+    autoResizeTextarea(queryInput);
+    updateRunButtonState();
+  }
   const numDocs = data.retrieval_statistics?.total_documents || data.citation_list?.length || 0;
   const rawDocs = data.retrieval_statistics?.raw_documents || numDocs * 3;
   const iters = data.retrieval_statistics?.iterations || 1;
@@ -617,7 +649,23 @@ function findAndScrollToPaperEvidence(paperTitle) {
    ========================================================================== */
 
 function updateRightOverview() {
-  if (!reportData) return;
+  const emptyCard = document.getElementById('rightSidebarEmpty');
+  const overviewCard = document.getElementById('cardResearchOverview');
+  const topSourcesCard = document.getElementById('cardTopSources');
+  const previewCard = document.getElementById('sourcePreviewCard');
+
+  if (!reportData) {
+    if (emptyCard) emptyCard.style.display = 'flex';
+    if (overviewCard) overviewCard.style.display = 'none';
+    if (topSourcesCard) topSourcesCard.style.display = 'none';
+    if (previewCard) previewCard.style.display = 'none';
+    return;
+  }
+
+  if (emptyCard) emptyCard.style.display = 'none';
+  if (overviewCard) overviewCard.style.display = 'flex';
+  if (topSourcesCard) topSourcesCard.style.display = 'flex';
+  if (previewCard) previewCard.style.display = 'flex';
 
   const numDocs = reportData.papers.length;
   const rawDocs = reportData.retrieval_statistics?.raw_documents || numDocs * 3;
@@ -782,78 +830,23 @@ function saveToRecentHistory(report) {
   }
 }
 
-let cachedServerHistoryItems = [];
-
 async function renderSidebarRecentHistory() {
   const container = document.getElementById('recentResearchList');
   if (!container) return;
 
   const localHistory = getRecentHistory();
 
-  try {
-    const resp = await fetch('/api/history');
-    if (resp.ok) {
-      const sData = await resp.json();
-      cachedServerHistoryItems = sData.items || [];
-    }
-  } catch (e) {
-    // offline or static fallback
-  }
-
-  // Combine all investigations into a single ordered list
-  const allItems = [];
-
-  // 1. User local history first (most recent)
-  localHistory.forEach(item => {
-    allItems.push({
-      type: 'local',
-      id: item.id,
-      title: item.research_question,
-      summary: item.executive_summary || "Synthesized scientific investigation.",
-      meta: `${item.timestamp || 'Recent'} · ${item.papers_count || 0} papers`,
-      data: item.data
-    });
-  });
-
-  // 2. Server-side saved investigations
-  cachedServerHistoryItems.forEach(item => {
-    if (!allItems.some(ai => ai.id === item.id || (ai.title && ai.title.toLowerCase() === (item.research_question || '').toLowerCase()))) {
-      allItems.push({
-        type: 'server',
-        id: item.id,
-        title: item.research_question,
-        summary: item.executive_summary || "Peer-reviewed literature synthesis from server.",
-        meta: `${item.total_documents || 0} papers · ${item.claims_count || 0} claims`
-      });
-    }
-  });
-
-  // 3. Built-in verified sample reports
-  builtInSamples.forEach(sample => {
-    if (!allItems.some(ai => ai.id === sample.id || (ai.title && ai.title.toLowerCase() === sample.title.toLowerCase()))) {
-      allItems.push({
-        type: 'sample',
-        id: sample.id,
-        title: sample.title,
-        summary: "Verified literature synthesis with extracted claims and evidence graph.",
-        meta: sample.subtitle,
-        file: sample.file
-      });
-    }
-  });
-
-  // Strictly cap the sidebar recent list at 5 items for a compact, clean look
-  const sidebarItems = allItems.slice(0, 5);
-
   let html = "";
-  if (sidebarItems.length === 0) {
-    html = `<div style="padding: 8px 4px; font-size: 0.72rem; color: var(--text-dim); text-align: center;">No recent research</div>`;
+  if (localHistory.length === 0) {
+    html = `<div class="empty-recent-note">No recent research yet.</div>`;
   } else {
+    // Strictly cap the sidebar recent list at 5 items for a compact, clean look
+    const sidebarItems = localHistory.slice(0, 5);
     sidebarItems.forEach(item => {
       html += `
-        <button type="button" class="recent-item-btn" data-recent-type="${item.type}" data-recent-id="${item.id}" ${item.file ? `data-recent-file="${item.file}"` : ''} title="${item.title}">
-          <span class="recent-item-title">${item.title}</span>
-          <span class="recent-item-meta">${item.meta}</span>
+        <button type="button" class="recent-item-btn" data-recent-id="${item.id}" title="${item.research_question}">
+          <span class="recent-item-title">${item.research_question}</span>
+          <span class="recent-item-meta">${item.timestamp || 'Recent'} · ${item.papers_count || 0} papers</span>
         </button>
       `;
     });
@@ -863,39 +856,12 @@ async function renderSidebarRecentHistory() {
 
   // Recent item click handlers
   container.querySelectorAll('.recent-item-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const type = btn.getAttribute('data-recent-type');
+    btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-recent-id');
-      const file = btn.getAttribute('data-recent-file');
-
-      if (type === 'sample' && file) {
-        try {
-          const resp = await fetch(file);
-          if (resp.ok) {
-            const sampleData = await resp.json();
-            loadReportIntoWorkstation(sampleData);
-            switchView('viewHome');
-          }
-        } catch (err) {
-          console.error("Load sample error:", err);
-        }
-      } else if (type === 'server' && id) {
-        try {
-          const resp = await fetch(`/api/research/${id}`);
-          if (resp.ok) {
-            const report = await resp.json();
-            loadReportIntoWorkstation(report);
-            switchView('viewHome');
-          }
-        } catch (err) {
-          console.error("Load server report error:", err);
-        }
-      } else if (type === 'local' && id) {
-        const item = localHistory.find(h => h.id === id);
-        if (item && item.data) {
-          loadReportIntoWorkstation(item.data);
-          switchView('viewHome');
-        }
+      const item = localHistory.find(h => h.id === id);
+      if (item && item.data) {
+        loadReportIntoWorkstation(item.data);
+        switchView('viewHome');
       }
     });
   });
@@ -911,7 +877,7 @@ async function renderSidebarRecentHistory() {
   // Update badge count in navigation
   const myResBadge = document.getElementById('myResearchCountBadge');
   if (myResBadge) {
-    myResBadge.textContent = allItems.length;
+    myResBadge.textContent = localHistory.length;
   }
 }
 
@@ -922,53 +888,21 @@ function renderMyResearchView() {
   const searchVal = document.getElementById('myResearchSearchInput')?.value.toLowerCase().trim() || "";
   const localHistory = getRecentHistory();
 
-  const allItems = [];
-
-  // Local history
-  localHistory.forEach(h => {
-    allItems.push({
-      id: h.id,
-      title: h.research_question,
-      summary: h.executive_summary || "Synthesized scientific investigation.",
-      meta: `${h.timestamp || 'Recent'} · ${h.papers_count || 0} papers · ${h.claims_count || 0} claims`,
-      type: 'local',
-      data: h.data
-    });
-  });
-
-  // Server history
-  cachedServerHistoryItems.forEach(s => {
-    if (!allItems.some(ai => ai.id === s.id || (ai.title && ai.title.toLowerCase() === (s.research_question || '').toLowerCase()))) {
-      allItems.push({
-        id: s.id,
-        title: s.research_question,
-        summary: s.executive_summary || "Peer-reviewed literature synthesis from server.",
-        meta: `${s.total_documents || 0} papers · ${s.claims_count || 0} claims`,
-        type: 'server'
-      });
-    }
-  });
-
-  // Built-in samples
-  builtInSamples.forEach(s => {
-    if (!allItems.some(ai => ai.id === s.id || (ai.title && ai.title.toLowerCase() === s.title.toLowerCase()))) {
-      allItems.push({
-        id: s.id,
-        title: s.title,
-        summary: "Verified literature synthesis with extracted claims and evidence graph.",
-        meta: s.subtitle,
-        type: 'sample',
-        file: s.file
-      });
-    }
-  });
+  const allItems = localHistory.map(h => ({
+    id: h.id,
+    title: h.research_question,
+    summary: h.executive_summary || "Synthesized scientific investigation.",
+    meta: `${h.timestamp || 'Recent'} · ${h.papers_count || 0} papers · ${h.claims_count || 0} claims`,
+    type: 'local',
+    data: h.data
+  }));
 
   const filtered = allItems.filter(item => {
     return !searchVal || item.title.toLowerCase().includes(searchVal) || item.summary.toLowerCase().includes(searchVal);
   });
 
   if (filtered.length === 0) {
-    grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 2rem; color: var(--text-muted); text-align: center;">No investigations match your search.</div>`;
+    grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 3rem; color: var(--text-muted); text-align: center;">No saved research investigations found.</div>`;
     return;
   }
 
@@ -977,32 +911,18 @@ function renderMyResearchView() {
       <h3 class="history-card-topic">${item.title}</h3>
       <p class="history-card-summary">${item.summary}</p>
       <div class="history-card-footer">
-        <span>${item.meta}</span>
-        <span style="color: var(--accent); font-weight: 600;">Open →</span>
+        <span class="history-card-date">${item.meta}</span>
+        <button type="button" class="btn-card-action btn-open-history" data-id="${item.id}">Open</button>
       </div>
     </div>
   `).join('');
 
-  grid.querySelectorAll('.research-history-card').forEach(card => {
-    card.addEventListener('click', async () => {
-      const cardId = card.getAttribute('data-card-id');
-      const item = allItems.find(i => i.id === cardId);
-      if (item) {
-        if (item.type === 'sample' && item.file) {
-          const resp = await fetch(item.file);
-          if (resp.ok) {
-            const data = await resp.json();
-            loadReportIntoWorkstation(data);
-          }
-        } else if (item.type === 'server') {
-          const resp = await fetch(`/api/research/${item.id}`);
-          if (resp.ok) {
-            const report = await resp.json();
-            loadReportIntoWorkstation(report);
-          }
-        } else if (item.data) {
-          loadReportIntoWorkstation(item.data);
-        }
+  grid.querySelectorAll('.btn-open-history').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      const item = localHistory.find(h => h.id === id);
+      if (item && item.data) {
+        loadReportIntoWorkstation(item.data);
         switchView('viewHome');
       }
     });
@@ -1146,13 +1066,7 @@ function initExportsAndModals() {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
       e.preventDefault();
       switchView('viewHome');
-      const qInput = document.getElementById('queryInput');
-      if (qInput) {
-        qInput.value = "";
-        autoResizeTextarea(qInput);
-        updateRunButtonState();
-        qInput.focus();
-      }
+      clearActiveResearch();
     }
     // Escape -> Close modals
     if (e.key === 'Escape') {
@@ -1163,10 +1077,9 @@ function initExportsAndModals() {
 
   // Clear history button
   document.getElementById('btnClearRecent')?.addEventListener('click', () => {
-    if (confirm("Clear local research history? (Verified samples will remain)")) {
-      localStorage.removeItem(STORAGE_HISTORY_KEY);
-      renderSidebarRecentHistory();
-    }
+    localStorage.removeItem(STORAGE_HISTORY_KEY);
+    renderSidebarRecentHistory();
+    renderMyResearchView();
   });
 }
 
@@ -1182,17 +1095,8 @@ async function initApp() {
   try { initExportsAndModals(); } catch (e) { console.error("Exports init error:", e); }
   try { renderSidebarRecentHistory(); } catch (e) { console.error("History init error:", e); }
 
-  // Preload verified sample report (BERT) so the application opens with real data
-  try {
-    const sampleResp = await fetch('./sample_report.json');
-    if (sampleResp.ok) {
-      const sampleJson = await sampleResp.json();
-      console.log("[RESEARCH WORKSTATION] Preloaded verified sample report: BERT");
-      loadReportIntoWorkstation(sampleJson);
-    }
-  } catch (e) {
-    console.log("[RESEARCH WORKSTATION] Ready for user query:", e);
-  }
+  // Start with clean, empty research state (no mock/preloaded research)
+  clearActiveResearch();
 }
 
 if (document.readyState === 'loading') {

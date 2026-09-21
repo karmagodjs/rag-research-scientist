@@ -145,42 +145,19 @@ function initComposer() {
 }
 
 /* ==========================================================================
-   3. SIMPLIFIED 5-STAGE RESEARCH PIPELINE CONTROLLER
+   3. PIPELINE EVENT CONTROLLER (INTERNAL STATE)
    ========================================================================== */
 
-const SIMPLE_STAGES = ['retrieve', 'rank', 'extract', 'analyze', 'synthesize'];
-const STAGE_DESCRIPTIONS = {
-  retrieve: 'Find relevant literature',
-  rank: 'Prioritize relevant sources',
-  extract: 'Find supporting passages',
-  analyze: 'Verify findings',
-  synthesize: 'Generate evidence-backed answer'
-};
-
 function updatePipelineStep(stepName, status, descText) {
-  const stepBox = document.getElementById(`pstep-${stepName}`);
-  if (!stepBox) return;
-
-  stepBox.classList.remove('active', 'done');
-  if (status === 'active') stepBox.classList.add('active');
-  if (status === 'done') stepBox.classList.add('done');
-
-  const descEl = document.getElementById(`pdesc-${stepName}`);
-  if (descEl) {
-    descEl.textContent = descText || STAGE_DESCRIPTIONS[stepName] || '';
-  }
+  // Visual pipeline section removed from UI; retained as safe no-op
 }
 
 function setPipelineOverallStatus(text, badgeClass) {
-  // Simplified pipeline view does not display redundant status badge
+  // Visual pipeline section removed from UI; retained as safe no-op
 }
 
 function resetPipelineToReady() {
-  updatePipelineStep('retrieve', 'ready');
-  updatePipelineStep('rank', 'ready');
-  updatePipelineStep('extract', 'ready');
-  updatePipelineStep('analyze', 'ready');
-  updatePipelineStep('synthesize', 'ready');
+  // Visual pipeline section removed from UI; retained as safe no-op
 }
 
 function clearActiveResearch() {

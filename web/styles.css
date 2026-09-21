@@ -921,148 +921,7 @@ button {
 }
 
 /* ==========================================================================
-   4. SIMPLIFIED 5-STAGE RESEARCH PIPELINE
-   ========================================================================== */
-
-.research-pipeline-card {
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--radius-panel);
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.pipeline-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.pipeline-title {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-dim);
-  letter-spacing: 0.06em;
-}
-
-.pipeline-status-badge {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 9px;
-  border-radius: var(--radius-pill);
-}
-
-.pipeline-status-badge.ready {
-  background: var(--bg-surface-elevated);
-  color: var(--text-muted);
-  border: 1px solid var(--border-dim);
-}
-
-.pipeline-status-badge.running {
-  background: var(--accent-tint);
-  color: var(--accent);
-  border: 1px solid var(--accent);
-}
-
-.pipeline-status-badge.done {
-  background: var(--success-tint);
-  color: var(--success);
-  border: 1px solid var(--success);
-}
-
-.pipeline-steps-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.pipeline-step-box {
-  flex: 1;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-card);
-  padding: 10px 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.15s ease;
-  min-width: 0;
-}
-
-.pipeline-step-box.active {
-  border-color: var(--accent);
-  background: var(--accent-tint);
-}
-
-.pipeline-step-box.done {
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.step-circle {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-dim);
-  flex-shrink: 0;
-}
-
-.pipeline-step-box.active .step-circle {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #ffffff;
-}
-
-.pipeline-step-box.done .step-circle {
-  background: var(--success-tint);
-  border-color: var(--success);
-  color: var(--success);
-}
-
-.step-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.step-name {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-high);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.step-desc {
-  font-size: 0.64rem;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.step-connector {
-  width: 14px;
-  height: 2px;
-  background: var(--border-subtle);
-  flex-shrink: 0;
-}
-
-/* ==========================================================================
-   5. RESULTS: RESEARCH SYNTHESIS & FINDINGS
+   4. RESULTS: RESEARCH SYNTHESIS & FINDINGS
    ========================================================================== */
 
 .results-area {
@@ -2252,18 +2111,6 @@ button {
   .right-overview-sidebar {
     width: 280px;
   }
-
-  .pipeline-steps-container {
-    flex-wrap: wrap;
-  }
-
-  .step-connector {
-    display: none;
-  }
-
-  .pipeline-step-box {
-    flex: 1 1 calc(33% - 6px);
-  }
 }
 
 /* Small Tablet / Mobile (Max 860px) */
@@ -2325,10 +2172,6 @@ button {
     border-top: 1px solid var(--border-dim);
     padding: 14px;
     overflow-y: visible;
-  }
-
-  .pipeline-step-box {
-    flex: 1 1 100%;
   }
 
   .advanced-grid {

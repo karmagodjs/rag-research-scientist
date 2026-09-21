@@ -901,12 +901,35 @@ async function renderSidebarRecentHistory() {
     });
   });
 
-  // Connect "View all" button to My Research view
-  const btnViewAll = document.getElementById('btnSidebarViewAll');
-  if (btnViewAll) {
-    btnViewAll.onclick = () => {
-      switchView('viewMyResearch');
-    };
+  // Conditionally render "View all" button only when recent research items exist
+  const recentContainer = document.querySelector('.sidebar-recent-container');
+  let btnViewAll = document.getElementById('btnSidebarViewAll');
+
+  if (localHistory.length > 0) {
+    if (!btnViewAll && recentContainer) {
+      btnViewAll = document.createElement('button');
+      btnViewAll.type = 'button';
+      btnViewAll.className = 'btn-sidebar-view-all';
+      btnViewAll.id = 'btnSidebarViewAll';
+      btnViewAll.title = 'View all investigations in My Research';
+      btnViewAll.innerHTML = `
+        <span>View all</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      `;
+      recentContainer.appendChild(btnViewAll);
+    }
+    if (btnViewAll) {
+      btnViewAll.onclick = () => {
+        switchView('viewMyResearch');
+      };
+    }
+  } else {
+    // Zero recent research items: completely remove the "View all" button from the DOM
+    if (btnViewAll) {
+      btnViewAll.remove();
+    }
   }
 
   // Update badge count in navigation

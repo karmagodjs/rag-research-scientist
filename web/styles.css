@@ -115,6 +115,32 @@ button {
   font-family: var(--font-mono) !important;
 }
 
+/* Global Typography System (Strict Inter Hierarchy) */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  color: var(--text-high);
+}
+
+h1 {
+  font-weight: 700;
+}
+
+h2, h3, h4 {
+  font-weight: 600;
+}
+
+p, span, div, li, label {
+  font-family: var(--font-sans);
+}
+
+button {
+  font-family: var(--font-sans);
+}
+
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
@@ -233,8 +259,9 @@ button {
 
 .shortcut-tag {
   margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 0.60rem;
+  font-family: inherit;
+  font-size: 0.62rem;
+  font-weight: 500;
   background: rgba(0, 0, 0, 0.25);
   padding: 2px 5px;
   border-radius: var(--radius-sm);
@@ -276,9 +303,9 @@ button {
 
 .nav-badge {
   margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
   padding: 1px 7px;
   border-radius: var(--radius-pill);
   background: var(--bg-surface-active);
@@ -316,15 +343,16 @@ button {
 }
 
 .recent-label {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
   color: var(--text-dim);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 .btn-clear-history {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 500;
   color: var(--text-dim);
   transition: color 0.12s ease;
 }
@@ -373,8 +401,9 @@ button {
 }
 
 .recent-item-meta {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 400;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -513,8 +542,9 @@ button {
 }
 
 .topbar-kbd {
-  font-family: var(--font-mono);
-  font-size: 0.60rem;
+  font-family: inherit;
+  font-size: 0.64rem;
+  font-weight: 500;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-dim);
   border-radius: var(--radius-sm);
@@ -552,9 +582,9 @@ button {
 }
 
 .status-text {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
@@ -787,8 +817,9 @@ button {
 }
 
 .hotkey-text {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-family: inherit;
+  font-size: 0.70rem;
+  font-weight: 500;
   color: var(--text-dim);
 }
 
@@ -890,10 +921,11 @@ button {
 }
 
 .examples-label {
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
   color: var(--text-dim);
+  letter-spacing: 0.03em;
 }
 
 .examples-chips {
@@ -909,6 +941,7 @@ button {
   border: 1px solid var(--border-dim);
   border-radius: var(--radius-pill);
   font-size: 0.75rem;
+  font-weight: 500;
   color: var(--text-secondary);
   transition: all 0.12s ease;
   white-space: nowrap;
@@ -1082,16 +1115,17 @@ button {
 }
 
 .details-drawer-title {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.70rem;
+  font-weight: 600;
   color: var(--text-dim);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
 }
 
 .details-drawer-badge {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
   background: var(--accent-tint);
   color: var(--accent);
   border: 1px solid var(--border-active);
@@ -1113,14 +1147,15 @@ button {
 
 .detail-label {
   font-size: 0.68rem;
+  font-weight: 400;
   color: var(--text-muted);
 }
 
 .detail-val {
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-high);
-  font-family: var(--font-mono);
+  font-family: inherit;
 }
 
 /* Key Findings Section */
@@ -1143,20 +1178,21 @@ button {
 
 .section-heading {
   font-size: 0.94rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-high);
 }
 
 .section-subtext {
   font-size: 0.74rem;
+  font-weight: 400;
   color: var(--text-muted);
   width: 100%;
 }
 
 .findings-count {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
   color: var(--accent);
 }
 
@@ -1217,19 +1253,19 @@ button {
 }
 
 .claim-label {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.70rem;
+  font-weight: 600;
   color: var(--accent);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.03em;
 }
 
 .claim-status-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-family: inherit;
+  font-size: 0.70rem;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: var(--radius-pill);
@@ -1274,24 +1310,26 @@ button {
 }
 
 .claim-subheading {
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
   color: var(--text-muted);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
 }
 
 .claim-evidence-source-tag {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
   color: var(--accent);
   background: var(--accent-tint);
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: var(--radius-pill);
 }
 
 .claim-evidence-snippet {
   font-size: 0.82rem;
+  font-weight: 400;
   font-style: italic;
   color: var(--text-primary);
   line-height: 1.5;
@@ -1301,7 +1339,7 @@ button {
 .claim-evidence-cite {
   font-size: 0.72rem;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 400;
   margin-top: 2px;
 }
 
@@ -1413,10 +1451,10 @@ button {
 }
 
 .source-detail-badge {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 700;
-  padding: 1px 6px;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 1px 7px;
   border-radius: var(--radius-pill);
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-dim);
@@ -1424,10 +1462,10 @@ button {
 }
 
 .source-relevance-badge {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 700;
-  padding: 1px 6px;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 1px 7px;
   border-radius: var(--radius-pill);
   background: var(--accent-tint);
   border: 1px solid var(--border-active);
@@ -1446,10 +1484,11 @@ button {
 
 .source-passage-label {
   display: block;
-  font-family: var(--font-mono);
-  font-size: 0.60rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 600;
   color: var(--text-muted);
+  letter-spacing: 0.03em;
   margin-bottom: 2px;
 }
 
@@ -1595,8 +1634,9 @@ button {
   border-top: 1px solid var(--border-subtle);
   padding-top: 8px;
   margin-top: auto;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 400;
   color: var(--text-muted);
 }
 
@@ -1654,9 +1694,9 @@ button {
 }
 
 .source-tag {
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
   background: var(--bg-input);
   border: 1px solid var(--border-subtle);
   padding: 2px 7px;
@@ -1665,9 +1705,9 @@ button {
 }
 
 .relevance-tag {
-  font-family: var(--font-mono);
+  font-family: inherit;
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--accent);
   background: var(--accent-tint);
   padding: 2px 7px;
@@ -1781,11 +1821,11 @@ button {
 }
 
 .card-kicker {
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
   color: var(--accent);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 .btn-text-action {
@@ -1816,8 +1856,8 @@ button {
 }
 
 .metric-num {
-  font-family: var(--font-mono);
-  font-size: 1.25rem;
+  font-family: inherit;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--text-high);
   line-height: 1.1;
@@ -1825,6 +1865,7 @@ button {
 
 .metric-label {
   font-size: 0.65rem;
+  font-weight: 400;
   color: var(--text-muted);
   margin-top: 3px;
 }
@@ -1871,13 +1912,15 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
+  font-family: inherit;
+  font-size: 0.70rem;
+  font-weight: 400;
   color: var(--text-muted);
 }
 
 .empty-sources-note {
   font-size: 0.74rem;
+  font-weight: 400;
   color: var(--text-muted);
   text-align: center;
   padding: 10px 0;
@@ -1891,9 +1934,9 @@ button {
 }
 
 .preview-badge {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
   color: var(--text-muted);
 }
 
@@ -1906,6 +1949,7 @@ button {
 
 .preview-authors {
   font-size: 0.72rem;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
@@ -1920,11 +1964,11 @@ button {
 }
 
 .snippet-label {
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.64rem;
+  font-weight: 600;
   color: var(--accent);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
 }
 
 .preview-snippet {
@@ -1932,6 +1976,7 @@ button {
   line-height: 1.45;
   color: var(--text-secondary);
   font-style: italic;
+  font-weight: 400;
 }
 
 .preview-footer {
@@ -1946,9 +1991,9 @@ button {
 }
 
 .preview-relevance {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
   color: var(--accent);
 }
 
@@ -2097,8 +2142,9 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 500;
   color: var(--accent);
 }
 
@@ -2209,7 +2255,7 @@ button {
 }
 
 .settings-advanced-summary {
-  font-family: var(--font-mono);
+  font-family: inherit;
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -2242,8 +2288,9 @@ button {
 }
 
 .diag-label {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-family: inherit;
+  font-size: 0.64rem;
+  font-weight: 500;
   color: var(--text-muted);
   text-transform: uppercase;
 }

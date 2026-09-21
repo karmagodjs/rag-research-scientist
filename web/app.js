@@ -949,7 +949,7 @@ function renderSourcesFullView() {
       <h3 class="source-card-title">${p.title}</h3>
       <p class="source-card-authors">${p.authors}</p>
       <div class="source-card-actions">
-        <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${p.evidence_count} evidence snippets</span>
+        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400;">${p.evidence_count} evidence snippets</span>
         <a href="${p.url || '#'}" target="_blank" rel="noopener noreferrer" class="btn-card-link">
           <span>Open Paper</span>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline></svg>

@@ -51,7 +51,7 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* CONSISTENT ROUNDED UI SYSTEM */
-  --radius-panel: 20px;   /* Main containers: 18–22px */
+  --radius-panel: 28px;   /* Main containers: 28px */
   --radius-card: 16px;    /* Cards: 14–18px */
   --radius-control: 12px; /* Inputs/buttons: 10–14px */
   --radius-sm: 8px;       /* Small icons, tags */
@@ -1803,19 +1803,26 @@ code, pre, kbd, samp {
 .right-overview-sidebar {
   width: 320px;
   height: 100%;
-  background: var(--bg-sidebar);
-  border-left: 1px solid var(--border-subtle);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  border-radius: 28px;
   padding: 16px 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: auto;
+  overflow: hidden;
   flex-shrink: 0;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.right-overview-sidebar:has(#cardResearchOverview:not([style*="display: none"])),
+.right-overview-sidebar.has-results {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .overview-card {
-  background: var(--bg-surface-elevated);
+  background: var(--bg-surface);
   border: 1px solid var(--border-dim);
   border-radius: var(--radius-card);
   padding: 14px;
@@ -1825,14 +1832,15 @@ code, pre, kbd, samp {
 }
 
 .right-empty-card {
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--radius-panel);
-  padding: 56px 24px;
+  background: transparent;
+  border: none;
+  border-radius: 28px;
+  padding: 40px 20px;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
   min-height: 260px;
   overflow: hidden;
 }
@@ -2220,8 +2228,8 @@ code, pre, kbd, samp {
 /* Small Tablet / Mobile (Max 860px) */
 @media (max-width: 860px) {
   .app-layout {
-    padding: 0;
-    gap: 0;
+    padding: 8px;
+    gap: 8px;
   }
 
   .sidebar {
@@ -2256,26 +2264,23 @@ code, pre, kbd, samp {
   .main-body-split {
     flex-direction: column;
     overflow-y: auto;
-    gap: 0;
+    gap: 8px;
   }
 
   .center-content-scroll {
     overflow-y: visible;
     padding: 14px;
-    border-radius: 0;
-    border: none;
+    border-radius: 28px;
+    border: 1px solid var(--border-dim);
   }
 
   .right-overview-sidebar {
     width: 100%;
     height: auto;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
-    border-top: 1px solid var(--border-dim);
-    padding: 14px;
-    overflow-y: visible;
+    border-radius: 28px;
+    border: 1px solid var(--border-dim);
+    padding: 16px;
+    overflow: hidden;
   }
 
   .advanced-grid {

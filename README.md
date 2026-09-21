@@ -140,7 +140,3 @@ Research Agent is an actively developed research prototype. Retrieval, evidence 
 ## Contributing
 
 Contributions and ideas are welcome. Open an issue to discuss a bug, feature request, or research workflow improvement before submitting a pull request.
-
-## License
-
-Add the project's chosen open-source license here when the repository license is finalized.

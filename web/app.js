@@ -1,8 +1,3 @@
-/* ==========================================================================
-   EVIDENCE-ORIENTED RESEARCH AGENT
-   Clean, Focused Research Tool Controller
-   ========================================================================== */
-
 let reportData = null;
 let currentInvestigationState = {
   selectedPaperId: null,
@@ -10,10 +5,6 @@ let currentInvestigationState = {
 };
 
 const STORAGE_HISTORY_KEY = "rag_research_history";
-
-/* ==========================================================================
-   THEME TOGGLE
-   ========================================================================== */
 
 const THEME_STORAGE_KEY = "rag_research_theme";
 
@@ -56,12 +47,8 @@ function initTheme() {
   }
 }
 
-/* ==========================================================================
-   1. USER NAVIGATION (HOME, MY RESEARCH, SOURCES)
-   ========================================================================== */
-
 function initNavigation() {
-  // Nav Buttons (Home, My Research, Sources)
+
   const navBtns = document.querySelectorAll('.sidebar-nav .nav-btn');
   navBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -70,7 +57,6 @@ function initNavigation() {
     });
   });
 
-  // App Brand / Logo click -> Reset to Home/New Research state
   const brandHome = document.getElementById('brandHome');
   if (brandHome) {
     const handleResetHome = () => {
@@ -89,18 +75,15 @@ function initNavigation() {
     });
   }
 
-  // New Research Button
   document.getElementById('btnNewResearch')?.addEventListener('click', () => {
     switchView('viewHome');
     clearActiveResearch();
   });
 
-  // View All Sources in Right Panel
   document.getElementById('btnViewAllSources')?.addEventListener('click', () => {
     switchView('viewSources');
   });
 
-  // Close mobile sidebar on nav click
   const sidebar = document.getElementById('appSidebar');
   navBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -114,18 +97,15 @@ function initNavigation() {
 function switchView(viewId) {
   if (!viewId) return;
 
-  // Update Nav Buttons
   document.querySelectorAll('.sidebar-nav .nav-btn').forEach(btn => {
     const isTarget = btn.getAttribute('data-view') === viewId;
     btn.classList.toggle('active', isTarget);
   });
 
-  // Update Panes
   document.querySelectorAll('.view-pane').forEach(pane => {
     pane.classList.toggle('active', pane.id === viewId);
   });
 
-  // Scroll main content to top
   const mainScroll = document.getElementById('mainContentScroll');
   if (mainScroll) mainScroll.scrollTop = 0;
 
@@ -135,10 +115,6 @@ function switchView(viewId) {
     renderSourcesFullView();
   }
 }
-
-/* ==========================================================================
-   2. RESEARCH COMPOSER HERO & ADVANCED SETTINGS
-   ========================================================================== */
 
 function autoResizeTextarea(el) {
   const queryInput = el || document.getElementById('queryInput');
@@ -190,7 +166,7 @@ function initComposer() {
   queryInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       if (e.shiftKey || e.isComposing) {
-        // Shift + Enter inserts a newline normally in textarea; ignore IME composing
+
         return;
       }
       e.preventDefault();
@@ -202,20 +178,16 @@ function initComposer() {
   updateRunButtonState();
 }
 
-/* ==========================================================================
-   3. PIPELINE EVENT CONTROLLER (INTERNAL STATE)
-   ========================================================================== */
-
 function updatePipelineStep(stepName, status, descText) {
-  // Visual pipeline section removed from UI; retained as safe no-op
+
 }
 
 function setPipelineOverallStatus(text, badgeClass) {
-  // Visual pipeline section removed from UI; retained as safe no-op
+
 }
 
 function resetPipelineToReady() {
-  // Visual pipeline section removed from UI; retained as safe no-op
+
 }
 
 function clearActiveResearch() {
@@ -255,10 +227,6 @@ function clearActiveResearch() {
   updateRightOverview();
   renderSourcesFullView();
 }
-
-/* ==========================================================================
-   4. LIVE RESEARCH EXECUTION (BACKEND API INTEGRATION)
-   ========================================================================== */
 
 async function executeLiveResearch() {
   if (isResearchRunning) return;
@@ -333,10 +301,6 @@ async function executeLiveResearch() {
   }
 }
 
-/* ==========================================================================
-   5. WORKSTATION DATA LOADER & NORMALIZER
-   ========================================================================== */
-
 function loadReportIntoWorkstation(data) {
   if (!data) return;
 
@@ -410,20 +374,17 @@ function loadReportIntoWorkstation(data) {
     })
   };
 
-  // Update 5 simplified pipeline steps (clean milestones, no noisy internal numbers)
   updatePipelineStep('retrieve', 'done');
   updatePipelineStep('rank', 'done');
   updatePipelineStep('extract', 'done');
   updatePipelineStep('analyze', 'done');
   updatePipelineStep('synthesize', 'done');
 
-  // Update Executive Synthesis
   const execSummary = document.getElementById('executiveSummaryText');
   if (execSummary) {
     execSummary.textContent = reportData.executive_summary;
   }
 
-  // Update technical execution drawer details
   const techDocs = document.getElementById('techDocsProcessed');
   if (techDocs) techDocs.textContent = `${rawDocs} candidate docs`;
   const techIter = document.getElementById('techIterations');
@@ -433,16 +394,11 @@ function loadReportIntoWorkstation(data) {
     techTime.textContent = '2.4s';
   }
 
-  // Render Findings, Evidence, and Sources
   renderFindings();
   renderEvidence();
   updateRightOverview();
   renderSourcesFullView();
 }
-
-/* ==========================================================================
-   6. RENDER FINDINGS & NATURAL EVIDENCE
-   ========================================================================== */
 
 function formatCompactAuthors(authors) {
   if (!authors) return "Academic Literature";
@@ -474,8 +430,7 @@ function renderFindings() {
 
   container.innerHTML = reportData.claims.map((claim, cIdx) => {
     const statusClass = (claim.status || 'SUPPORTED').toLowerCase();
-    
-    // Group and identify unique sources for this claim
+
     const sourcesMap = new Map();
     (claim.evidence || []).forEach(ev => {
       const title = ev.paper_title || claim.paper_title || "Academic Literature Paper";
@@ -512,13 +467,10 @@ function renderFindings() {
     const primarySnippet = claim.snippet || (uniqueSources[0]?.snippet) || (claim.evidence?.[0]?.snippet) || "";
     const primarySource = uniqueSources[0] || null;
 
-    // Clean user-friendly support badge (no raw scores)
     const supportText = sourceCount === 1 ? "Supported by 1 research paper" : `Supported by ${sourceCount} research papers`;
 
-    // Only show reasoning if it is clean and non-technical
     const cleanReasoning = (claim.reasoning && !claim.reasoning.toLowerCase().includes('calculated from') && !claim.reasoning.toLowerCase().includes('avg relevance')) ? claim.reasoning : '';
 
-    // Build the expanded sources list
     const sourcesListHtml = uniqueSources.map((source, sIdx) => `
       <div class="source-detail-card" data-claim-idx="${cIdx}" data-source-idx="${sIdx}">
         <div class="source-detail-header">
@@ -592,7 +544,6 @@ function renderFindings() {
     `;
   }).join('');
 
-  // Toggle sources button click handler
   container.querySelectorAll('.btn-toggle-sources').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -612,15 +563,13 @@ function renderFindings() {
     });
   });
 
-  // View Evidence action inside source detail card
   container.querySelectorAll('.btn-view-evidence').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const cIdx = parseInt(btn.getAttribute('data-claim-idx'));
       const sIdx = parseInt(btn.getAttribute('data-source-idx'));
       const claim = reportData.claims[cIdx];
-      
-      // Highlight the claim's evidence block
+
       const evPreview = document.getElementById(`claim-evidence-${cIdx}`);
       if (evPreview) {
         evPreview.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -630,7 +579,6 @@ function renderFindings() {
         setTimeout(() => evPreview.classList.remove('highlight-evidence'), 2000);
       }
 
-      // Update right sidebar source preview
       if (claim) {
         const ev = claim.evidence?.[sIdx] || {
           paper_title: claim.paper_title,
@@ -645,7 +593,6 @@ function renderFindings() {
     });
   });
 
-  // Claim card selection click
   container.querySelectorAll('.claim-card').forEach(card => {
     card.addEventListener('click', (e) => {
       if (e.target.closest('button') || e.target.closest('a')) return;
@@ -661,7 +608,7 @@ function renderFindings() {
 }
 
 function renderEvidence() {
-  // Evidence is embedded directly inside each Key Finding & Claim card (eliminating duplicate sections)
+
 }
 
 function findAndScrollToPaperEvidence(paperTitle) {
@@ -678,10 +625,6 @@ function findAndScrollToPaperEvidence(paperTitle) {
     }
   }
 }
-
-/* ==========================================================================
-   7. RIGHT SIDEBAR OVERVIEW & TOP SOURCES
-   ========================================================================== */
 
 function updateRightOverview() {
   const emptyCard = document.getElementById('rightSidebarEmpty');
@@ -707,7 +650,6 @@ function updateRightOverview() {
   const numEvidence = reportData.claims.reduce((acc, c) => acc + (c.evidence?.length || 1), 0);
   const numClaims = reportData.claims.length;
 
-  // Update Exactly 4 User Metrics
   const mSources = document.getElementById('mSourcesFound');
   const mRel = document.getElementById('mRelevantSources');
   const mEv = document.getElementById('mEvidenceFound');
@@ -718,7 +660,6 @@ function updateRightOverview() {
   if (mEv) mEv.textContent = numEvidence;
   if (mCl) mCl.textContent = numClaims;
 
-  // Update Top Sources list
   const topList = document.getElementById('topSourcesList');
   if (topList) {
     const topPapers = reportData.papers.slice(0, 4);
@@ -744,14 +685,12 @@ function updateRightOverview() {
         });
       });
 
-      // Default select the first top paper
       if (topPapers.length > 0) {
         updateSourcePreviewFromPaper(topPapers[0]);
       }
     }
   }
 
-  // Update badge counters in sidebar
   const sourcesBadge = document.getElementById('sourcesCountBadge');
   if (sourcesBadge) sourcesBadge.textContent = numDocs;
 }
@@ -768,8 +707,7 @@ function updateSourcePreviewFromPaper(paper) {
   if (pTitle) pTitle.textContent = paper.title;
   if (pAuthors) pAuthors.textContent = formatCompactAuthors(paper.authors);
   if (pBadge) pBadge.textContent = `${paper.source.toUpperCase()} · ${paper.year}`;
-  
-  // Find matching evidence snippet
+
   let matchSnippet = "Peer-reviewed publication analyzing this scientific domain.";
   for (const c of reportData?.claims || []) {
     for (const ev of c.evidence || []) {
@@ -830,10 +768,6 @@ function updateSourcePreviewFromEvidence(ev) {
   }
 }
 
-/* ==========================================================================
-   8. VIEW: MY RESEARCH (HISTORY & SAVED REPORTS)
-   ========================================================================== */
-
 function getRecentHistory() {
   try {
     const raw = localStorage.getItem(STORAGE_HISTORY_KEY);
@@ -875,7 +809,7 @@ async function renderSidebarRecentHistory() {
   if (localHistory.length === 0) {
     html = `<div class="empty-recent-note">No recent research yet.</div>`;
   } else {
-    // Strictly cap the sidebar recent list at 5 items for a compact, clean look
+
     const sidebarItems = localHistory.slice(0, 5);
     sidebarItems.forEach(item => {
       html += `
@@ -889,7 +823,6 @@ async function renderSidebarRecentHistory() {
 
   container.innerHTML = html;
 
-  // Recent item click handlers
   container.querySelectorAll('.recent-item-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-recent-id');
@@ -901,7 +834,6 @@ async function renderSidebarRecentHistory() {
     });
   });
 
-  // Conditionally render "View all" button only when recent research items exist
   const recentContainer = document.querySelector('.sidebar-recent-container');
   let btnViewAll = document.getElementById('btnSidebarViewAll');
 
@@ -926,13 +858,12 @@ async function renderSidebarRecentHistory() {
       };
     }
   } else {
-    // Zero recent research items: completely remove the "View all" button from the DOM
+
     if (btnViewAll) {
       btnViewAll.remove();
     }
   }
 
-  // Update badge count in navigation
   const myResBadge = document.getElementById('myResearchCountBadge');
   if (myResBadge) {
     myResBadge.textContent = localHistory.length;
@@ -986,10 +917,6 @@ function renderMyResearchView() {
     });
   });
 }
-
-/* ==========================================================================
-   9. VIEW: SOURCES (ACADEMIC LITERATURE LIBRARY)
-   ========================================================================== */
 
 function renderSourcesFullView() {
   const grid = document.getElementById('sourcesFullGrid');
@@ -1047,12 +974,8 @@ function initSourcesControls() {
   document.getElementById('myResearchSearchInput')?.addEventListener('input', renderMyResearchView);
 }
 
-/* ==========================================================================
-   10. EXPORTS, SETTINGS & GLOBAL SHORTCUTS
-   ========================================================================== */
-
 function initExportsAndModals() {
-  // Export JSON
+
   document.getElementById('btnExportJson')?.addEventListener('click', () => {
     if (!reportData) {
       alert("No research report loaded. Please run a research query first.");
@@ -1068,7 +991,6 @@ function initExportsAndModals() {
     URL.revokeObjectURL(url);
   });
 
-  // Export Markdown
   document.getElementById('btnExportMarkdown')?.addEventListener('click', () => {
     if (!reportData) {
       alert("No research report loaded. Please run a research query first.");
@@ -1098,7 +1020,6 @@ function initExportsAndModals() {
     URL.revokeObjectURL(url);
   });
 
-  // Settings Modal
   const modal = document.getElementById('settingsModal');
   const btnOpen = document.getElementById('btnOpenSettings');
   const btnClose = document.getElementById('btnCloseSettings');
@@ -1108,7 +1029,6 @@ function initExportsAndModals() {
   btnClose?.addEventListener('click', () => modal?.classList.remove('active'));
   backdrop?.addEventListener('click', () => modal?.classList.remove('active'));
 
-  // Sync settings with composer
   document.getElementById('settingDefaultPapers')?.addEventListener('change', (e) => {
     const el = document.getElementById('maxPapersInput');
     if (el) el.value = e.target.value;
@@ -1118,22 +1038,20 @@ function initExportsAndModals() {
     if (el) el.value = e.target.value;
   });
 
-  // Global Keyboard Shortcuts
   document.addEventListener('keydown', (e) => {
-    // Ctrl + N -> New research
+
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
       e.preventDefault();
       switchView('viewHome');
       clearActiveResearch();
     }
-    // Escape -> Close modals
+
     if (e.key === 'Escape') {
       modal?.classList.remove('active');
       document.getElementById('appSidebar')?.classList.remove('open');
     }
   });
 
-  // Clear history button
   document.getElementById('btnClearRecent')?.addEventListener('click', () => {
     localStorage.removeItem(STORAGE_HISTORY_KEY);
     renderSidebarRecentHistory();
@@ -1152,11 +1070,10 @@ function initCustomSelects() {
     const select = wrapper.querySelector('select');
     if (!trigger || !menu || !select) return;
 
-    // Toggle menu
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = wrapper.classList.contains('open');
-      // Close all other dropdowns
+
       document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
         if (w !== wrapper) {
           w.classList.remove('open');
@@ -1167,7 +1084,6 @@ function initCustomSelects() {
       trigger.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
     });
 
-    // Option selection
     menu.querySelectorAll('.custom-select-option').forEach(opt => {
       opt.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1187,7 +1103,6 @@ function initCustomSelects() {
       });
     });
 
-    // Sync if select is changed programmatically
     select.addEventListener('change', () => {
       const currentOpt = menu.querySelector(`.custom-select-option[data-value="${select.value}"]`);
       if (currentOpt) {
@@ -1201,7 +1116,6 @@ function initCustomSelects() {
     });
   });
 
-  // Global click outside to close dropdowns
   document.addEventListener('click', () => {
     document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
       w.classList.remove('open');
@@ -1209,7 +1123,6 @@ function initCustomSelects() {
     });
   });
 
-  // Global Escape key to close dropdowns
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
@@ -1220,10 +1133,6 @@ function initCustomSelects() {
   });
 }
 
-/* ==========================================================================
-   INITIALIZE APP
-   ========================================================================== */
-
 async function initApp() {
   try { initTheme(); } catch (e) { console.error("Theme init error:", e); }
   try { initNavigation(); } catch (e) { console.error("Nav init error:", e); }
@@ -1233,7 +1142,6 @@ async function initApp() {
   try { initExportsAndModals(); } catch (e) { console.error("Exports init error:", e); }
   try { renderSidebarRecentHistory(); } catch (e) { console.error("History init error:", e); }
 
-  // Start with clean, empty research state (no mock/preloaded research)
   clearActiveResearch();
 }
 

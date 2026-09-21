@@ -117,12 +117,30 @@ function autoResizeTextarea(el) {
   queryInput.style.overflowY = scrollH > 180 ? "auto" : "hidden";
 }
 
-function updateRunButtonState() {
+let isResearchRunning = false;
+
+function setRunButtonLoading(loading) {
+  isResearchRunning = Boolean(loading);
   const btnRun = document.getElementById('btnRunAgent');
   const queryInput = document.getElementById('queryInput');
   if (!btnRun) return;
-  if (btnRun.classList.contains('is-loading')) return;
-  const hasText = queryInput && queryInput.value.trim().length > 0;
+
+  if (isResearchRunning) {
+    btnRun.disabled = true;
+    btnRun.classList.add('is-loading');
+  } else {
+    btnRun.classList.remove('is-loading');
+    const hasText = queryInput && typeof queryInput.value === 'string' && queryInput.value.trim().length > 0;
+    btnRun.disabled = !hasText;
+  }
+}
+
+function updateRunButtonState() {
+  if (isResearchRunning) return;
+  const btnRun = document.getElementById('btnRunAgent');
+  const queryInput = document.getElementById('queryInput');
+  if (!btnRun) return;
+  const hasText = queryInput && typeof queryInput.value === 'string' && queryInput.value.trim().length > 0;
   btnRun.disabled = !hasText;
 }
 
@@ -192,18 +210,16 @@ function resetPipelineToReady() {
    ========================================================================== */
 
 async function executeLiveResearch() {
+  if (isResearchRunning) return;
+
   const queryInput = document.getElementById('queryInput');
-  const btnRun = document.getElementById('btnRunAgent');
   const query = queryInput ? queryInput.value.trim() : "";
   if (!query) return;
 
   const maxPapers = parseInt(document.getElementById('maxPapersInput')?.value || "15");
   const iterations = parseInt(document.getElementById('iterationsInput')?.value || "1");
 
-  if (btnRun) {
-    btnRun.disabled = true;
-    btnRun.classList.add('is-loading');
-  }
+  setRunButtonLoading(true);
 
   updatePipelineStep('retrieve', 'active');
   updatePipelineStep('rank', 'ready');
@@ -257,11 +273,7 @@ async function executeLiveResearch() {
       execSummary.innerHTML = `<strong style="color: var(--danger);">Research request failed</strong><br><span class="finding-subtext">Unable to complete research (${err.message}). Ensure the server is online at localhost:8000.</span>`;
     }
   } finally {
-    clearInterval(runtimeTimer);
-    if (btnRun) {
-      btnRun.classList.remove('is-loading');
-      updateRunButtonState();
-    }
+    setRunButtonLoading(false);
   }
 }
 

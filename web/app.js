@@ -70,6 +70,25 @@ function initNavigation() {
     });
   });
 
+  // App Brand / Logo click -> Reset to Home/New Research state
+  const brandHome = document.getElementById('brandHome');
+  if (brandHome) {
+    const handleResetHome = () => {
+      switchView('viewHome');
+      clearActiveResearch();
+      if (window.innerWidth <= 860) {
+        document.getElementById('appSidebar')?.classList.remove('open');
+      }
+    };
+    brandHome.addEventListener('click', handleResetHome);
+    brandHome.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleResetHome();
+      }
+    });
+  }
+
   // New Research Button
   document.getElementById('btnNewResearch')?.addEventListener('click', () => {
     switchView('viewHome');
@@ -169,7 +188,11 @@ function initComposer() {
   });
 
   queryInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    if (e.key === 'Enter') {
+      if (e.shiftKey || e.isComposing) {
+        // Shift + Enter inserts a newline normally in textarea; ignore IME composing
+        return;
+      }
       e.preventDefault();
       executeLiveResearch();
     }

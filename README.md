@@ -574,12 +574,6 @@ If you use this project in research or experimentation, please reference the rep
 
 ---
 
-## License
-
-See the repository license for usage and redistribution terms.
-
----
-
 ## Acknowledgements
 
 This project builds on ideas and open-source tooling from the broader research ecosystem, including scientific literature APIs, information retrieval methods, NetworkX, and the open-source RAG community.

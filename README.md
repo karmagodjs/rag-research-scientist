@@ -94,23 +94,7 @@ User Query
 └─────────────────────────────┘
 ```
 
-## Run Locally
-
-### 1. Start the backend
-
-```bash
-uvicorn app.main:app --reload --port 8000
-```
-
-### 2. Start the frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### 3. Configure environment variables
+### 2. Configure environment variables
 
 Create your local environment configuration using the provided `.env.example` file and add the required API keys and service configuration.
 
